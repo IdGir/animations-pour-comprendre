@@ -1,0 +1,96 @@
+[
+ {
+  "id": "g-b2-mairie",
+  "q": "Palais des ducs et des États de Bourgogne Dijon hôtel de ville",
+  "must": [
+   "Dijon",
+   "palais"
+  ],
+  "alt": "façade du palais des ducs de Bourgogne à Dijon, qui abrite la mairie"
+ },
+ {
+  "id": "g-b2-ter",
+  "q": "TER Bourgogne-Franche-Comté gare de Dijon-Ville",
+  "must": [
+   "TER",
+   "Dijon"
+  ],
+  "alt": "un train régional TER en gare de Dijon-Ville"
+ },
+ {
+  "id": "g-b3-paris-aerienne",
+  "q": "Paris aerial view rooftops dense buildings",
+  "must": [
+   "Paris"
+  ],
+  "alt": "vue aérienne de Paris : immeubles serrés, densité très forte"
+ },
+ {
+  "id": "g-b3-campagne-cote-d-or",
+  "q": "Auxois paysage village champs prairies Côte-d'Or",
+  "must": [
+   "Côte-d'Or"
+  ],
+  "alt": "campagne de Côte-d'Or : village isolé entre champs et prairies, faible densité"
+ },
+ {
+  "id": "g-b4-tgv-dijon",
+  "q": "TGV gare de Dijon-Ville",
+  "must": [
+   "TGV",
+   "Dijon"
+  ],
+  "alt": "un TGV à quai en gare de Dijon-Ville"
+ },
+ {
+  "id": "g-b4-tram-dijon",
+  "q": "Tramway de Dijon Citadis",
+  "must": [
+   "tramway",
+   "Dijon"
+  ],
+  "alt": "une rame du tramway de Dijon"
+ },
+ {
+  "id": "g-b5-dijon-aerienne",
+  "q": "Dijon vue aérienne centre ville",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "vue aérienne de Dijon : centre ancien dense"
+ },
+ {
+  "id": "g-b5-lotissement",
+  "q": "lotissement pavillonnaire vue aérienne France périurbain",
+  "must": [
+   "lotissement"
+  ],
+  "alt": "lotissement de maisons individuelles en périphérie d'une ville, vu du ciel"
+ },
+ {
+  "id": "g-b6-source-seine",
+  "q": "Source de la Seine Source-Seine Côte-d'Or",
+  "must": [
+   "Source",
+   "Seine"
+  ],
+  "alt": "la source de la Seine à Source-Seine (Côte-d'Or)"
+ },
+ {
+  "id": "g-b6-canal-bourgogne",
+  "q": "Canal de Bourgogne Pouilly-en-Auxois",
+  "must": [
+   "Canal",
+   "Bourgogne"
+  ],
+  "alt": "le canal de Bourgogne près de Pouilly-en-Auxois"
+ },
+ {
+  "id": "g-b6-morvan",
+  "q": "Lac des Settons Morvan",
+  "must": [
+   "Settons"
+  ],
+  "alt": "le lac des Settons, dans le Morvan"
+ }
+]

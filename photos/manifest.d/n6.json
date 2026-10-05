@@ -1,0 +1,12 @@
+[
+ {"id":"s-c1-nuages","q":"Cumulus clouds blue sky","must":["cloud"],"alt":"nuages (cumulus) dans le ciel"},
+ {"id":"s-c1-lac-kir","q":"Lac Kir Dijon","must":["Kir"],"alt":"le lac Kir à Dijon (plan d'eau)"},
+ {"id":"s-c2-glacon","q":"ice cubes in a glass of water","must":["ice"],"alt":"des glaçons dans un verre d'eau"},
+ {"id":"s-c2-ebullition","q":"boiling water in a pot bubbles","must":["boiling"],"alt":"de l'eau qui bout dans une casserole : bulles de vapeur d'eau"},
+ {"id":"s-c3-marais-guerande","q":"Marais salants de Guérande vue aérienne","must":["Guérande"],"alt":"les marais salants de Guérande vus du ciel : bassins et œillets"},
+ {"id":"s-c3-paludier","q":"paludier récolte sel Guérande","must":["paludier"],"alt":"un paludier récoltant le sel dans les marais de Guérande (vue de loin)"},
+ {"id":"s-c3-fleur-de-sel","q":"fleur de sel Guérande","must":["fleur"],"alt":"la fleur de sel, fine couche de cristaux blancs en surface d'un œillet"},
+ {"id":"s-c4-station","q":"water treatment plant sedimentation tanks","must":["water"],"alt":"une usine de production d'eau potable (bassins de décantation)"},
+ {"id":"s-c5-iceberg","q":"iceberg floating","must":["iceberg"],"alt":"un iceberg : la glace flotte, seule une petite partie dépasse de l'eau"},
+ {"id":"s-c5-cargo","q":"container ship at sea","must":["container"],"alt":"un grand porte-conteneurs en acier qui flotte"}
+]

@@ -1,0 +1,497 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les croisades</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>const EUROPE={"land":"M841 76L843 76L846 76L851 78L849 80L848 81L847 82L846 84L844 85L841 86L839 87L838 88L838 91L837 93L836 94L835 95L834 94L836 90L837 89L836 88L834 87L832 86L833 85L833 83L831 80L833 80L835 79L837 79L838 77L840 76ZM930 658L933 657L934 656L936 655L937 657L935 658L937 659L938 658L939 660L940 661L942 660L944 660L946 659L948 658L954 658L956 659L960 659L964 659L966 658L969 657L970 658L970 661L971 663L972 662L973 661L976 660L979 659L981 656L981 660L981 662L979 664L977 665L972 665L968 666L960 669L951 670L950 669L950 667L946 666L944 666L934 665L931 665L928 666L926 666L925 665L924 664L924 661L924 658L926 659L927 658L927 656L928 655L928 657ZM910 572L912 575L915 576L920 578L925 578L926 580L927 581L928 582L927 583L928 586L930 589L932 590L934 590L936 590L936 593L935 594L933 593L931 592L929 591L928 590L927 588L926 586L925 585L921 585L919 585L917 584L916 582L914 581L913 580L912 579L910 578L908 576L905 575L903 575L901 576L900 575L902 574L905 571L907 570ZM1147 615L1138 625L1138 627L1139 629L1141 630L1142 632L1140 633L1138 634L1136 634L1132 639L1130 641L1128 643L1126 644L1124 645L1123 646L1123 648L1121 647L1120 646L1118 647L1116 647L1112 647L1111 646L1110 645L1107 642L1106 638L1108 639L1109 637L1111 635L1112 634L1114 634L1117 633L1117 630L1117 628L1121 628L1125 627L1128 626L1131 625L1139 620L1141 617L1143 616L1145 614L1148 613ZM795 100L794 101L793 103L791 104L791 110L793 112L791 113L790 116L788 117L787 118L786 120L786 123L785 124L783 125L784 122L785 120L784 119L783 117L782 116L783 114L782 111L782 108L783 107L784 106L786 103L787 101L790 100L791 101L791 99L792 98L793 99ZM704 155L704 158L703 159L701 160L699 162L699 165L701 166L701 168L700 169L697 171L696 174L696 176L696 178L696 180L693 181L691 177L691 174L690 170L688 170L685 170L683 167L684 163L683 161L682 159L681 158L681 156L684 156L686 156L688 153L688 151L690 151L691 152L691 154L691 156L693 157L694 155L695 154L695 152L694 150L696 148L699 147L701 147L703 148L705 149L704 151L703 152ZM676 159L677 163L678 167L678 170L677 171L675 173L672 173L670 172L666 170L665 168L664 165L664 161L666 161L671 159L673 160L676 159ZM513 547L515 549L517 548L519 549L519 551L518 552L517 554L515 556L514 558L512 559L510 560L507 557L505 557L505 553L503 552L500 554L499 552L498 551L507 545L509 544L514 543L514 545L515 546ZM1470 402L1468 401L1465 398L1465 396L1466 398ZM1352 290L1351 291L1350 292L1348 290L1347 287L1348 286L1348 288L1350 290ZM1352 287L1351 286L1351 284L1352 286ZM641 532L642 533L644 540L644 542L643 543L640 547L641 550L641 552L641 554L641 556L639 570L638 573L637 575L636 576L634 575L631 574L629 574L628 573L626 578L625 580L623 581L620 580L618 579L617 577L616 575L615 573L615 571L615 566L616 564L616 562L616 560L617 559L618 560L618 557L617 555L616 553L617 551L617 549L618 545L617 544L616 541L615 538L614 537L613 536L613 533L614 530L616 531L619 532L621 531L623 530L626 529L629 525L631 525L632 524L633 522L635 523L638 525L639 526L640 528L641 529L639 530L640 531ZM641 483L640 487L641 489L641 499L639 504L638 505L638 510L637 511L636 513L635 517L633 518L630 516L628 515L627 514L626 513L627 512L628 511L626 509L625 508L626 506L626 504L624 504L623 503L624 502L625 501L624 499L623 498L624 496L625 495L624 494L623 493L625 492L626 488L628 487L632 486L633 485L634 484L635 485L637 486L638 485L638 483L638 479L639 477L641 478L641 482ZM756 601L755 604L754 605L749 613L749 616L748 617L748 619L747 621L747 623L748 625L750 626L748 627L750 629L751 630L751 632L749 634L748 635L747 637L747 639L747 641L745 640L743 640L741 640L737 639L736 638L732 633L730 632L728 630L725 630L723 630L721 629L716 626L712 624L710 622L709 621L708 620L705 620L703 618L700 618L698 618L697 617L695 615L693 613L694 608L696 606L697 605L698 604L699 603L702 605L703 606L706 605L708 602L710 602L712 603L713 604L714 605L718 607L719 608L723 607L726 606L730 607L733 606L735 606L737 605L739 603L742 603L744 603L747 603L749 602L750 601L755 600L756 599L757 600ZM494 60L493 62L493 64L491 65L488 66L482 70L479 72L478 73L479 75L480 76L476 79L475 81L477 81L482 80L485 80L487 80L489 82L491 82L493 82L501 84L503 84L505 85L506 87L506 90L505 92L503 93L502 95L501 96L501 98L500 99L496 105L493 107L492 110L490 111L489 112L487 113L483 113L481 114L479 114L481 114L485 115L488 117L487 119L486 120L483 119L479 122L477 122L475 122L472 121L471 119L472 121L473 122L481 125L484 124L487 125L493 129L494 132L496 136L498 138L499 141L499 147L499 153L500 160L500 162L501 163L506 167L507 169L509 172L511 175L513 178L514 180L513 181L512 182L512 184L513 186L514 190L515 193L514 192L512 192L511 191L510 189L507 189L505 189L504 188L507 189L509 190L515 197L516 201L517 205L516 207L514 208L512 209L511 211L514 214L516 214L517 213L518 211L521 211L523 211L525 212L527 212L530 213L531 214L535 219L535 221L535 223L535 226L534 228L533 231L532 233L531 234L528 237L526 238L525 237L526 239L525 241L522 242L520 241L517 242L519 244L518 246L517 247L515 247L513 247L511 248L513 248L514 250L517 252L519 252L523 252L525 253L525 258L519 260L517 262L514 262L512 263L510 264L508 264L506 265L504 265L498 262L494 262L488 262L485 260L483 259L481 258L479 257L480 259L477 260L475 260L471 260L469 259L469 261L468 262L463 260L462 261L460 260L458 259L457 257L455 256L453 256L446 257L445 259L443 262L442 264L440 266L438 266L437 264L434 262L433 260L431 261L430 260L427 260L424 261L422 261L418 263L416 265L414 265L413 264L411 263L409 263L408 262L410 260L414 260L418 257L420 256L421 255L422 254L423 253L429 249L430 246L431 245L435 244L437 240L443 241L447 242L450 243L452 244L454 244L455 243L459 240L461 238L462 237L464 235L467 233L463 235L462 236L458 236L456 237L453 239L448 237L446 233L444 232L443 231L441 231L439 231L440 230L441 229L439 228L438 227L437 226L435 225L432 226L429 227L426 224L425 223L426 222L426 220L425 219L426 218L428 217L432 217L437 215L440 215L443 213L444 212L446 211L447 209L448 208L447 207L447 204L448 203L448 200L448 198L444 198L441 199L439 199L440 197L442 195L444 194L446 192L450 190L455 189L457 190L459 190L461 190L465 193L465 189L467 189L468 192L469 193L471 193L470 192L469 191L468 190L467 186L468 185L469 183L470 181L469 180L469 178L470 177L472 176L473 174L474 172L474 170L472 170L470 171L467 168L466 166L465 161L465 158L468 154L472 151L475 150L470 149L468 149L466 150L464 150L463 151L461 152L459 151L458 150L457 149L455 150L453 151L451 149L449 147L448 149L447 151L446 149L445 146L444 144L445 143L446 142L447 143L449 139L453 135L454 133L455 131L455 129L453 126L454 124L454 121L455 120L459 121L458 120L456 117L457 115L455 117L454 118L452 118L451 119L450 120L450 117L451 115L452 114L455 112L453 113L450 115L448 116L447 117L447 121L442 131L441 132L439 132L439 130L442 125L443 123L445 121L444 120L445 114L446 113L448 110L449 107L450 106L451 104L452 103L453 101L454 100L455 98L449 102L446 102L445 101L444 99L444 97L442 96L444 95L446 95L449 94L447 92L449 91L452 88L453 85L453 83L451 81L451 79L452 78L453 77L455 77L454 76L453 75L453 73L455 71L456 70L457 69L460 70L461 69L463 70L461 65L460 64L462 63L462 61L463 60L466 61L467 60L467 58L468 55L469 53L472 54L472 56L475 55L476 56L480 56L484 57L487 56L490 57L492 56L495 57L495 59ZM417 134L419 134L421 131L423 132L428 132L431 133L433 133L434 136L434 139L434 142L436 145L435 147L433 148L435 148L437 149L438 151L438 154L437 155L436 153L435 152L435 154L434 156L436 157L434 159L431 159L430 160L428 162L427 163L425 162L424 161L425 162L424 163L422 163L421 164L421 166L422 167L422 170L422 172L422 174L422 176L421 177L421 179L420 181L421 185L420 187L420 191L419 192L417 193L416 195L416 197L414 199L412 202L411 203L409 203L411 206L409 207L407 207L405 206L404 205L402 206L401 204L400 206L397 205L393 205L391 206L390 207L389 208L386 208L384 209L382 210L380 208L379 207L377 207L378 208L377 211L375 211L373 212L370 211L369 212L361 212L360 211L357 211L354 211L353 210L355 208L358 207L353 206L351 206L349 206L350 205L353 204L354 203L356 202L359 202L351 202L349 201L347 200L347 198L350 196L352 196L354 196L355 195L356 194L351 193L349 192L350 190L353 189L355 190L356 191L359 192L358 190L359 188L358 187L360 187L363 185L368 186L373 186L377 186L375 184L372 185L368 184L365 183L362 184L359 183L363 182L367 180L368 179L370 178L369 177L372 173L375 173L377 173L379 172L377 171L376 170L371 169L370 168L370 166L368 166L366 165L367 164L366 163L364 163L363 162L364 161L364 158L366 159L368 159L370 159L368 158L368 156L371 154L374 155L374 153L372 152L369 152L370 150L371 149L372 146L370 146L371 145L369 144L369 142L370 141L372 142L375 142L377 142L381 144L383 147L385 145L389 147L391 148L392 147L391 145L393 144L395 143L397 143L399 141L400 140L395 140L392 137L393 136L394 135L396 135L397 134L399 133L399 131L400 129L401 128L402 127L404 127L406 127L409 128L410 127L412 127L412 129L411 131L410 132L411 133L409 134L411 134L412 133L413 132L413 130L413 128L414 127L417 127L416 125L418 126L419 128L420 129L421 130L419 131L417 132L416 133ZM1336 239L1336 241L1335 242L1333 242L1332 245L1330 249L1329 251L1328 253L1326 254L1324 255L1321 258L1320 259L1322 261L1320 261L1319 263L1320 264L1321 265L1319 266L1320 267L1319 268L1316 272L1315 273L1315 275L1316 276L1317 277L1316 278L1314 278L1311 284L1310 285L1308 286L1305 289L1304 290L1302 291L1303 293L1301 292L1300 291L1299 292L1301 293L1301 295L1302 296L1301 297L1302 301L1302 303L1302 305L1302 309L1301 310L1301 312L1301 314L1300 315L1298 318L1298 320L1298 323L1299 325L1300 326L1303 326L1305 326L1308 327L1310 328L1312 329L1314 331L1318 336L1321 341L1319 334L1320 332L1321 334L1321 337L1322 342L1323 345L1324 347L1325 348L1326 353L1328 354L1330 355L1332 356L1334 359L1335 360L1343 364L1348 367L1350 369L1353 371L1355 371L1357 372L1359 372L1364 375L1370 379L1372 380L1374 382L1375 384L1377 385L1383 389L1386 390L1390 391L1393 391L1395 389L1398 389L1399 390L1401 390L1402 391L1405 393L1401 394L1397 396L1395 398L1393 400L1392 402L1392 405L1393 411L1394 417L1395 420L1397 422L1397 424L1398 431L1397 432L1396 431L1394 431L1393 432L1394 435L1394 439L1398 448L1399 449L1402 455L1404 457L1406 460L1408 462L1411 464L1413 465L1417 465L1420 465L1424 463L1429 461L1433 461L1435 462L1439 465L1444 466L1454 468L1458 467L1471 464L1479 460L1498 443L1504 438L1507 437L1506 439L1503 441L1505 441L1508 440L1509 439L1509 436L1508 435L1504 431L1502 428L1500 426L1496 421L1493 415L1492 413L1489 407L1488 404L1486 402L1485 400L1484 397L1483 394L1481 392L1480 391L1477 390L1476 389L1475 388L1472 388L1470 388L1467 388L1466 389L1465 390L1465 392L1464 390L1463 388L1463 383L1464 384L1466 383L1468 382L1470 381L1469 380L1467 380L1465 378L1464 376L1463 374L1461 374L1459 375L1456 376L1454 377L1454 379L1457 381L1455 381L1453 379L1450 377L1447 374L1445 370L1444 366L1443 362L1442 358L1441 354L1442 355L1444 356L1447 357L1450 356L1452 355L1453 353L1455 353L1457 353L1459 355L1461 354L1464 351L1466 349L1468 349L1469 348L1467 347L1466 346L1467 344L1470 344L1472 342L1472 339L1471 338L1470 337L1469 336L1466 335L1459 334L1457 334L1454 333L1452 330L1450 328L1448 326L1443 322L1441 322L1439 323L1437 325L1434 327L1432 328L1431 329L1430 332L1430 335L1431 340L1433 341L1435 348L1437 351L1436 350L1433 348L1429 346L1424 341L1423 339L1421 335L1420 334L1419 330L1419 328L1419 325L1418 322L1415 318L1413 317L1412 318L1410 319L1409 320L1407 319L1405 320L1404 321L1402 321L1399 320L1398 319L1396 318L1394 317L1392 318L1389 319L1388 320L1388 318L1387 315L1386 314L1385 313L1384 312L1383 311L1381 310L1378 308L1374 305L1369 300L1366 300L1362 301L1360 301L1358 300L1357 299L1356 297L1358 294L1362 292L1365 290L1369 291L1372 291L1373 289L1374 288L1377 287L1376 286L1373 287L1370 285L1366 284L1364 282L1365 278L1366 276L1365 273L1366 269L1368 269L1370 266L1375 263L1381 260L1383 259L1387 259L1390 258L1393 257L1394 255L1391 255L1387 255L1385 253L1384 248L1384 242L1383 237L1380 232L1379 231L1378 229L1378 227L1377 224L1374 222L1371 221L1367 223L1364 224L1363 225L1363 227L1361 230L1359 230L1357 230L1353 231L1351 230L1344 231L1342 231L1339 235L1337 238ZM1620 670L1617 670L1608 671L1600 670L1598 669L1596 667L1592 665L1584 666L1580 665L1576 666L1572 668L1570 669L1568 668L1561 666L1560 664L1554 660L1552 659L1549 654L1548 653L1543 652L1542 651L1542 649L1541 648L1539 647L1536 648L1535 647L1534 643L1533 642L1529 640L1524 638L1519 635L1517 635L1515 632L1512 629L1510 630L1503 638L1500 637L1490 636L1488 635L1489 634L1492 633L1493 632L1492 631L1489 631L1487 632L1488 633L1486 635L1486 637L1488 639L1489 642L1489 644L1488 645L1485 647L1484 649L1482 651L1479 651L1474 651L1473 652L1471 653L1472 655L1473 657L1476 660L1479 661L1478 663L1475 663L1473 667L1472 670L1475 670L1477 669L1478 668L1480 668L1481 670L1482 671L1486 676L1489 677L1492 680L1493 681L1495 683L1497 684L1499 686L1500 688L1505 692L1510 695L1511 696L1513 698L1513 700L1516 702L1521 702L1523 701L1525 702L1524 703L1528 705L1532 707L1535 707L1541 710L1548 710L1554 712L1552 713L1551 715L1553 717L1555 718L1558 718L1559 720L1560 726L1558 726L1560 730L1563 732L1565 733L1568 736L1569 737L1575 739L1577 741L1581 746L1585 748L1587 749L1590 750L1590 748L1585 741L1582 736L1581 735L1581 733L1582 730L1581 727L1580 720L1581 716L1584 713L1588 715L1593 716L1595 718L1595 721L1596 725L1597 727L1598 728L1600 730L1603 733L1604 735L1605 738L1605 740L1605 746L1604 747L1602 750L1604 750L1606 749L1606 752L1606 756L1608 755L1610 755L1612 754L1613 752L1614 753L1615 754L1616 753L1620 757L1620 780L1199 780L1198 768L1198 765L1197 763L1196 766L1195 767L1194 772L1194 780L1151 780L1150 779L1149 778L1148 777L1144 770L1141 766L1140 768L1139 772L1139 776L1140 778L1143 780L862 780L861 777L860 774L858 772L856 768L855 761L856 756L857 754L859 751L864 745L869 740L878 734L883 734L886 733L890 729L892 729L894 730L902 729L905 729L910 731L915 732L918 733L922 734L924 738L923 740L928 744L939 744L941 745L945 747L947 747L954 746L959 745L963 746L965 746L967 748L969 752L970 753L972 756L976 756L987 752L999 753L1006 753L1017 753L1024 757L1026 757L1031 756L1034 758L1046 757L1053 758L1057 760L1060 760L1062 760L1064 758L1067 756L1070 753L1077 746L1079 745L1081 745L1083 744L1084 742L1085 740L1086 739L1089 737L1096 733L1096 735L1089 739L1092 739L1095 737L1099 736L1099 734L1099 732L1102 732L1110 733L1112 733L1116 730L1117 729L1119 730L1124 733L1123 734L1118 731L1118 733L1116 736L1119 737L1122 737L1123 738L1125 740L1127 739L1128 736L1127 735L1126 734L1128 735L1134 737L1136 738L1137 737L1141 735L1146 733L1147 734L1152 732L1158 731L1163 728L1168 724L1169 723L1172 718L1173 715L1175 706L1176 698L1175 687L1176 681L1176 677L1176 674L1177 672L1177 669L1177 665L1178 662L1179 652L1180 647L1180 642L1181 636L1183 634L1184 633L1184 631L1181 625L1180 623L1179 620L1179 616L1178 614L1177 613L1177 611L1173 608L1172 601L1173 599L1174 597L1171 593L1169 590L1170 587L1172 583L1174 579L1173 577L1171 575L1169 574L1167 576L1165 578L1164 579L1163 581L1161 584L1159 586L1154 585L1149 584L1146 583L1143 583L1142 585L1137 591L1133 599L1132 600L1127 604L1124 606L1122 606L1116 609L1112 610L1110 612L1105 612L1101 611L1099 609L1094 605L1092 603L1086 603L1077 600L1075 600L1069 600L1062 601L1061 603L1062 610L1062 612L1062 616L1060 618L1058 617L1054 619L1049 622L1047 623L1039 622L1036 620L1035 619L1033 616L1032 614L1031 612L1028 613L1025 613L1019 611L1016 612L1014 615L1013 617L1011 617L1010 616L1012 614L1006 615L1003 617L1001 618L999 617L1001 616L1002 615L1008 613L1010 612L1011 610L1013 607L1011 607L1002 609L996 610L995 611L993 609L994 607L996 607L999 605L998 603L995 602L993 602L991 601L991 598L989 596L987 595L990 592L990 588L989 586L983 585L980 583L977 582L976 583L974 584L972 583L970 582L969 581L970 579L971 577L970 574L970 572L972 572L974 574L975 575L975 577L976 578L977 579L977 577L980 577L985 575L982 575L981 574L979 573L978 571L977 569L980 567L981 564L980 563L978 563L977 561L977 559L974 555L973 553L975 551L977 548L975 548L968 550L966 551L961 552L961 550L961 547L960 542L961 539L963 537L966 533L970 527L975 526L977 524L980 524L981 525L984 527L989 525L991 524L988 522L989 521L991 520L993 521L992 524L999 522L1006 521L1008 520L1013 520L1014 519L1012 518L1010 518L1009 517L1011 514L1013 513L1021 510L1027 508L1026 507L1018 508L1016 507L1012 506L1011 504L1011 502L1011 500L1012 498L1015 498L1026 497L1034 494L1043 495L1052 493L1053 492L1054 487L1064 478L1068 473L1072 470L1079 467L1084 462L1086 462L1101 459L1111 457L1115 453L1118 453L1118 455L1118 457L1121 458L1123 460L1128 461L1134 457L1137 457L1141 463L1143 464L1146 465L1148 465L1149 463L1150 462L1152 461L1157 462L1159 464L1166 464L1172 463L1175 464L1185 463L1188 461L1193 458L1202 452L1210 453L1212 453L1214 452L1216 452L1219 451L1225 445L1227 442L1229 440L1231 439L1235 433L1236 430L1238 424L1238 421L1238 419L1237 417L1234 414L1230 408L1226 403L1225 401L1219 401L1217 399L1212 397L1206 397L1204 397L1198 395L1194 393L1191 393L1183 389L1179 386L1165 380L1163 379L1157 380L1155 379L1147 374L1145 376L1142 377L1141 376L1139 376L1138 375L1136 372L1134 371L1129 370L1123 370L1122 369L1126 366L1127 365L1125 364L1123 364L1124 363L1125 362L1127 362L1130 364L1132 364L1133 363L1139 359L1138 356L1137 355L1137 352L1139 348L1139 343L1140 341L1141 343L1142 341L1142 339L1144 338L1146 338L1148 337L1143 335L1138 332L1137 333L1135 333L1133 330L1131 328L1133 328L1135 327L1137 325L1139 324L1141 324L1143 324L1143 322L1141 320L1144 318L1146 316L1151 312L1153 310L1151 307L1150 305L1147 306L1146 309L1142 311L1140 312L1142 310L1143 309L1140 309L1139 311L1135 315L1129 317L1124 319L1122 323L1120 324L1118 326L1116 328L1115 331L1113 330L1110 331L1108 332L1106 335L1102 336L1099 338L1094 346L1092 351L1091 353L1090 354L1091 350L1092 349L1092 346L1090 345L1089 350L1087 351L1086 353L1086 356L1087 358L1089 360L1092 364L1097 369L1100 371L1102 371L1106 368L1107 367L1111 367L1113 365L1115 364L1117 364L1120 364L1120 367L1119 369L1119 371L1119 373L1117 375L1114 375L1111 377L1109 376L1107 375L1105 376L1103 377L1102 380L1099 383L1099 386L1095 386L1092 387L1088 390L1086 396L1083 399L1081 401L1078 401L1076 401L1072 399L1072 397L1072 390L1072 388L1070 385L1067 384L1065 385L1063 384L1058 382L1055 382L1052 383L1050 382L1055 376L1059 371L1061 370L1064 367L1067 364L1066 362L1065 360L1063 361L1062 362L1059 361L1058 360L1054 363L1051 363L1046 365L1043 365L1037 363L1035 363L1033 362L1034 361L1036 360L1033 358L1031 359L1029 358L1028 357L1030 357L1033 357L1038 356L1042 356L1044 353L1041 354L1037 354L1035 353L1034 352L1033 350L1033 348L1032 345L1030 343L1029 341L1027 340L1029 343L1030 345L1031 347L1032 352L1032 354L1031 355L1029 355L1026 355L1026 352L1024 356L1023 357L1020 357L1015 360L1015 362L1014 365L1014 367L1012 372L1008 379L1005 382L1003 383L1002 384L1000 384L999 385L998 386L999 388L1000 389L1002 394L1002 396L1002 398L1002 403L1002 405L1002 407L993 411L994 410L993 408L992 407L993 405L991 405L990 406L991 410L990 412L990 414L990 416L991 418L989 421L988 424L990 431L989 436L990 438L990 444L989 447L986 446L983 448L982 451L981 452L980 454L980 458L981 465L980 466L975 473L978 474L980 475L983 478L986 482L987 484L987 486L989 489L992 493L996 495L1008 498L1010 498L1010 501L1010 503L1009 504L1006 506L996 505L994 505L992 506L990 508L986 508L982 510L981 514L978 518L974 522L970 524L965 531L963 535L962 536L961 537L961 535L961 533L961 530L962 528L964 527L969 523L970 521L966 522L962 523L959 523L957 523L956 522L955 521L954 520L951 518L944 518L941 517L939 518L936 517L931 521L929 521L926 519L923 520L921 524L918 526L915 526L912 526L912 528L915 531L914 533L915 534L918 534L922 536L923 538L925 540L922 538L921 537L919 537L916 535L914 535L912 537L915 540L917 541L918 542L919 544L918 545L915 544L911 539L907 539L906 540L907 543L908 544L912 546L907 546L905 544L905 540L900 539L896 537L895 535L896 534L896 532L894 532L893 534L891 535L891 537L891 540L891 544L891 547L897 552L899 556L900 558L903 559L906 562L907 564L908 567L906 569L904 568L905 566L901 563L900 564L898 566L899 568L901 569L901 571L903 571L901 573L899 575L896 575L894 575L895 576L898 577L903 578L906 580L908 580L911 583L915 583L918 587L921 587L923 588L924 589L925 591L926 596L927 599L927 602L926 603L923 601L920 598L917 596L916 595L913 596L909 598L907 599L906 600L907 601L908 602L909 604L910 606L911 607L913 607L914 608L916 609L912 612L911 613L910 614L909 613L908 611L907 610L905 609L903 609L902 608L901 609L902 613L904 615L908 622L909 626L910 628L910 631L911 634L913 636L910 635L905 631L904 628L900 629L899 635L899 638L898 637L896 636L896 633L896 631L893 627L891 627L890 625L889 624L887 625L887 627L887 630L886 632L883 629L879 623L879 620L881 617L880 615L877 612L874 609L872 609L871 606L870 605L868 605L868 603L871 600L873 595L876 596L878 595L879 593L881 591L883 591L889 594L896 595L899 597L901 598L903 598L903 596L904 595L907 595L908 594L907 592L905 592L903 592L901 592L900 591L899 590L896 589L892 587L892 589L890 590L883 589L880 590L878 591L876 592L874 592L872 590L871 588L871 590L870 591L868 592L866 591L865 588L863 585L861 582L859 581L858 579L859 578L861 577L864 579L865 578L866 577L865 575L863 575L861 575L858 576L857 575L854 573L852 570L848 569L846 563L844 561L842 559L842 557L841 555L838 551L831 547L829 546L828 544L827 543L829 543L830 542L827 537L828 533L829 529L829 525L829 521L828 519L828 517L829 513L830 512L830 507L828 506L825 506L822 504L821 501L816 497L811 494L811 492L809 492L805 490L802 488L796 484L791 483L785 480L781 479L784 479L794 483L793 481L791 480L786 476L782 474L778 469L772 468L768 466L766 466L764 467L762 467L760 466L760 463L758 461L755 459L752 457L746 451L745 448L747 448L749 448L751 448L750 447L748 445L742 440L741 437L740 434L741 430L740 428L736 424L734 422L732 421L730 421L729 423L729 426L726 430L725 432L724 434L722 434L720 430L718 427L718 424L716 418L717 417L718 416L720 415L721 414L718 410L715 412L711 410L710 411L709 412L707 414L705 414L703 416L700 417L698 418L699 416L695 417L694 418L694 420L693 423L694 424L696 428L698 430L698 432L697 433L696 435L694 434L693 436L694 444L696 449L697 451L701 455L705 457L712 463L716 465L717 466L719 470L721 476L723 484L725 488L728 493L735 499L741 504L747 507L751 508L762 507L765 508L766 510L765 511L763 513L761 515L761 518L763 519L773 524L784 528L787 530L791 534L801 538L802 540L808 545L811 548L812 551L811 554L810 556L809 559L807 558L804 556L799 547L792 547L790 546L788 545L787 544L786 542L783 542L781 544L779 547L776 552L774 559L774 562L775 565L780 566L783 568L786 571L786 577L787 581L786 583L783 582L779 584L776 586L775 588L776 594L775 596L770 600L768 604L767 606L766 608L759 608L758 606L758 602L759 600L761 599L763 594L762 591L763 590L764 589L766 588L768 587L768 583L766 581L765 578L764 572L761 565L759 559L758 556L755 555L752 555L750 554L743 550L743 548L744 547L743 544L742 542L741 540L739 539L736 540L733 540L732 541L733 538L731 536L727 536L726 534L722 528L720 525L718 525L716 525L712 524L710 524L707 525L706 524L703 520L699 519L691 510L688 507L683 503L680 498L678 496L674 494L672 495L671 494L672 493L672 491L668 486L665 484L664 482L662 480L660 480L660 477L661 475L659 470L657 466L656 457L655 455L653 453L647 450L639 444L633 442L630 441L626 443L621 448L617 453L615 454L610 456L606 456L602 458L600 458L594 463L591 465L590 466L590 468L588 469L586 470L583 470L579 471L574 470L571 468L567 466L565 463L563 463L561 462L561 460L559 460L557 460L556 461L554 461L549 459L548 458L546 457L544 455L543 454L540 455L539 456L538 457L527 462L525 465L522 469L522 471L522 477L524 480L524 483L525 484L523 486L522 488L523 489L523 494L521 495L518 497L503 503L500 506L499 507L488 508L481 509L478 510L473 513L471 515L474 518L470 519L469 520L468 519L462 526L457 531L455 533L452 536L445 544L445 546L446 556L447 558L448 560L452 563L452 565L451 566L447 568L439 571L436 573L435 576L433 577L431 581L430 583L429 584L428 586L427 587L429 590L427 590L424 590L417 589L410 592L406 595L401 602L397 606L395 606L393 604L391 603L388 603L386 604L383 604L381 603L376 602L374 601L370 602L367 600L363 599L352 597L350 597L348 599L344 601L339 600L334 601L332 602L330 605L328 607L327 606L326 608L324 608L322 608L319 606L317 603L315 602L313 598L313 595L313 593L313 591L311 589L311 587L313 585L315 584L316 583L314 583L312 585L311 581L305 573L306 572L304 572L303 573L299 571L294 571L293 570L285 573L283 572L279 569L273 567L271 566L268 566L265 565L263 566L262 565L265 563L269 557L270 553L271 549L272 546L271 543L274 538L275 536L275 532L278 533L278 531L277 530L275 530L271 530L269 530L269 527L269 524L271 524L274 523L275 522L276 520L277 518L281 517L279 516L277 517L273 521L272 523L269 523L267 523L266 522L265 521L266 520L266 518L268 516L269 512L271 509L272 508L273 506L275 506L277 503L282 497L287 491L287 489L288 487L292 479L295 476L296 472L297 470L297 468L298 467L297 463L298 456L299 454L300 453L298 452L299 449L301 447L299 446L300 442L303 440L305 439L303 438L304 437L305 436L304 434L305 432L306 431L302 430L302 428L304 426L305 425L303 424L302 423L301 421L300 419L301 418L303 415L305 414L309 413L313 414L315 414L318 414L321 413L321 411L322 410L324 409L327 408L330 409L333 408L335 409L336 410L338 411L340 414L343 416L346 416L351 417L354 418L358 419L361 420L365 420L368 422L374 424L377 426L387 431L391 432L397 432L399 431L401 432L404 432L406 433L407 435L414 438L416 437L422 439L426 442L429 442L432 443L436 442L439 442L443 439L447 428L452 415L453 413L455 412L454 410L453 411L452 412L455 400L457 396L459 391L461 394L463 396L464 398L464 404L465 405L466 406L465 404L464 396L464 394L463 392L458 387L458 385L460 385L461 386L461 382L461 375L462 373L460 371L458 370L452 365L450 360L448 356L449 354L450 351L450 349L449 348L448 347L449 346L450 345L453 346L455 347L452 344L446 344L445 343L444 342L443 341L445 340L446 339L445 338L444 337L442 337L440 337L441 334L439 334L437 334L436 333L435 331L434 330L432 330L431 329L429 328L423 324L420 323L418 324L416 323L415 322L415 319L411 316L412 315L414 316L417 315L416 313L415 312L414 311L415 310L416 311L420 312L419 310L418 309L416 309L413 308L412 307L414 304L417 303L425 302L429 303L431 303L434 303L435 302L440 302L443 304L445 309L447 311L451 310L457 311L458 313L459 311L460 310L461 311L468 313L467 311L467 309L468 299L467 295L466 291L465 288L466 287L469 286L470 287L474 287L476 288L475 290L475 292L476 294L479 296L482 297L486 298L492 301L494 300L497 299L502 298L500 298L497 296L498 294L499 291L507 289L512 288L517 287L520 285L523 282L524 281L526 269L527 267L528 266L530 265L532 264L541 263L542 262L550 259L554 257L556 257L560 257L562 258L564 259L567 258L568 259L570 259L569 258L567 257L564 257L562 256L560 256L559 255L558 253L559 252L563 252L565 253L569 257L571 257L570 256L569 255L568 254L567 253L570 253L569 251L567 247L568 245L570 243L572 242L575 238L577 236L578 233L581 223L582 222L583 220L584 221L587 220L592 217L594 214L596 213L601 211L604 211L608 211L612 211L615 211L617 213L619 215L621 215L620 214L619 213L619 210L620 208L622 206L623 205L628 205L634 206L636 210L635 212L636 213L637 212L638 211L638 209L639 208L640 210L641 211L641 214L642 210L641 207L642 204L643 203L644 202L648 203L652 203L654 204L658 210L659 211L661 211L658 210L654 203L653 202L650 202L649 201L648 200L649 192L648 191L646 191L644 190L645 189L648 188L649 187L650 185L649 184L647 181L646 178L646 173L645 170L646 169L647 165L646 162L642 160L639 157L641 150L641 147L640 143L641 139L642 131L646 133L648 134L649 135L650 134L650 131L652 129L654 128L655 127L656 129L657 130L657 127L658 122L656 121L654 122L652 125L651 129L648 129L646 130L645 129L644 128L644 126L646 122L649 119L652 119L654 118L659 118L661 118L662 116L666 110L669 108L673 107L677 104L676 106L675 107L675 109L676 112L676 117L675 119L673 122L672 123L672 128L672 133L673 135L675 136L680 136L681 138L680 140L680 142L678 143L676 144L674 142L672 143L670 149L669 152L667 152L665 153L667 155L665 156L664 157L663 158L662 160L660 161L661 163L661 165L661 167L661 169L659 171L658 173L660 173L661 174L662 175L661 176L662 179L664 180L665 181L666 183L666 185L664 187L663 188L667 187L668 188L668 190L670 189L676 192L679 191L681 193L680 196L677 198L677 200L678 201L681 200L685 202L690 198L692 197L696 197L697 195L699 194L700 192L703 189L706 190L708 190L710 191L712 194L716 198L721 197L722 201L723 205L724 206L725 207L728 208L732 210L733 211L733 209L733 206L730 205L727 205L725 205L724 204L723 203L723 201L722 200L722 198L725 200L728 203L730 203L735 201L744 198L753 195L755 194L757 193L758 192L760 190L763 187L767 185L769 184L773 182L781 179L785 178L788 178L792 180L795 182L796 183L794 182L791 180L793 186L794 188L797 190L799 190L805 189L807 187L810 184L812 182L813 179L813 177L813 174L815 173L819 173L821 172L823 169L825 166L825 164L827 161L827 159L828 156L828 159L827 162L825 167L822 172L823 173L826 174L828 174L830 173L831 168L830 164L830 162L830 159L829 155L827 150L826 145L825 139L824 129L825 124L827 121L828 119L828 116L828 113L829 111L832 104L835 103L839 101L843 99L844 101L845 102L851 107L852 109L855 114L860 117L864 115L866 114L868 111L870 108L870 106L868 98L867 95L867 93L867 91L868 86L868 82L868 80L866 79L865 81L864 82L863 83L861 82L858 81L857 79L856 77L854 76L853 74L853 72L855 71L853 70L851 67L852 66L851 64L852 63L851 60L853 58L855 57L859 56L858 54L860 54L862 51L865 51L869 49L876 48L877 47L876 45L878 45L880 44L889 45L891 45L895 46L896 47L901 46L909 46L910 44L910 42L910 39L909 37L910 35L911 37L913 37L914 36L914 34L915 33L918 33L920 32L921 30L922 27L929 27L935 28L936 27L934 25L931 23L929 21L927 21L924 22L920 23L916 20L914 19L912 16L911 15L913 16L913 13L912 12L911 11L907 15L902 17L901 18L899 19L895 18L893 19L892 20L889 21L888 22L887 23L886 21L886 19L887 18L886 17L886 19L885 21L885 23L883 23L880 22L881 25L879 25L878 27L877 28L876 26L874 27L873 29L871 29L870 31L867 32L863 34L862 36L861 37L860 36L856 38L852 39L850 39L847 41L845 43L843 44L844 42L845 40L844 38L842 37L841 34L840 35L840 37L839 38L838 39L835 39L835 36L836 35L836 33L836 31L835 30L832 30L827 28L825 26L823 27L821 26L820 25L820 23L819 19L819 16L819 14L819 12L820 11L820 8L820 4L819 3L820 2L819 1L820 0L819 -2L818 -6L817 -9L815 -10L815 -14L816 -17L815 -18L815 -20L1620 -20ZM91 780L97 774L101 769L105 767L108 764L112 764L119 765L131 766L142 765L145 764L149 761L156 758L166 755L172 753L180 747L186 742L191 739L195 736L197 733L200 727L200 724L199 720L197 718L198 716L199 713L201 708L204 699L209 693L219 685L221 682L224 676L225 674L236 668L243 663L245 662L250 660L267 657L277 655L283 653L287 650L300 636L314 615L315 613L319 613L321 613L323 613L326 612L329 613L327 614L326 617L327 620L329 625L334 631L338 634L343 636L351 636L355 637L357 636L359 638L363 639L367 639L370 638L373 636L372 639L373 640L373 643L374 644L376 644L378 645L382 646L386 647L390 648L393 649L398 647L402 645L406 644L409 641L412 640L416 638L427 635L431 637L434 637L437 636L440 632L443 630L448 628L454 627L458 625L464 624L479 625L486 625L491 626L497 624L500 623L511 624L516 622L536 625L539 626L541 627L545 631L546 632L549 632L556 629L563 628L567 627L568 624L572 623L573 626L580 628L585 628L587 628L586 625L591 626L594 628L598 631L600 632L605 631L614 631L619 629L624 626L626 625L637 622L639 622L640 623L639 625L640 627L641 626L641 624L643 624L645 624L647 626L647 630L650 634L649 637L651 638L653 637L655 634L659 633L663 630L665 630L665 632L666 635L664 636L663 638L659 644L656 646L653 648L652 650L652 652L652 656L654 660L656 662L658 663L662 667L662 669L663 671L663 674L664 677L661 682L659 686L655 691L651 694L644 699L642 700L641 702L640 704L640 706L642 712L645 715L649 717L654 716L654 718L654 721L656 721L658 720L659 718L662 720L663 725L666 726L665 727L664 728L667 729L671 730L674 732L677 732L687 739L690 740L698 740L706 738L709 738L715 740L717 741L721 741L728 743L730 744L734 747L736 748L750 751L752 753L754 757L755 762L756 765L758 770L760 773L762 776L765 777L772 780L774 780L91 780ZM770 -20L768 -20L770 -20ZM766 -20L767 -17L768 -15L770 -14L769 -13L768 -12L768 -8L767 -7L767 -4L767 -2L768 -1L768 1L765 0L765 2L764 4L764 6L765 7L764 9L765 10L765 12L765 15L766 19L767 24L767 27L768 28L771 28L772 30L773 31L775 30L776 29L777 31L779 34L780 35L782 36L784 38L784 40L785 41L787 42L788 43L789 45L790 49L789 51L787 53L786 55L785 56L783 58L781 59L780 60L777 62L780 63L781 62L782 61L784 60L786 62L785 63L783 66L782 68L780 69L778 71L776 72L774 73L771 75L770 77L767 79L765 80L760 81L756 81L757 82L761 82L764 85L763 86L761 86L762 90L763 92L762 93L762 100L760 100L760 103L760 107L761 109L762 111L761 112L759 117L759 119L760 120L760 122L759 126L759 129L758 131L756 134L755 137L753 144L752 145L751 146L749 146L748 145L746 145L744 146L740 145L736 146L735 149L733 149L731 150L730 151L728 153L728 157L729 159L730 162L727 166L722 165L715 167L708 165L709 163L710 160L710 158L710 156L709 155L708 153L704 146L703 143L706 144L707 143L707 141L706 140L705 139L707 138L709 137L709 134L707 133L704 129L702 126L699 118L698 112L696 113L696 110L695 108L695 106L693 105L693 99L691 98L690 95L690 89L688 88L687 87L687 85L687 80L687 75L686 72L687 70L688 69L690 71L689 69L686 68L684 67L682 67L681 64L680 61L680 56L680 54L680 51L679 53L679 56L678 57L677 58L677 60L677 64L674 69L673 71L672 70L670 72L668 70L666 68L667 70L666 71L665 72L661 74L662 76L661 77L660 78L659 79L656 81L650 88L647 90L645 92L643 91L641 93L635 94L631 93L629 93L627 92L628 90L626 90L625 92L623 91L623 89L625 88L624 87L622 87L621 86L616 83L612 79L611 76L610 73L610 71L611 67L612 66L615 68L618 70L620 69L622 67L618 68L617 67L616 65L617 63L617 61L617 59L619 57L621 56L623 54L624 53L622 53L621 54L619 56L616 58L614 58L612 59L611 61L609 62L607 62L606 60L608 54L609 51L610 49L612 48L614 48L616 49L617 48L619 48L622 46L620 46L617 46L616 44L617 43L620 40L621 39L622 38L622 35L625 32L628 31L627 36L627 38L629 32L630 31L631 30L633 30L634 29L632 29L625 30L623 32L622 33L620 35L619 37L618 39L617 40L614 43L613 45L611 46L609 47L608 49L607 48L608 44L609 42L610 40L609 39L610 38L612 38L616 37L615 36L613 36L611 35L610 32L610 28L616 24L617 22L614 24L612 25L610 23L610 21L609 17L610 15L610 12L612 12L614 13L616 13L623 12L626 13L628 13L631 12L633 12L634 13L635 14L635 16L636 17L636 14L643 12L641 10L640 8L642 5L640 6L639 9L639 11L638 12L635 12L633 11L631 10L631 8L630 9L629 11L628 12L624 10L618 10L616 11L614 11L612 9L611 7L611 3L613 2L615 1L613 -1L613 -3L612 -4L611 -5L611 -8L611 -10L614 -10L618 -10L622 -7L625 -6L630 -6L634 -7L633 -8L630 -7L626 -8L621 -10L618 -11L616 -11L615 -12L614 -14L615 -17L616 -18L617 -17L618 -16L619 -18L620 -20L766 -20ZM731 658L729 657L730 656L731 657ZM723 538L722 537L724 538ZM685 638L684 639L682 638L683 636L684 637L685 638ZM608 208L606 209L608 208ZM602 209L599 209L598 208L601 209ZM589 212L586 213L588 211ZM593 210L591 210L594 209L596 209ZM774 480L777 480L780 480L782 480L783 481L780 481L777 482L775 482L774 481ZM784 476L782 476L774 476L772 476L769 475L768 474L771 474L774 474L781 476ZM776 473L773 473L770 472L769 471L770 470L772 470L777 471L778 472ZM455 288L454 290L452 289L454 288ZM461 296L461 298L460 297L457 297L458 295L460 296ZM1385 258L1382 257L1383 256L1385 257ZM1309 292L1307 291L1307 289L1309 291ZM784 70L783 69L784 68ZM786 58L785 59L785 57L786 56L787 57L786 58ZM1573 726L1573 728L1569 726L1568 723L1566 720L1568 718L1570 720L1572 723ZM1481 660L1480 661L1478 660L1475 658L1476 656L1475 655L1475 653L1476 652L1477 653L1481 655L1482 657ZM1037 364L1040 365L1037 365L1032 365L1029 365L1028 364L1028 362L1029 363L1030 364ZM845 70L844 71L843 70L842 74L840 74L839 73L838 70L836 69L834 69L833 68L838 67L839 66L840 64L841 65L842 66L844 66L845 68L846 70ZM851 77L847 75L848 74L851 74L851 76ZM1010 636L1008 636L1008 632L1007 631L1008 629L1008 627L1010 625L1015 622L1016 621L1016 623L1015 627L1014 630L1015 631L1012 632ZM999 650L998 651L997 650L996 647L997 643L997 641L998 640L998 643L997 645L999 647L1000 649ZM1008 620L1006 619L1007 618L1008 619ZM989 612L987 613L987 611L986 610L988 610L989 611ZM989 618L988 619L989 617L990 615L993 613L996 614L993 616L990 617ZM959 617L958 618L956 617L955 615L958 611L960 612L960 615ZM954 615L952 617L950 616L951 614L952 613L953 615ZM960 631L959 633L959 631L958 630L960 630ZM957 625L955 624L954 623L955 622L958 623ZM982 592L984 592L986 592L987 593L985 594L983 596L980 595L978 595L977 594L978 593L980 592ZM967 601L966 600L968 598L970 598L972 597L973 596L972 598L970 600ZM966 620L965 621L966 619L968 618L969 616L970 617L969 618ZM979 624L977 626L976 625L975 624L977 624L978 623ZM933 605L932 606L932 604L932 602L934 603ZM936 610L935 611L935 609L935 607L936 608ZM940 625L940 627L936 628L936 626L938 626ZM945 605L946 608L945 607L945 605ZM946 598L945 600L943 598L941 597L939 595L940 593L942 595L944 595L945 597ZM951 602L949 603L947 602L946 601L947 600L948 601L951 601ZM943 620L942 619L944 619ZM966 584L964 585L962 584L961 583L963 582L963 580L962 579L960 577L959 575L963 574L965 575L966 577L967 581L966 582ZM968 555L971 558L972 560L972 562L971 561L972 563L970 563L969 564L964 563L963 562L965 559L966 558L964 559L962 562L959 561L957 560L958 557L960 557L961 556L963 555L966 553ZM917 567L916 568L913 565ZM919 566L919 564L920 563L920 565ZM936 573L934 574L933 573L931 571L931 569L933 570L934 571ZM950 529L947 530L945 528L947 527L948 528ZM946 541L945 544L945 546L943 545L942 546L940 545L939 544L939 542L942 541L944 542L945 541L946 540ZM931 527L929 528L926 527L927 524L928 523L930 523L931 524L931 526ZM956 536L952 537L950 537L951 535L954 533L956 535ZM64 609L66 612L69 612L72 615L73 616L71 617L69 618L66 616L63 613L63 610ZM38 725L34 730L32 732L28 732L26 727L26 723L26 721L29 722L34 723L40 721L45 722ZM100 733L98 735L96 733L99 730L100 729L103 729L106 729L107 728L108 727L109 729L108 730L106 733L104 733ZM83 748L79 750L76 748L79 748L82 747L86 742L91 738L92 736L95 736L96 738L95 741L92 745L90 748ZM56 739L56 741L55 743L54 746L53 747L49 747L47 746L46 745L45 742L46 739L49 738L50 736L55 739L56 738ZM17 727L15 725L15 723L16 722L18 722L19 724L19 726ZM-1 726L-4 729L-6 726L-7 725L-4 725L-1 724ZM7 709L7 707L7 702L9 700L12 701L12 703L12 705L11 707L10 708ZM667 689L664 691L665 689L667 688ZM659 716L657 716L655 716L654 715L655 712L659 711L661 713L660 715ZM451 165L447 168L446 167L447 163L449 163L451 160L453 160L453 163L452 164ZM435 98L434 97L436 96ZM449 131L447 131L446 130L446 126L447 124L449 125L449 128L449 130ZM445 107L439 107L437 106L439 105L441 102L439 100L439 98L441 98L443 99L444 101L445 102L446 103ZM437 116L437 119L437 121L436 123L433 123L434 122L434 120L433 119L431 120L432 118L433 117L434 116L436 116ZM439 119L437 119L438 117L441 115L440 114L443 112L442 115ZM531 14L530 12L531 9L532 10L531 12L531 14ZM528 13L528 15L529 17L531 16L530 18L528 22L528 24L526 27L525 30L524 29L525 26L526 24L526 22L524 22L522 20L523 19L526 18L526 15L524 14L525 13L527 11ZM536 7L535 10L533 10L534 7L536 7ZM494 53L492 51L492 49L494 50L494 52L495 53ZM449 187L450 188L451 189L449 190L447 191L446 192L445 190L444 188L444 185L446 184L448 185ZM505 44L503 43L505 42L507 42ZM497 55L496 53L498 53ZM497 47L498 48L499 49L501 50L500 51L498 50L495 50L495 48L493 48L494 46L494 44L497 44L498 46ZM502 44L501 45L501 42L500 41L499 40L500 39L501 41L502 43ZM452 54L449 58L447 59L445 60L447 60L447 62L444 64L442 64L440 66L439 67L437 67L436 65L439 64L440 63L439 61L438 60L439 59L438 58L439 57L440 56L442 57L444 57L444 54L447 53L451 51L452 53ZM442 89L441 90L440 89L440 87L442 87L442 89ZM447 76L446 79L446 81L447 82L449 83L452 84L451 85L450 86L447 88L447 84L445 84L443 84L442 82L442 80L439 78L438 76L439 75L441 75L441 73L445 73L445 71L447 72L447 74ZM434 68L435 70L433 72L431 71L429 69L430 68L432 68ZM430 82L428 82L428 80L429 77L429 75L431 75L430 82ZM369 150L368 149L365 147L367 147L369 148ZM426 85L425 84L427 84ZM828 32L826 31L826 29L827 30L828 32ZM798 39L797 40L797 37ZM802 34L804 34L805 35L806 36L805 38L803 38L803 41L800 41L799 37L800 36L800 38L801 36L800 35L800 33L802 34ZM796 98L796 100L794 98L795 97L797 96L798 97ZM761 142L760 143L759 141L759 137L759 135L762 127L763 126L765 121L765 119L766 117L767 115L767 117L765 124L765 128L764 129ZM741 175L740 176L738 175L735 173L735 170L736 168L741 172ZM720 192L721 193L720 194L719 193L717 193L716 195L713 193L712 192L712 188L713 186L715 183L716 185L717 186L719 187L720 188L719 189ZM703 176L700 176L698 178L697 176L699 175L700 174L701 175L703 176ZM705 160L704 161L703 160L704 159L705 158ZM686 178L688 180L690 180L691 181L692 183L690 184L687 185L681 181L681 178L681 176L684 176ZM673 178L672 179L671 178L669 176L671 177L673 178ZM667 177L665 178L664 177L662 173L663 172L666 175L666 177ZM676 181L675 179L676 177L677 176L678 173L680 171L679 173L677 180ZM676 155L674 154L675 151L674 150L675 149L676 151L676 153ZM684 190L682 190L681 189L681 187L683 188L684 189ZM683 117L681 117L682 115L684 115ZM640 178L641 175L642 171L643 172L642 173L642 175L645 176L641 177ZM459 382L458 384L457 382L456 380L456 378L458 379ZM484 263L482 264L481 265L479 265L476 262L477 261L479 261L480 260L483 262ZM585 217L583 219L582 218L583 216L585 214ZM658 482L658 484L658 486L657 485L654 485L652 484L653 483L655 483L657 483ZM616 576L614 579L613 577L613 575L615 576ZM615 526L614 527L615 525L616 524L617 525L616 526ZM536 549L530 546L528 545L528 543L532 543L535 544L536 547L537 548ZM479 571L477 571L475 571L476 570L476 568L477 570L479 570ZM477 565L476 566L473 565L474 563L475 562L476 560L480 560L481 561L478 564ZM736 662L734 663L732 662L732 659L734 659L736 661ZM747 453L745 453L744 451ZM739 430L737 431L736 430L734 429L733 428L732 427L734 426L735 424L736 425L737 427L738 428ZM740 436L738 436L736 435L737 434ZM746 446L744 446L743 445L741 443L741 441L738 438L739 439L741 440L743 441L745 444L747 446ZM746 457L741 452L740 451L742 452ZM750 456L751 457L748 456ZM733 438L732 436L730 432L731 430L730 426L731 428L732 429L733 430L733 433L733 437ZM792 485L794 486L787 484ZM856 592L857 595L860 598L860 600L857 599L855 599L855 597L854 596L852 597L853 594L855 594L855 592L855 590ZM863 606L866 609L864 608L862 610L860 608L858 606L859 603L861 605ZM857 586L855 587L855 585L855 583L856 581L857 580L858 581L858 585ZM859 593L857 591L856 590L857 589L858 590L859 592ZM844 566L844 568L842 567L840 566L838 563L835 559L836 558L838 557L840 558L839 560L840 562L841 565L843 566ZM916 598L915 599L914 598L915 596L916 597ZM911 643L909 644L908 642L908 640L909 638L910 640L912 641ZM567 249L568 251L566 252L564 250L563 249ZM645 180L644 181L642 181L643 179ZM615 207L613 207L614 206L616 206ZM831 31L833 31L834 32L833 33L833 35L834 36L832 36L831 34L830 33L830 31ZM821 28L820 29L818 28L818 26ZM827 37L826 38L825 37L826 36ZM811 41L810 42L808 42L809 41L811 41ZM824 39L822 38L823 37L824 38ZM609 11L607 11L608 8L610 9ZM609 32L609 35L607 34L607 32L607 29L608 28L609 29ZM955 606L953 606L953 604L956 604ZM938 616L936 616L936 614L938 614Z","west":"M728 780L637 746L596 718L534 686L432 658L388 663L323 662L292 654L220 634L294 391L393 266L422 229L441 168L445 142L498 151L539 226L554 251L573 246L601 250L611 273L621 291L632 300L634 313L628 328L616 360L640 359L665 353L691 331L716 339L758 348L779 353L808 356L812 402L819 427L822 464L830 507L833 780L728 780Z","east":"M833 780L830 507L822 464L819 427L841 430L877 432L925 449L978 433L1003 398L1024 385L1147 366L1242 428L1281 468L1263 537L1244 575L1236 618L1213 693L1198 764L1198 780L833 780Z","francs481":"M540 283L540 262L554 256L572 251L581 270L569 288Z","syagrius":"M474 287L496 291L522 282L540 283L569 288L577 308L570 337L546 355L511 355L487 346L471 320Z","francs511":"M474 287L496 291L522 282L534 261L554 251L580 221L595 210L616 240L639 262L657 289L667 317L651 344L633 358L616 360L598 351L576 348L565 355L556 369L548 388L546 419L537 433L526 439L505 454L495 473L466 465L436 444L442 440L455 404L455 373L450 347L462 313Z","burgondes":"M548 388L556 369L565 355L576 348L598 351L616 360L614 385L616 403L602 417L596 442L572 447L554 445L537 433L546 419Z","wisigoths":"M495 473L505 454L526 439L537 433L550 462L524 495L447 570L323 609L249 568L297 413L436 444L466 465Z","charlemagne":"M409 301L428 295L481 283L526 262L551 253L588 204L636 172L651 179L669 190L675 211L679 226L690 242L690 267L692 295L700 311L721 334L733 339L766 338L796 355L813 376L815 412L796 428L769 424L753 429L734 422L717 440L721 468L738 501L728 508L709 525L687 520L659 492L632 477L625 452L606 463L549 470L527 498L487 507L472 495L473 474L439 458L434 441L442 350Z","limes":"M573 246L601 250L611 273L621 291L632 300L634 313L628 328L641 336L666 330L691 331L716 339L758 348L779 353L808 356L812 402L841 430L877 432L925 449L978 433L1003 398","villes":{"Rome":[696,508],"Constantinople":[1010,504],"Ravenne":[692,444],"Tournai":[554,277],"Soissons":[549,307],"Reims":[560,312],"Paris":[531,318],"Vouillé":[486,368],"Aix-la-Chapelle":[598,277],"Barcelone":[501,505],"Pavie":[638,422],"Dijon":[571,363],"Lyon":[563,401],"Toulouse":[496,447]},"centres":{"west":[555,499],"east":[1041,585],"francs481":[560,270],"syagrius":[524,318],"francs511":[543,339],"burgondes":[579,398],"wisigoths":[378,510],"charlemagne":[603,364]}};
+/* META {"id":"histoire-A5-croisades","matiere":"histoire","annee":"A","periode":1,"theme":"Le Moyen Âge : des rois francs aux … / vie religieuse et savoir","resume":"Les croisades (1095-1291) : l'appel de 1095, les grands itinéraires, la création des États latins du Proche-Orient et des conséquences qui ne sont pas seulement militaires (échanges, produits, savoirs).","motsCles":["croisades","Jérusalem","États latins","Urbain II","Vézelay","commerce","Venise","Gênes","Orient"]} */
+//@data europe
+(function(){
+const E=EUROPE;
+const C={sea:"#DCEBF5",land:"#F5EFE2",ac:"#A8431F",ink:"#1E2430",gr:"#2E8B57",bl:"#2563A8",pr:"#7A3E9D",or:"#E07A1F",rd:"#C0392B"};
+const el=(...x)=>Anim.H.el(...x);
+const V={Clermont:[533,397],"Vézelay":[550,356],Venise:[695,418],"Gênes":[633,442],Marseille:[566,464],"Aigues-Mortes":[545,455],Messine:[756,602],Acre:[1177,678],Damiette:[1119,725],Tunis:[647,636],"Jérusalem":[1187,706],Antioche:[1176,591],"Édesse":[1221,552],Tripoli:[1182,636],Constantinople:[1010,504],"Chypre":[1129,635]};
+const CITY={Clermont:[9,6,"start"],"Vézelay":[9,-7,"start"],Venise:[-7,-7,"end"],"Gênes":[-8,-6,"end"],Marseille:[-8,9,"end"],"Aigues-Mortes":[-4,25,"middle"],Messine:[8,-8,"start"],Acre:[-8,-2,"end"],Damiette:[-8,7,"end"],Tunis:[8,15,"start"],"Jérusalem":[-8,10,"end"],Antioche:[-8,-4,"end"],Constantinople:[-8,-10,"end"]};
+const RT={c1:[[533,397],[631,363],[691,346],[765,348],[840,430],[898,478],[1010,504],[1026,516],[1048,528],[1093,568],[1176,591],[1182,661],[1187,706]],
+ c2:[[550,356],[693,328],[765,348],[840,430],[898,478],[1010,504],[1048,528],[1093,568],[1177,678]],
+ c3:[[[550,356],[563,401],[566,464]],[[566,464],[614,466],[660,484],[702,541],[734,572],[756,602]],[[756,602],[817,643],[936,681],[1087,682],[1166,679]]],
+ c4:[[695,418],[712,440],[752,480],[812,554],[829,606],[896,647],[948,612],[961,564],[963,536],[992,513],[1010,504]],
+ c7:[[545,455],[577,509],[589,550],[624,607],[675,647],[746,671],[853,705],[979,686],[1129,635],[1119,725]],
+ c8:[[545,455],[573,511],[610,575],[642,620],[647,636]]};
+const TR=[[[1166,679],[1087,682],[936,675],[896,647],[829,606],[812,554],[752,480],[712,440],[695,418]],[[1166,679],[1087,682],[936,681],[817,643],[756,602],[734,572],[702,541],[660,484],[633,442]],[[1119,725],[979,690],[853,705],[746,671],[675,647],[624,607],[589,550],[577,509],[566,464]]];
+const CRO=[["c1","1re croisade","1096-1099",C.rd,1096,1099,[1026,516]],["c2","2e croisade","1147-1149",C.or,1147,1149,[1093,568]],["c3","3e croisade","1189-1192",C.bl,1189,1192,[756,602]],["c4","4e croisade","1202-1204",C.pr,1202,1204,[829,606]],["c7","7e croisade","1248-1254",C.gr,1248,1254,[1129,635]],["c8","8e croisade","1270",C.ac,1270,1270,[647,636]]];
+const ET=[ // États latins : [nom, début, fin, couleur, points, étiquette [x,y,ancre], ville]
+ ["Jérusalem",1099,1291,"#C0392B","1170,726 1195,727 1194,698 1187,670 1173,663 1170,699",[1166,700,"end"],["Royaume de","Jérusalem"]],
+ ["Tripoli",1109,1289,"#E07A1F","1173,663 1187,670 1195,647 1191,624 1177,625 1176,644",[1170,642,"end"],["Comté de","Tripoli"]],
+ ["Antioche",1098,1268,"#7A3E9D","1177,625 1191,624 1197,603 1186,577 1172,573 1167,583 1172,608",[1163,596,"end"],["Principauté","d'Antioche"]],
+ ["Édesse",1098,1144,"#2E8B57","1204,572 1229,570 1242,549 1232,534 1212,537 1200,552",[1198,553,"end"],["Comté","d'Édesse"]]];
+const EVT=[[1095,"Au concile de Clermont, le pape Urbain II appelle à partir vers Jérusalem."],[1096,"Les premiers croisés se mettent en route."],[1098,"Les croisés fondent les États latins d'Édesse et d'Antioche."],[1099,"Les croisés prennent Jérusalem, au prix d'une guerre très violente."],[1109,"Le comté de Tripoli est fondé : il y a maintenant quatre États latins."],[1144,"Édesse est reprise par des princes musulmans."],[1146,"À Vézelay, Bernard de Clairvaux prêche la deuxième croisade."],[1147,"Départ de la deuxième croisade."],[1187,"Saladin reprend Jérusalem."],[1189,"Troisième croisade : les rois de France et d'Angleterre partent (de Vézelay en 1190)."],[1204,"Quatrième croisade : les croisés prennent Constantinople, ville chrétienne."],[1229,"Jérusalem revient aux chrétiens par un traité."],[1244,"Jérusalem est de nouveau perdue."],[1248,"Saint Louis part en Égypte (septième croisade)."],[1268,"Antioche tombe aux mains des Mamelouks, des princes musulmans d'Égypte."],[1270,"Saint Louis meurt à Tunis pendant la huitième croisade."],[1289,"Tripoli est conquise par les Mamelouks."],[1291,"Saint-Jean-d'Acre tombe : c'est la fin des États latins."]];
+const R={}; let yr=1140, touched=false;
+const evAt=y=>{ let e=EVT[0]; EVT.forEach(x=>{ if(x[0]<=y) e=x; }); return e; };
+const jerCh=y=>(y>=1099&&y<1187)||(y>=1229&&y<1244);
+
+function smooth(pts){ let d="M"+pts[0][0]+","+pts[0][1]; for(let i=0;i<pts.length-1;i++){ const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+  d+=` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`; } return d; }
+function croise(p,s){ const g=el("g",{},p); const k=el("g",{transform:`scale(${s||1})`},g); el("path",{d:"M-7,-9 H7 V2 Q7,9 0,12 Q-7,9 -7,2Z",fill:"#fff",stroke:C.ink,"stroke-width":1.6,"stroke-linejoin":"round"},k); el("path",{d:"M0,-6 V7 M-4,-1 H4",stroke:C.rd,"stroke-width":2.6,"stroke-linecap":"round"},k); return g; }
+function goods(p,kind){ const g=el("g",{},p); if(kind===0){ el("path",{d:"M-6,6 Q-8,-2 -3,-6 L3,-6 Q8,-2 6,6Z",fill:"#B07A3A",stroke:C.ink,"stroke-width":1.3},g); el("path",{d:"M-3,-6 L3,-6",stroke:C.ink,"stroke-width":1.6},g); }
+  if(kind===1){ el("path",{d:"M-6,6 L0,-8 L6,6Z",fill:"#fff",stroke:C.ink,"stroke-width":1.3},g); }
+  if(kind===2){ el("rect",{x:-7,y:-5,width:14,height:11,rx:5,fill:"#C4452C",stroke:C.ink,"stroke-width":1.3},g); el("path",{d:"M-7,0 H7",stroke:"#F2C230","stroke-width":1.5},g); } return g; }
+function person(p,col,s){ const g=el("g",{},p); const k=el("g",{transform:`scale(${s||1})`},g); el("path",{d:"M-14,0 L-10,-36 L10,-36 L14,0Z",fill:col,stroke:C.ink,"stroke-width":2.2,"stroke-linejoin":"round"},k); el("circle",{cx:0,cy:-46,r:10,fill:"#F1C9A5",stroke:C.ink,"stroke-width":2.2},k); return g; }
+
+Anim.run({
+  titre:"Les croisades",
+  sousTitre:"Histoire · CM1-CM2 · Le Moyen Âge : l'Occident et l'Orient (1095-1291)",
+  matiere:"histoire", badge:"Histoire", manipDes:4, manipJusqua:4,
+  accroche:"Pourquoi des chevaliers et des pèlerins sont-ils partis vers Jérusalem ? Qu'est-ce que cela a changé ?",
+  init(a){
+    const defs=el("defs",{},a.svg);
+    const cp=el("clipPath",{id:"zoneA5"},defs); el("rect",{x:20,y:20,width:980,height:740,rx:14},cp);
+    const map=a.layer("carte"); R.map=map;
+    const vp=el("g",{"clip-path":"url(#zoneA5)"},map);
+    el("rect",{x:0,y:0,width:1600,height:900,fill:C.sea},vp);
+    const inner=el("g",{transform:"translate(-604.5,-321.6) scale(1.33)"},vp); R.inner=inner;
+    el("path",{d:E.land,fill:C.land,stroke:"#B8AC93","stroke-width":.8},inner);
+    const T=(x,y,txt,o,par)=>el("text",Object.assign({x,y,"font-size":17,"font-weight":800,fill:C.ink,stroke:"#fff","stroke-width":4,"paint-order":"stroke",text:txt},o||{}),par||inner);
+    R.reg=[T(640,318,"Occident chrétien",{"text-anchor":"middle",fill:"#2F5DA8","font-size":17}),T(950,458,"Empire byzantin",{"text-anchor":"middle",fill:C.pr,"font-size":17})];
+    // routes
+    R.rt={}; R.len={};
+    ["c1","c2","c4","c7","c8"].forEach(k=>{ const col=CRO.find(c=>c[0]===k)[3]; R.rt[k]=[el("path",{d:smooth(RT[k]),fill:"none",stroke:col,"stroke-width":5,"stroke-linecap":"round","stroke-linejoin":"round"},inner)]; });
+    R.rt.c3=RT.c3.map(pts=>el("path",{d:smooth(pts),fill:"none",stroke:C.bl,"stroke-width":5,"stroke-linecap":"round","stroke-linejoin":"round"},inner));
+    // routes commerciales (étape 6)
+    R.tr=TR.map(pts=>el("path",{d:smooth(pts),fill:"none",stroke:"#6B4A2B","stroke-width":3.5,"stroke-linecap":"round","stroke-dasharray":"2 9"},inner));
+    R.gd=[]; TR.forEach((_,i)=>[0,1,2].forEach(k=>{ R.gd.push({i,k,g:goods(inner,k)}); }));
+    // villes
+    R.city={}; Object.keys(CITY).forEach(n=>{ const p=V[n], l=CITY[n]; const g=el("g",{},inner); el("circle",{cx:p[0],cy:p[1],r:4.6,fill:"#fff",stroke:C.ink,"stroke-width":2},g); T(p[0]+l[0],p[1]+l[1],n,{"text-anchor":l[2]},g); R.city[n]=g; });
+    // Jérusalem en étoile
+    R.jer=el("g",{},inner); el("path",{d:"M0,-12 L3.5,-4 L12,-3 L5.5,3 L7.5,11.5 L0,7 L-7.5,11.5 L-5.5,3 L-12,-3 L-3.5,-4Z",fill:"#F2C230",stroke:"#8A6A00","stroke-width":1.6},R.jer); R.jer.setAttribute("transform",`translate(${V["Jérusalem"][0]},${V["Jérusalem"][1]})`);
+    R.pulse=el("circle",{cx:V.Clermont[0],cy:V.Clermont[1],r:12,fill:"none",stroke:C.rd,"stroke-width":3},inner);
+    R.appel=T(V.Clermont[0]+9,V.Clermont[1]+26,"1095 : l'appel du pape",{"text-anchor":"start","font-size":17},inner);
+    // têtes de colonne + pastilles
+    R.head=croise(inner,1.5);
+    R.badge=CRO.map(c=>{ const g=el("g",{},inner); g.setAttribute("transform",`translate(${c[6][0]},${c[6][1]})`); el("circle",{r:11,fill:c[3],stroke:"#fff","stroke-width":2.4},g); el("text",{y:6,"text-anchor":"middle","font-size":15,"font-weight":800,fill:"#fff",text:c[1][0]},g); return g; });
+    // légende marchandises
+    R.leg=el("g",{},map); el("rect",{x:40,y:690,width:850,height:56,rx:10,fill:"#fff",stroke:"#D6DBE4","stroke-width":2,opacity:.95},R.leg);
+    el("text",{x:58,y:726,"font-size":24,"font-weight":700,fill:"#4A5468",text:"Produits d'Orient (exemples) :"},R.leg);
+    [["épices",0,440],["sucre",1,610],["tissus",2,740]].forEach(([n,k,x])=>{ const g=goods(R.leg,k); g.setAttribute("transform",`translate(${x},718) scale(1.9)`); el("text",{x:x+28,y:726,"font-size":24,"font-weight":700,fill:C.ink,text:n},R.leg); });
+    // ===== encart Proche-Orient =====
+    const ins=a.layer("inset"); R.ins=ins;
+    const cpi=el("clipPath",{id:"insetA5"},defs); el("rect",{x:1040,y:70,width:540,height:400,rx:12},cpi);
+    el("text",{x:1310,y:52,"text-anchor":"middle","font-size":24,"font-weight":800,fill:C.ac,text:"Zoom : le Proche-Orient (schéma simplifié)"},ins);
+    const ig=el("g",{"clip-path":"url(#insetA5)"},ins);
+    el("rect",{x:1040,y:70,width:540,height:400,fill:C.sea},ig);
+    const ii=el("g",{transform:"translate(-1438.5,-1179) scale(2.3)"},ig);
+    el("path",{d:E.land,fill:C.land,stroke:"#B8AC93","stroke-width":.6},ii);
+    { const mt=el("text",{x:1112,y:660,"text-anchor":"middle","font-size":9.6,"font-style":"italic",fill:"#6F96B8"},ii); el("tspan",{x:1112,text:"Mer"},mt); el("tspan",{x:1112,dy:11,text:"Méditerranée"},mt); }
+    R.st=ET.map(s=>{ const g=el("g",{},ii); const pg=el("polygon",{points:s[4],fill:s[3],"fill-opacity":.6,stroke:s[3],"stroke-width":1.4,"stroke-linejoin":"round"},g);
+      const t=el("text",{x:s[5][0],y:s[5][1],"text-anchor":s[5][2],"font-size":9.6,"font-weight":800,fill:s[3],stroke:"#fff","stroke-width":2.4,"paint-order":"stroke"},g); el("tspan",{x:s[5][0],text:s[6][0]},t); el("tspan",{x:s[5][0],dy:11,text:s[6][1]},t); g.pg=pg; g.t=t; g.s=s; return g; });
+    R.ic={}; [["Jérusalem",1187,706,5,"start"],["Acre",1177,678,5,"start"],["Tripoli",1182,636,5,"start"],["Antioche",1176,591,5,"start"],["Édesse",1221,552,5,"start"]].forEach(([n,x,y,dy,an])=>{ const g=el("g",{},ii); const c=el("circle",{cx:x,cy:y,r:3.6,fill:"#fff",stroke:C.ink,"stroke-width":1.6},g); el("text",{x:x+6,y:y+dy,"text-anchor":an,"font-size":9.6,"font-weight":700,fill:C.ink,stroke:"#fff","stroke-width":2.4,"paint-order":"stroke",text:n},g); g.c=c; R.ic[n]=g; });
+    el("rect",{x:1040,y:70,width:540,height:400,rx:12,fill:"none",stroke:"#B8C6D4","stroke-width":3},ins);
+    R.insTxt=el("text",{x:1310,y:500,"text-anchor":"middle","font-size":26,"font-weight":800,fill:C.ink},ins);
+    R.jTxt=el("text",{x:1310,y:534,"text-anchor":"middle","font-size":24,"font-weight":700},ins);
+    // ===== panneau =====
+    const pan=a.layer("panneau"); R.pan=pan;
+    const card=(parent,x,y,w,h,col,titre,txt,n)=>{ const g=el("g",{},parent); el("rect",{x,y,width:w,height:h,rx:14,fill:"#fff",stroke:"#D6DBE4","stroke-width":3},g); el("rect",{x,y,width:14,height:h,rx:5,fill:col},g); el("text",{x:x+36,y:y+42,"font-size":28,"font-weight":800,fill:col===C.gr?"#14532D":C.ink,text:titre},g); const t=el("text",{x:x+36,y:y+78,"font-size":25,"font-weight":600,fill:C.ink},g); a.wrap(t,txt,n||34,1.2); return g; };
+    R.p1=[card(pan,1040,70,540,150,C.rd,"1095 : l'appel de Clermont","Le pape Urbain II appelle les chrétiens d'Occident à partir vers Jérusalem."),
+          card(pan,1040,250,540,150,C.or,"Jérusalem, ville sainte","Importante pour les chrétiens, les juifs et les musulmans."),
+          card(pan,1040,430,540,150,C.pr,"Une demande d'aide","L'empereur byzantin voulait de l'aide contre les Turcs seldjoukides.")];
+    R.p2=el("g",{},pan); el("text",{x:1060,y:80,"font-size":32,"font-weight":800,fill:C.rd,text:"1re croisade (1096-1099)"},R.p2);
+    R.b2=["Chevaliers, soldats et pèlerins partent, avec une croix sur leurs vêtements.","Ils traversent l'Europe, puis l'Empire byzantin, puis la Turquie actuelle.","En juillet 1099, ils prennent Jérusalem : la guerre est très violente."].map((s,i)=>{ const g=el("g",{},R.p2); const y=130+i*140; el("circle",{cx:1075,cy:y+24,r:22,fill:C.rd},g); el("text",{x:1075,y:y+33,"text-anchor":"middle","font-size":26,"font-weight":800,fill:"#fff",text:String(i+1)},g); const t=el("text",{x:1115,y:y+22,"font-size":27,"font-weight":600,fill:C.ink},g); a.wrap(t,s,31,1.25); return g; });
+    R.p3=el("g",{},pan);
+    R.pV=a.photo(pan,{id:"h-a4-vezelay-basilique",x:1140,y:80,w:300,h:200,cap:"Vézelay (Yonne)",rot:-1});
+    const v1=el("text",{x:1050,y:400,"font-size":24,"font-weight":700,fill:C.ink},R.p3); a.wrap(v1,"1146 : Bernard de Clairvaux y prêche la 2e croisade. 1190 : Philippe Auguste et Richard Cœur de Lion en partent pour la 3e.",42,1.25);
+    R.rows=CRO.map((c,i)=>{ const g=el("g",{},R.p3); const y=505+i*43; el("circle",{cx:1062,cy:y+12,r:15,fill:c[3]},g); el("text",{x:1062,y:y+19,"text-anchor":"middle","font-size":20,"font-weight":800,fill:"#fff",text:c[1][0]},g); el("text",{x:1090,y:y+20,"font-size":24,"font-weight":700,fill:C.ink,text:c[1]+" : "+c[2]},g); return g; });
+    R.p4=el("g",{},pan); const t4=el("text",{x:1050,y:515,"font-size":24,"font-weight":700,fill:C.ink},R.p4); a.wrap(t4,"Les croisés fondent des États « latins » : Édesse et Antioche (1098), Jérusalem (1099), Tripoli (1109).",42,1.25);
+    R.pK=a.photo(pan,{id:"h-a5-krak-chevaliers",x:70,y:440,w:300,h:200,cap:"Krak des Chevaliers (Syrie)",rot:1});
+    R.p5=el("g",{},pan); el("rect",{x:1040,y:560,width:540,height:240,rx:14,fill:"#fff",stroke:"#D6DBE4","stroke-width":3},R.p5);
+    R.yBig=el("text",{x:1075,y:640,"font-size":64,"font-weight":800,fill:C.ac},R.p5); R.yTxt=el("text",{x:1075,y:690,"font-size":25,"font-weight":600,fill:C.ink},R.p5);
+    a.manip.innerHTML=`Année : <input type="range" id="mY" min="1095" max="1291" step="1" value="1140"> <b id="mYv">1140</b> &nbsp; <button data-y="1099">1099</button><button data-y="1147">1147</button><button data-y="1187">1187</button><button data-y="1204">1204</button><button data-y="1270">1270</button><button data-y="1291">1291</button>`;
+    const gid=id=>document.getElementById(id);
+    gid("mY").oninput=e=>{ yr=+e.target.value; touched=true; a.redraw(); };
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ yr=+b.dataset.y; touched=true; gid("mY").value=yr; a.redraw(); });
+    // étape 6
+    R.p6=el("g",{},pan);
+    R.c6=[card(R.p6,1040,70,540,250,C.rd,"Conséquences militaires","États latins ; ordres militaires (Templiers, Hospitaliers) ; grands châteaux, comme le Krak des Chevaliers.",35),
+          card(R.p6,1040,350,540,420,C.gr,"Mais aussi des échanges","Le commerce se développe, avec Venise, Gênes et Marseille. Des produits d'Orient arrivent en Europe : épices, sucre, tissus. Des idées et des savoirs circulent.",35)];
+    // ===== synthèse =====
+    const sy=a.layer("synthese"); R.sy=sy;
+    R.myth=a.myth(sy,60,60,720,"Les croisades n'ont eu que des conséquences militaires.","Elles ont aussi développé le commerce, fait circuler des produits (épices, sucre, tissus) et des savoirs, et changé les relations entre l'Occident et l'Orient.");
+    el("text",{x:850,y:96,"font-size":30,"font-weight":800,fill:C.ac,text:"À retenir"},sy);
+    R.syP=["En 1095, le pape appelle les chrétiens d'Occident à partir vers Jérusalem : c'est le début des croisades, qui durent jusqu'en 1291.","Les croisés fondent des États latins au Proche-Orient. Ils tombent peu à peu : en 1291, Saint-Jean-d'Acre est perdue.","Ce sont des guerres violentes, mais aussi des contacts : commerce, produits et savoirs circulent."].map((p,i)=>{ const g=el("g",{},sy); const y=130+i*190; el("circle",{cx:880,cy:y+30,r:24,fill:C.ac},g); el("text",{x:880,y:y+40,"text-anchor":"middle","font-size":28,"font-weight":800,fill:"#fff",text:String(i+1)},g); const t=el("text",{x:925,y:y+24,"font-size":29,"font-weight":600,fill:C.ink},g); a.wrap(t,p,38,1.25); return g; });
+    R.fr=a.frise(a.svg,{x:120,y:842,w:1360,debut:1080,fin:1310,ticks:[1100,1150,1200,1250,1300],events:[{id:"e1095",d:1095,label:"1095 l'appel",color:C.rd},{id:"e1099",d:1099,label:"1099 Jérusalem prise",color:C.rd,up:true},{id:"e1187",d:1187,label:"1187 Jérusalem perdue",color:C.bl},{id:"e1204",d:1204,label:"1204 Constantinople",color:C.pr,up:true},{id:"e1270",d:1270,label:"1270 Tunis",color:C.ac},{id:"e1291",d:1291,label:"1291 Acre",color:"#555",up:true}]});
+  },
+  reset(a){
+    const all=[R.map,R.ins,R.pan,R.p1[0],R.p1[1],R.p1[2],R.p2,R.p3,R.p4,R.p5,R.p6,R.pV,R.pK,R.sy,R.myth,R.fr,R.pulse,R.appel,R.jer,R.head,R.leg,...R.reg,...Object.values(R.city),...Object.values(R.rt).flat(),...R.tr,...R.gd.map(g=>g.g),...R.badge,...R.b2,...R.rows,...R.c6,...R.syP];
+    all.forEach(e=>a.op(e,0)); a.op(R.map,1); a.op(R.fr,1); Object.values(R.fr.events).forEach(e=>a.op(e,0)); R.fr.at(1095,"");
+    Object.values(R.rt).flat().forEach(p=>{ p.setAttribute("stroke-width",5); });
+  },
+  etapes:[
+  { titre:"1095 : l'appel de Clermont", duree:10000,
+    legende:"En 1095, à Clermont, le pape Urbain II appelle les chrétiens d'Occident à partir vers Jérusalem, une ville sainte pour les chrétiens, les juifs et les musulmans. Ce sont les croisades.",
+    voix:"En l'an mille quatre-vingt-quinze, à Clermont, en Auvergne, le pape Urbain deux appelle les chrétiens d'Occident à partir vers Jérusalem. Jérusalem est une ville sainte pour les chrétiens, mais aussi pour les juifs et les musulmans. L'empereur byzantin, à Constantinople, avait aussi demandé de l'aide contre les Turcs. C'est le début de ce qu'on appellera les croisades.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1); a.op(R.fr,1); a.op(R.reg[0],s(t,.1,.25)); a.op(R.reg[1],s(t,.55,.7)); a.op(R.city.Clermont,s(t,.15,.3)); a.op(R.pulse,s(t,.2,.3)); a.cls(R.pulse,"pulse",t>.3); a.op(R.appel,s(t,.25,.4));
+      a.op(R.city.Constantinople,s(t,.55,.7)); a.op(R.jer,s(t,.4,.55)); a.op(R.city["Jérusalem"],s(t,.4,.55)); a.op(R.fr.events.e1095,s(t,.2,.3)); R.fr.at(1095,"");
+      R.p1.forEach((g,i)=>{ const v=s(t,.2+i*.22,.4+i*.22); a.op(g,v); a.tr(g,(1-v)*60,0); }); a.op(R.pan,1); } },
+  { titre:"1096-1099 : la première croisade", duree:11000,
+    legende:"Des chevaliers, des soldats et des pèlerins marchent des mois à travers l'Europe et la Turquie actuelle. En juillet 1099, ils prennent Jérusalem. Cette guerre est très violente.",
+    voix:"La première croisade part en mille quatre-vingt-seize. Chevaliers, soldats et pèlerins portent une croix sur leurs vêtements : c'est pour cela qu'on les appelle les croisés. Ils marchent des mois à travers l'Europe, passent par Constantinople, traversent la Turquie actuelle, puis arrivent à Jérusalem. Ils la prennent en juillet mille quatre-vingt-dix-neuf. Cette guerre est très violente.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1); a.op(R.fr,1); a.op(R.reg[0],1-s(t,0,.15)); a.op(R.reg[1],1-s(t,0,.15)); a.op(R.appel,1-s(t,0,.1)); a.cls(R.pulse,"pulse",false); a.op(R.pulse,1-s(t,0,.1));
+      a.op(R.city.Clermont,1); a.op(R.city.Constantinople,1); a.op(R.jer,1); a.op(R.city["Jérusalem"],1); R.p1.forEach(g=>a.op(g,1-s(t,0,.1))); a.op(R.fr.events.e1095,1);
+      const u=s(t,.1,.88,true); const p=R.rt.c1[0]; a.op(p,1); a.draw(p,u); const q=a.along(p,u); a.op(R.head,s(t,.05,.12)*(1-s(t,.92,.98))); a.tr(R.head,q.x,q.y-10);
+      a.op(R.badge[0],s(t,.35,.45)); a.op(R.p2,s(t,.05,.15)); R.b2.forEach((g,i)=>a.op(g,s(t,.1+i*.3,.25+i*.3)));
+      R.fr.at(a.lerp(1095,1099,u),""); a.op(R.fr.events.e1099,s(t,.88,.96)); } },
+  { titre:"1147-1270 : d'autres croisades", duree:13000,
+    legende:"Il y aura d'autres croisades, par terre ou par mer : en 1146, Bernard de Clairvaux prêche la deuxième à Vézelay. Elles partent aussi de Marseille, de Venise ou d'Aigues-Mortes.",
+    voix:"Les croisés ne reprendront pas Jérusalem définitivement, et d'autres croisades suivent. En mille cent quarante-six, à Vézelé, en Bourgogne, Bernard de Clairvaux prêche la deuxième croisade. La troisième part aussi de Vézelé, en mille cent quatre-vingt-dix. La quatrième part de Venise. Saint Louis, roi de France, part d'Aigues-Mortes, vers l'Égypte puis vers Tunis. Au total, on compte huit croisades principales.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1); a.op(R.fr,1); a.op(R.p2,1-s(t,0,.08)); R.b2.forEach(g=>a.op(g,0)); a.op(R.jer,1); a.op(R.fr.events.e1095,1); a.op(R.fr.events.e1099,1);
+      const p1=R.rt.c1[0]; a.op(p1,.35); a.draw(p1,1); p1.setAttribute("stroke-width",3.5); a.op(R.badge[0],1);
+      Object.keys(R.city).forEach(n=>a.op(R.city[n],["Clermont","Constantinople","Jérusalem"].includes(n)?1:0));
+      const order=["c2","c3","c4","c7","c8"], wnd=[[.04,.22],[.22,.4],[.4,.56],[.56,.76],[.76,.92]];
+      let head=null;
+      order.forEach((k,i)=>{ const paths=R.rt[k]; paths.forEach(p=>{ if(!p._len) p._len=p.getTotalLength(); }); const T=paths.reduce((x,p)=>x+p._len,0); const u=s(t,wnd[i][0],wnd[i][1],true); let before=0;
+        paths.forEach(p=>{ const local=Math.max(0,Math.min(1,(u*T-before)/p._len)); a.op(p,u>0?.95:0); a.draw(p,local); if(local>0&&local<1) head=a.along(p,local); before+=p._len; });
+        a.op(R.badge[CRO.findIndex(c=>c[0]===k)],s(t,wnd[i][1]-.04,wnd[i][1])); });
+      a.op(R.head,head?1:0); if(head) a.tr(R.head,head.x,head.y-10);
+      const cityOn={c2:["Vézelay"],c3:["Vézelay","Messine","Acre"],c4:["Venise"],c7:["Aigues-Mortes","Damiette"],c8:["Tunis"]};
+      order.forEach((k,i)=>{ if(t>=wnd[i][0]) cityOn[k].forEach(n=>a.op(R.city[n],1)); });
+      a.op(R.p3,s(t,.04,.14)); a.op(R.pV,s(t,.06,.2)); R.rows.forEach((g,i)=>{ const st=i===0?0:wnd[i-1][0]; a.op(g,i===0?1:s(t,st,st+.08)); });
+      const yv=a.lerp(1099,1270,s(t,.04,.92)); R.fr.at(yv,""); ["e1187","e1204","e1270"].forEach((id,i)=>a.op(R.fr.events[id],s(t,[.3,.5,.9][i],[.38,.58,.97][i]))); } },
+  { titre:"Les États latins", duree:11000,
+    legende:"En Orient, les croisés fondent des États « latins » : Édesse et Antioche (1098), Jérusalem (1099), Tripoli (1109). Ils y construisent de grands châteaux.",
+    voix:"En Orient, les croisés fondent des États qu'on appelle États latins. Édesse et Antioche en mille quatre-vingt-dix-huit, le royaume de Jérusalem en mille quatre-vingt-dix-neuf, puis le comté de Tripoli en mille cent neuf. Ils construisent de grands châteaux, comme le Krak des Chevaliers, en Syrie.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1); a.op(R.fr,1); R.fr.at(1109,"");
+      Object.keys(R.city).forEach(n=>a.op(R.city[n],["Clermont","Constantinople","Jérusalem","Acre","Antioche"].includes(n)?s(t,0,.1):0)); a.op(R.jer,1);
+      Object.values(R.rt).flat().forEach(p=>{ a.op(p,.18); a.draw(p,1); p.setAttribute("stroke-width",3.5); }); R.badge.forEach(b=>a.op(b,0)); a.op(R.head,0);
+      a.op(R.p3,1-s(t,0,.1)); a.op(R.pV,1-s(t,0,.1)); R.rows.forEach(g=>a.op(g,0));
+      a.op(R.ins,s(t,.05,.2)); [0,1,2,3].forEach(i=>{ const j=[3,2,0,1][i]; const g=R.st[j]; const v=s(t,.25+i*.15,.4+i*.15); a.op(g,v); g.pg.setAttribute("fill-opacity",.6); });
+      ["Jérusalem","Acre","Tripoli","Antioche","Édesse"].forEach(n=>a.op(R.ic[n],s(t,.2,.35))); R.ic["Jérusalem"].c.setAttribute("fill","#fff");
+      R.insTxt.textContent=""; R.jTxt.textContent=""; a.op(R.p4,s(t,.7,.85)); a.op(R.pK,s(t,.78,.95)); ["e1099","e1187"].forEach((id,i)=>a.op(R.fr.events[id],1)); a.op(R.fr.events.e1095,1); a.op(R.fr.events.e1204,1); a.op(R.fr.events.e1270,1); } },
+  { titre:"À vous : choisissez l'année", duree:7000,
+    legende:"À vous : déplacez le curseur ou touchez une année. Quels États latins existent ? Qui tient Jérusalem ? Que se passe-t-il cette année-là ? Regardez la frise.",
+    voix:"À vous de jouer. Déplacez le curseur pour choisir une année entre mille quatre-vingt-quinze et mille deux cent quatre-vingt-onze. Regardez quels États latins existent, qui tient Jérusalem, et ce qui se passe cette année-là. Prenez votre temps, puis continuez.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1); a.op(R.fr,1); a.op(R.pan,1); a.op(R.p4,1-s(t,0,.1)); a.op(R.pK,1-s(t,0,.1)); a.op(R.p5,s(t,0,.15)); a.op(R.ins,1); a.op(R.jer,1);
+      let y; if(touched) y=yr; else { y=Math.round(a.lerp(1095,1140,s(t,.1,.85))); const sl=document.getElementById("mY"); if(sl) sl.value=y; }
+      const yv=document.getElementById("mYv"); if(yv) yv.textContent=y;
+      Object.keys(R.city).forEach(n=>a.op(R.city[n],["Clermont","Constantinople","Jérusalem","Acre","Antioche"].includes(n)?1:0));
+      R.st.forEach(g=>{ const s0=g.s; const on=y>=s0[1], over=y>s0[2]; a.op(g,on?1:0); g.pg.setAttribute("fill",over?"#9AA3B5":s0[3]); g.pg.setAttribute("stroke",over?"#6B7385":s0[3]); g.pg.setAttribute("fill-opacity",over?.35:.6); g.t.setAttribute("fill",over?"#6B7385":s0[3]); });
+      const n=ET.filter(e=>y>=e[1]&&y<=e[2]).length; R.insTxt.textContent=n+" État"+(n>1?"s":"")+" latin"+(n>1?"s":"")+" en "+y; a.op(R.ic["Jérusalem"],1); a.op(R.ic.Acre,1); a.op(R.ic.Tripoli,1); a.op(R.ic.Antioche,1); a.op(R.ic["Édesse"],1);
+      const ch=jerCh(y); R.jTxt.textContent="Jérusalem : "+(y<1099?"tenue par des princes musulmans":ch?"aux mains des croisés":"tenue par des princes musulmans"); R.jTxt.setAttribute("fill",ch?"#C0392B":"#4A5468"); R.ic["Jérusalem"].c.setAttribute("fill",ch?"#C0392B":"#fff");
+      R.yBig.textContent=y; R.yTxt.textContent=""; a.wrap(R.yTxt,evAt(y)[1],40,1.25); R.yTxt.setAttribute("y",690);
+      let act=null; CRO.forEach(c=>{ if(y>=c[4]&&y<=c[5]) act=c[0]; });
+      Object.keys(R.rt).forEach(k=>R.rt[k].forEach(p=>{ a.op(p,k===act?1:.15); a.draw(p,1); p.setAttribute("stroke-width",k===act?7:3.5); }));
+      R.badge.forEach((b,i)=>a.op(b,1)); a.op(R.city.Clermont,1); a.op(R.city.Constantinople,1);
+      ["Vézelay","Venise","Aigues-Mortes","Marseille","Tunis","Damiette","Messine"].forEach(n=>a.op(R.city[n],0));
+      R.fr.at(y,""); ["e1095","e1099","e1187","e1204","e1270","e1291"].forEach(id=>a.op(R.fr.events[id],1)); } },
+  { titre:"Les conséquences : aussi des échanges", duree:12000,
+    legende:"Les croisades ont des conséquences militaires, mais aussi des échanges : le commerce de Venise, de Gênes et de Marseille se développe, et des produits d'Orient arrivent en Europe.",
+    voix:"Les croisades ont des conséquences militaires : des États latins, des ordres de moines soldats, de grands châteaux. Mais elles ont aussi développé les échanges. Des bateaux relient l'Orient à Venise, à Gênes et à Marseille. Ils rapportent des épices, du sucre, des tissus. Des idées et des savoirs circulent aussi entre l'Orient et l'Occident.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1); a.op(R.fr,1); a.op(R.ins,1-s(t,0,.12)); a.op(R.p5,1-s(t,0,.12)); a.op(R.pan,1); a.op(R.p6,s(t,.05,.2)); a.op(R.jer,1);
+      Object.values(R.rt).flat().forEach(p=>{ a.op(p,.14); a.draw(p,1); p.setAttribute("stroke-width",3.5); }); R.badge.forEach(b=>a.op(b,0));
+      ["Clermont","Jérusalem","Constantinople","Antioche"].forEach(n=>a.op(R.city[n],0)); ["Acre","Damiette","Venise","Gênes","Marseille"].forEach(n=>a.op(R.city[n],s(t,.1,.25))); a.op(R.jer,s(t,.1,.25)===0?1:1);
+      R.c6.forEach((g,i)=>{ a.op(g,s(t,.1+i*.25,.25+i*.25)); }); R.tr.forEach(p=>{ a.op(p,s(t,.2,.3)); p.style.strokeDasharray="2 9"; p.style.strokeDashoffset=0; p.style.display=t<.2?"none":""; }); a.op(R.leg,s(t,.25,.35));
+      R.gd.forEach(g=>{ const p=R.tr[g.i]; if(!p._len) p._len=p.getTotalLength(); const f=((t-.25)*1.8+g.k*.14+g.i*.05)%1; const on=t>.25&&f>=0; const q=a.along(p,Math.max(0,Math.min(1,f))); a.op(g.g,on?1:0); a.tr(g.g,q.x,q.y-2,1.3); });
+      R.fr.at(1291,""); ["e1095","e1099","e1187","e1204","e1270","e1291"].forEach(id=>a.op(R.fr.events[id],1)); } },
+  { titre:"Idée fausse et synthèse", duree:11000,
+    legende:"Non, les croisades n'ont pas eu que des conséquences militaires : elles ont aussi fait circuler des produits, des idées et des savoirs entre l'Orient et l'Occident.",
+    voix:"Retenons l'essentiel. Une idée fausse : les croisades n'auraient eu que des conséquences militaires. En réalité, elles ont aussi développé le commerce, fait circuler des produits comme les épices, le sucre et les tissus, ainsi que des savoirs. À partir de mille quatre-vingt-quinze, des chrétiens d'Occident partent vers Jérusalem. Ils fondent des États latins, qui tombent peu à peu : en mille deux cent quatre-vingt-onze, Saint-Jean-d'Acre est perdue. Ce sont des guerres violentes, mais aussi des contacts entre l'Orient et l'Occident.",
+    anim(t,a){ const s=a.seg; a.op(R.map,1-s(t,0,.12)); a.op(R.pan,1-s(t,0,.12)); a.op(R.fr,1); a.op(R.sy,1); a.op(R.myth,s(t,.1,.25)); a.cls(R.myth.faux,"pulse",t>.25&&t<.4);
+      R.syP.forEach((g,i)=>{ const v=s(t,.35+i*.17,.5+i*.17); a.op(g,v); a.tr(g,(1-v)*50,0); }); ["e1095","e1099","e1187","e1204","e1270","e1291"].forEach(id=>a.op(R.fr.events[id],1)); R.fr.at(1291,""); a.op(R.fr.cursor,0); } },
+  ]
+});
+})();
+</script></body></html>

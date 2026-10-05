@@ -1,0 +1,76 @@
+[
+ {
+  "id": "h-b1-guedelon",
+  "q": "Château de Guédelon chantier",
+  "must": [
+   "Guédelon"
+  ],
+  "alt": "le chantier du château de Guédelon (Yonne), construit avec les techniques du XIIIe siècle"
+ },
+ {
+  "id": "h-b1-pontlevis",
+  "q": "pont-levis relevé château fort",
+  "must": [
+   "pont-levis"
+  ],
+  "alt": "un pont-levis de château fort (relevé ou abaissé), avec ses chaînes"
+ },
+ {
+  "id": "h-b1-chateauneuf",
+  "q": "Château de Châteauneuf-en-Auxois",
+  "must": [
+   "Châteauneuf"
+  ],
+  "alt": "le château fort de Châteauneuf-en-Auxois (Côte-d'Or) dominant le village"
+ },
+ {
+  "id": "h-b1b-berry-octobre",
+  "q": "Très Riches Heures du duc de Berry octobre semailles",
+  "must": [
+   "Très Riches Heures"
+  ],
+  "alt": "enluminure du mois d'octobre des Très Riches Heures du duc de Berry : un paysan sème le blé"
+ },
+ {
+  "id": "h-b1b-grange-dimiere",
+  "q": "Grange dîmière de Meslay",
+  "must": [
+   "Meslay"
+  ],
+  "alt": "la grange dîmière de Meslay (Parçay-Meslay, près de Tours), grande grange médiévale où l'on stockait la dîme"
+ },
+ {
+  "id": "g-a1-tram-dijon",
+  "q": "Tramway de Dijon rame station",
+  "must": [
+   "Dijon",
+   "tram"
+  ],
+  "alt": "une rame de tramway circulant dans une rue de Dijon"
+ },
+ {
+  "id": "g-a1-village-rural",
+  "q": "Flavigny-sur-Ozerain village vue",
+  "must": [
+   "Flavigny"
+  ],
+  "alt": "un village de Côte-d'Or entouré de champs et de prés : habitat dispersé, peu de transports en commun"
+ },
+ {
+  "id": "g-b1-prefecture-dijon",
+  "q": "Préfecture de la Côte-d'Or Dijon",
+  "must": [
+   "préfecture"
+  ],
+  "alt": "la préfecture de la Côte-d'Or à Dijon, siège du préfet du département"
+ },
+ {
+  "id": "g-b1-hotel-ville-dijon",
+  "q": "Hôtel de ville de Dijon",
+  "must": [
+   "Dijon",
+   "hôtel de ville"
+  ],
+  "alt": "l'hôtel de ville (mairie) de Dijon"
+ }
+]

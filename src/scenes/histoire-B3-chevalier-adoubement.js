@@ -1,0 +1,370 @@
+/* META {"id":"histoire-B3-chevalier-adoubement","matiere":"histoire","annee":"B","periode":1,"theme":"Le Moyen Âge : seigneurs, chevaliers, villes… (le chevalier)","resume":"De page à écuyer puis chevalier adoubé : l'équipement qui s'empile (mailles, plates, épée, écu, destrier), l'adoubement, le code de la chevalerie, le tournoi, et pourquoi un chevalier en armure pouvait se relever.","motsCles":["chevalier","page","écuyer","adoubement","armure","cotte de mailles","destrier","tournoi","chevalerie"]} */
+(function(){
+/* ---- bibliothèque : personnage articulé (vue de profil, tourné vers la droite) ---- */
+const FL={torso:120,neck:16,head:27,th:95,sh:90,ua:62,fa:56,foot:32};
+const dirv=d=>{const r=d*Math.PI/180;return [-Math.sin(r),Math.cos(r)];};   // membre : 0 = vers le bas, négatif = vers l'avant (+x)
+const upv=d=>{const r=d*Math.PI/180;return [Math.sin(r),-Math.cos(r)];};    // tronc : 0 = vers le haut, positif = penché vers l'avant
+const addv=(p,v,l)=>[p[0]+v[0]*l,p[1]+v[1]*l];
+const POSE0={torso:0,head:0,th1:0,sh1:0,th2:4,sh2:0,ua1:8,fa1:-28,ua2:-6,fa2:-30,ax:0};
+const pose=o=>Object.assign({},POSE0,o);
+function mixPose(A,B,t){const o={};for(const k in A)o[k]=A[k]+((B[k]!==undefined?B[k]:A[k])-A[k])*t;return o;}
+function fk(p){
+  const d1=dirv(p.th1),e1=dirv(p.sh1),P={};
+  if(p.hip) P.hip=[p.hip[0],p.hip[1]]; else P.hip=[p.ax-(d1[0]*FL.th+e1[0]*FL.sh),0];
+  P.k1=addv(P.hip,d1,FL.th); P.a1=addv(P.k1,e1,FL.sh); P.t1=addv(P.a1,dirv(p.sh1-90),FL.foot);
+  const d2=dirv(p.th2),e2=dirv(p.sh2);
+  P.k2=addv(P.hip,d2,FL.th); P.a2=addv(P.k2,e2,FL.sh); P.t2=addv(P.a2,dirv(p.sh2-90),FL.foot);
+  P.sh=addv(P.hip,upv(p.torso),FL.torso);
+  P.hd=addv(P.sh,upv(p.torso+(p.head||0)),FL.neck+FL.head);
+  P.e1=addv(P.sh,dirv(p.ua1),FL.ua); P.w1=addv(P.e1,dirv(p.fa1),FL.fa);
+  P.e2=addv(P.sh,dirv(p.ua2),FL.ua); P.w2=addv(P.e2,dirv(p.fa2),FL.fa);
+  if(!p.hip){
+    const RR={hip:24,k1:18,a1:14,t1:13,k2:18,a2:14,t2:13,sh:30,hd:29,e1:12,w1:11,e2:12,w2:11}; let low=-1e9;
+    for(const k in RR) low=Math.max(low,P[k][1]+RR[k]);
+    for(const k in P) P[k]=[P[k][0],P[k][1]-low];
+  }
+  return P;
+}
+const SEGP={th1:["hip","k1"],sh1:["k1","a1"],f1:["a1","t1"],th2:["hip","k2"],sh2:["k2","a2"],f2:["a2","t2"],torso:["hip","sh"],ua1:["sh","e1"],fa1:["e1","w1"],ua2:["sh","e2"],fa2:["e2","w2"]};
+const SEGORDER=["th2","sh2","f2","ua2","fa2","torso","th1","sh1","f1","ua1","fa1"];
+const SW={torso:50,th:30,sh:24,ua:18,fa:16,f:18};
+const swOf=s=>SW[s.replace(/[12]$/,"")];
+/* o.layers : [{name,fill,stroke,grow,dash,dashCol,flat,head:(g)=>{}}] ; o.base = couleurs de base {tunic,hose,skin} */
+function makeFig(a,parent,o){
+  const el=a.el; const g=el("g",{},parent); const fig={g,layers:{},lines:{},joints:{}};
+  const spec=o.layers;
+  const lay=[];
+  spec.forEach(L=>{
+    const lg=el("g",{},g); fig.layers[L.name]=lg; const lines=[]; const heads=el("g",{},lg);
+    const mk=(seg,w,col,extra)=>{ const ln=el("line",Object.assign({stroke:col,"stroke-width":w,"stroke-linecap":"round",fill:"none"},extra||{}),lg); lines.push({seg,ln}); return ln; };
+    const grow=L.grow||0, col=ev=>typeof L.fill==="function"?L.fill(ev):L.fill;
+    if(L.flat){
+      SEGORDER.forEach(s=>mk(s,swOf(s)+grow+(L.stroke?5:0),L.stroke));
+      SEGORDER.forEach(s=>{ if(L.skip&&L.skip.includes(s)) return; mk(s,swOf(s)+grow,col(s)); });
+    } else {
+      SEGORDER.forEach(s=>{ if(L.stroke) mk(s,swOf(s)+grow+4,L.stroke); mk(s,swOf(s)+grow,col(s)); if(L.dash) mk(s,Math.max(4,swOf(s)+grow-8),L.dashCol||"#555",{"stroke-dasharray":L.dash,opacity:.65}); });
+    }
+    if(L.flat&&L.dash) SEGORDER.forEach(s=>mk(s,Math.max(4,swOf(s)+grow-10),L.dashCol||"#555",{"stroke-dasharray":L.dash,opacity:.55}));
+    const hd=el("g",{},heads); if(L.head) L.head(hd);
+    const hands=L.hands?el("g",{},lg):null; const hh=[]; const jj=[];
+    if(L.joints) L.joints.forEach(([nm,r,fl,st])=>{ jj.push([nm,el("circle",{r,fill:fl,stroke:st||"#1E2430","stroke-width":2.5},lg)]); });
+    if(L.hands){ [1,2].forEach(i=>{ hh.push(el("circle",{r:L.hands,fill:L.handCol||"#F1C9A5",stroke:L.handStroke||"#1E2430","stroke-width":2.5},hands)); }); }
+    lay.push({lines,hd,hh,jj,L});
+  });
+  fig.update=function(p,x,y,s,flip){
+    const P=fk(p); fig.P=P; fig.p=p;
+    g.setAttribute("transform",`translate(${x},${y}) scale(${(flip?-1:1)*s},${s})`);
+    lay.forEach(l=>{
+      l.lines.forEach(({seg,ln})=>{ const [A,B]=SEGP[seg]; ln.setAttribute("x1",P[A][0]); ln.setAttribute("y1",P[A][1]); ln.setAttribute("x2",P[B][0]); ln.setAttribute("y2",P[B][1]); });
+      l.hd.setAttribute("transform",`translate(${P.hd[0]},${P.hd[1]}) rotate(${p.torso+(p.head||0)})`);
+      l.hh.forEach((h,i)=>{ const w=P["w"+(i+1)]; h.setAttribute("cx",w[0]); h.setAttribute("cy",w[1]); });
+      l.jj.forEach(([nm,c])=>{ const q=P[nm]; c.setAttribute("cx",q[0]); c.setAttribute("cy",q[1]); });
+    });
+    return P;
+  };
+  return fig;
+}
+const SKIN="#F1C9A5";
+function baseLayer(tunic,hose,o){ o=o||{};
+  return {name:"base",flat:true,stroke:"#1E2430",hands:11,handCol:SKIN,
+    fill:s=>/^th|^sh[12]|^f/.test(s)?hose:(s==="torso"||/^ua/.test(s)?tunic:(o.sleeve||tunic)),
+    head:g=>{ a_el("circle",{r:27,fill:SKIN,stroke:"#1E2430","stroke-width":2.5},g); a_el("circle",{cx:11,cy:-4,r:3.5,fill:"#1E2430"},g);
+      if(o.hat==="crown"){ a_el("path",{d:"M-22,-22 L-24,-52 L-10,-36 L0,-58 L10,-36 L24,-52 L22,-22Z",fill:"#F2C230",stroke:"#8A6A00","stroke-width":2.5},g); }
+      else if(o.hat==="cap"){ a_el("path",{d:"M-27,-6 A27,27 0 0 1 27,-6 L27,-14 A27,27 0 0 0 -27,-14Z",fill:o.hatCol||"#6B3FA0",stroke:"#1E2430","stroke-width":2.5},g); a_el("rect",{x:-27,y:-16,width:54,height:10,rx:4,fill:o.hatCol||"#6B3FA0",stroke:"#1E2430","stroke-width":2.5},g); }
+      else if(o.hat==="hair"){ a_el("path",{d:"M-26,-4 A27,27 0 0 1 26,-8 L8,-18 Q-8,-14 -22,-8Z",fill:o.hatCol||"#5B3A1E",stroke:"#1E2430","stroke-width":2},g); }
+      else if(o.hat==="coif"){ a_el("path",{d:"M-28,6 A28,28 0 1 1 28,6 L14,-4 L14,-14 Q0,-20 -14,-14 L-14,6Z",fill:o.hatCol||"#E9E2D0",stroke:"#1E2430","stroke-width":2.5},g); }
+    }};
+}
+var a_el=(t,at,p)=>Anim.H.el(t,at,p);
+/* ---- bibliothèque UI ---- */
+let A=null;
+const C={ink:"#1E2430",or:"#E07A1F",gr:"#2E8B57",red:"#C0392B",bl:"#2563A8",roi:"#6B3FA0",gris:"#4A5468",brown:"#8C6D46",gold:"#D4A017"};
+function T(p,x,y,s,o){o=o||{};return A.el("text",{x,y,"font-size":o.size||24,"font-weight":o.w||700,fill:o.col||C.ink,"text-anchor":o.anchor||"middle",text:s},p);}
+function TL(p,x,y,lines,o){o=o||{};const sz=o.size||24;const t=A.el("text",{x,y,"font-size":sz,"font-weight":o.w||600,fill:o.col||C.ink,"text-anchor":o.anchor||"start"},p);lines.split("\n").forEach((l,i)=>A.el("tspan",{x,dy:i?sz*1.28:0,text:l},t));return t;}
+function panel(p,x,y,w,h,title,col){ const g=A.el("g",{},p); A.el("rect",{x,y,width:w,height:h,rx:16,fill:"#fff",stroke:col||C.or,"stroke-width":3.5},g); if(title) T(g,x+w/2,y+44,title,{size:30,w:800,col:col||C.or}); return g; }
+const frac=v=>v-Math.floor(v);
+function person(p,col,s,o){ o=o||{}; const g=A.el("g",{},p); const q=A.el("g",{transform:`scale(${s})`},g);
+  A.el("path",{d:"M-15,-40 L15,-40 L21,0 L-21,0Z",fill:col,stroke:C.ink,"stroke-width":2.4},q);
+  A.el("circle",{cx:0,cy:-52,r:13,fill:"#F1C9A5",stroke:C.ink,"stroke-width":2.4},q);
+  if(o.crown) A.el("path",{d:"M-13,-60 l-2,-16 l8,8 l7,-12 l7,12 l8,-8 l-2,16Z",fill:"#F2C230",stroke:"#8A6A00","stroke-width":2},q);
+  if(o.helm){ A.el("path",{d:"M-14,-54 A14,14 0 0 1 14,-54 L14,-48 L-14,-48Z",fill:"#B9C2CC",stroke:C.ink,"stroke-width":2.2},q); }
+  if(o.hat) A.el("path",{d:"M-18,-60 Q0,-76 18,-60Z",fill:"#C9B07A",stroke:C.ink,"stroke-width":2},q);
+  if(o.cap) A.el("path",{d:"M-15,-58 Q0,-74 15,-58Z",fill:o.cap,stroke:C.ink,"stroke-width":2},q);
+  g._s=s; return g; }
+let R={};
+/* manipulation : pièces d'équipement (poids = exemples arrondis) */
+const PIECES=[{nom:"Le gambison",desc:"vêtement matelassé qui amortit",kg:3},{nom:"La cotte de mailles",desc:"des milliers d'anneaux de fer",kg:13},{nom:"Les plaques d'acier",desc:"cuirasse, jambières (XIVe-XVe s.)",kg:10},{nom:"Le casque",desc:"protège la tête et le visage",kg:3},{nom:"L'épée",desc:"l'arme du chevalier",kg:1},{nom:"L'écu",desc:"le bouclier de bois et de cuir",kg:2}];
+const EQ=[1,1,1,1,1,1];
+function syncBtns(){ PIECES.forEach((p,i)=>{ const b=document.getElementById("eqB"+i); if(b) b.classList.toggle("sel",!!EQ[i]); }); }
+function toggle(i){ EQ[i]=EQ[i]?0:1; syncBtns(); if(A) A.redraw(); }
+const STEEL="#CBD3DC", STEELD="#46505C";
+const GY=770; // sol des scènes
+function swordG(p){ const g=A.el("g",{},p); const q=A.el("g",{},g);
+  A.el("path",{d:"M-7,-8 L-6,-140 L0,-158 L6,-140 L7,-8Z",fill:"#E7ECF1",stroke:C.ink,"stroke-width":3},q); A.el("line",{x1:0,y1:-12,x2:0,y2:-134,stroke:"#9AA5B1","stroke-width":2.5},q);
+  A.el("rect",{x:-26,y:-13,width:52,height:10,rx:3,fill:"#B08A12",stroke:C.ink,"stroke-width":2.5},q); A.el("rect",{x:-5,y:-3,width:10,height:26,fill:"#6B4524",stroke:C.ink,"stroke-width":2},q); A.el("circle",{cx:0,cy:27,r:8,fill:"#B08A12",stroke:C.ink,"stroke-width":2.5},q); return g; }
+function shieldG(p,s){ const g=A.el("g",{},p); const q=A.el("g",{transform:`scale(${s||1})`},g);
+  A.el("path",{d:"M-34,-46 L34,-46 L34,0 Q34,40 0,60 Q-34,40 -34,0Z",fill:"#2563A8",stroke:C.ink,"stroke-width":3.5},q);
+  A.el("path",{d:"M-34,-46 L34,-46 L34,-24 L-34,22Z",fill:"#E8B923"},q); A.el("path",{d:"M-34,-46 L34,-46 L34,0 Q34,40 0,60 Q-34,40 -34,0Z",fill:"none",stroke:C.ink,"stroke-width":3.5},q); return g; }
+function lanceG(p,len){ const g=A.el("g",{},p); A.el("line",{x1:0,y1:0,x2:len,y2:0,stroke:"#8A5A2B","stroke-width":9,"stroke-linecap":"round"},g); A.el("path",{d:`M${len},-7 L${len+34},0 L${len},7Z`,fill:"#C9D1DA",stroke:C.ink,"stroke-width":2.5},g); A.el("path",{d:`M${len-110},0 L${len-40},-16 L${len-34},16Z`,fill:C.red,stroke:C.ink,"stroke-width":2.5},g); return g; }
+/* cheval de profil, tourné vers la droite, sabots au sol (y=0) */
+function makeHorse(p,col,cloth){ const g=A.el("g",{},p); const h={g,legs:[]}; const dark="#4E3017";
+  const leg=(x,c)=>{ const lg=A.el("g",{transform:`translate(${x},-150)`},g); A.el("line",{x1:0,y1:0,x2:0,y2:72,stroke:c,"stroke-width":24,"stroke-linecap":"round"},lg); const lo=A.el("g",{transform:"translate(0,72)"},lg); A.el("line",{x1:0,y1:0,x2:0,y2:76,stroke:c,"stroke-width":17,"stroke-linecap":"round"},lo); A.el("rect",{x:-11,y:70,width:24,height:12,rx:4,fill:"#2B2B2B"},lo); return {u:lg,l:lo,x}; };
+  h.legs=[leg(-72,dark),leg(70,dark),leg(-46,col),leg(46,col)];
+  A.el("ellipse",{cx:0,cy:-196,rx:112,ry:50,fill:col,stroke:C.ink,"stroke-width":3.5},g);
+  A.el("path",{d:"M-110,-205 Q-140,-190 -138,-120 Q-150,-190 -118,-215Z",fill:dark,stroke:C.ink,"stroke-width":2},g);
+  A.el("path",{d:"M64,-220 Q112,-300 150,-318 L206,-278 Q214,-254 192,-250 L166,-254 Q140,-214 108,-180Z",fill:col,stroke:C.ink,"stroke-width":3.5},g);
+  A.el("path",{d:"M150,-318 L156,-342 L168,-316Z",fill:col,stroke:C.ink,"stroke-width":2.5},g);
+  A.el("path",{d:"M86,-250 Q116,-318 150,-326",fill:"none",stroke:dark,"stroke-width":9,"stroke-linecap":"round"},g);
+  A.el("circle",{cx:176,cy:-286,r:5,fill:C.ink},g);
+  if(cloth){ A.el("path",{d:"M-100,-218 L96,-218 L104,-130 L88,-146 L72,-130 L56,-146 L40,-130 L24,-146 L8,-130 L-8,-146 L-24,-130 L-40,-146 L-56,-130 L-72,-146 L-88,-130 L-104,-146Z",fill:cloth,stroke:C.ink,"stroke-width":3},g); A.el("path",{d:"M-100,-218 L96,-218",stroke:"#F2C230","stroke-width":6},g); }
+  A.el("path",{d:"M-18,-246 Q10,-262 38,-246 L34,-232 L-14,-232Z",fill:"#7A4A22",stroke:C.ink,"stroke-width":2.5},g);
+  return h; }
+function gallop(h,ph){ const L=[[-72,0],[70,2.2],[-46,1.1],[46,3.3]]; h.legs.forEach((l,i)=>{ const f=ph*6.28+L[i][1]; const a1=34*Math.sin(f), a2=-30*Math.max(0,Math.sin(f+1.4))-8; l.u.setAttribute("transform",`translate(${l.x},-150) rotate(${a1})`); l.l.setAttribute("transform",`translate(0,72) rotate(${a2})`); }); }
+const FQ=[ "gamb","mail","plate","helm" ];
+function knightFig(p,tunic,hose){
+  return makeFig(A,p,{layers:[
+    baseLayer(tunic,hose,{hat:"hair"}),
+    {name:"gamb",flat:true,stroke:"#8A7440",fill:"#E3D3A8",grow:8,dash:"3 11",dashCol:"#A88F55"},
+    {name:"mail",flat:true,stroke:"#3C4650",fill:"#AEB7C2",grow:14,dash:"2 6",dashCol:"#4C5762",head:g=>{ A.el("circle",{r:33,fill:"#AEB7C2",stroke:"#3C4650","stroke-width":3},g); A.el("circle",{r:33,fill:"none",stroke:"#4C5762","stroke-width":3,"stroke-dasharray":"2 6"},g); A.el("circle",{cx:12,cy:-3,r:3.5,fill:"#1E2430"},g); }},
+    {name:"plate",stroke:STEELD,fill:()=>STEEL,grow:20,hands:14,handCol:"#B9C2CC",joints:[["k1",16,"#AEB8C3"],["k2",16,"#AEB8C3"],["e1",14,"#AEB8C3"],["e2",14,"#AEB8C3"]]},
+    {name:"helm",head:g=>{ A.el("path",{d:"M-33,8 A33,33 0 1 1 33,8 L33,26 Q0,38 -33,26Z",fill:STEEL,stroke:STEELD,"stroke-width":3.5},g); A.el("path",{d:"M-33,8 Q0,18 33,8",fill:"none",stroke:STEELD,"stroke-width":3},g); A.el("rect",{x:2,y:-8,width:32,height:7,rx:3,fill:"#1E2430"},g); A.el("path",{d:"M-14,-30 Q-8,-52 8,-50 Q-4,-42 0,-30Z",fill:C.red,stroke:STEELD,"stroke-width":2},g); }}
+  ]});
+}
+const WALK=ph=>{ const s=Math.sin(ph*6.283), c=Math.cos(ph*6.283); return pose({th1:28*s,sh1:Math.max(0,-30*c)+4,th2:-28*s,sh2:Math.max(0,30*c)+4,ua1:-26*s+6,fa1:-30,ua2:26*s-6,fa2:-26,torso:2}); };
+/* poses pour se relever */
+const RISE=[
+ pose({torso:-92,head:-4,th1:-90,sh1:-91,th2:-88,sh2:-93,ua1:-84,fa1:-100,ua2:-86,fa2:-96}),
+ pose({torso:10,head:0,th1:-88,sh1:-92,th2:-90,sh2:-93,ua1:22,fa1:8,ua2:16,fa2:6}),
+ pose({torso:42,head:-4,th1:-128,sh1:14,th2:-120,sh2:18,ua1:-70,fa1:-90,ua2:-62,fa2:-85}),
+ pose({torso:60,head:-8,th1:-98,sh1:6,th2:-94,sh2:8,ua1:-100,fa1:-105,ua2:-92,fa2:-100}),
+ pose({torso:0,head:0,th1:0,sh1:0,th2:3,sh2:0,ua1:6,fa1:-26,ua2:-4,fa2:-30})
+];
+function risePose(u){ const n=RISE.length-1; const x=Math.max(0,Math.min(0.9999,u))*n; const i=Math.floor(x); const f=A.ease(x-i); const o=mixPose(RISE[i],RISE[i+1],f); o.ax=0; return o; }
+function riderPose(){ return pose({hip:[0,0],torso:-2,th1:-62,sh1:12,th2:-56,sh2:16,ua1:-76,fa1:-98,ua2:-22,fa2:-50}); }
+Anim.run({
+  titre:"Du page au chevalier : l'adoubement",
+  sousTitre:"Histoire · CM1-CM2 · Thème 1 : le Moyen Âge",
+  matiere:"histoire", badge:"Histoire", manipDes:1, manipJusqua:1,
+  accroche:"Comment devient-on chevalier ? Et peut-on se relever avec une armure ?",
+  init(a){
+    A=a; const {el}=a;
+    /* ============ 1. de page à chevalier ============ */
+    const s1=a.layer("ages"); R.s1=s1;
+    el("rect",{x:0,y:GY,width:1600,height:130,fill:"#D8E7C0"},s1); el("rect",{x:0,y:GY-6,width:1600,height:8,fill:"#A9C27F"},s1);
+    el("line",{x1:100,y1:GY+60,x2:1500,y2:GY+60,stroke:C.ink,"stroke-width":5},s1);
+    el("path",{d:"M1500,"+(GY+60)+" l-18,-12 l0,24Z",fill:C.ink},s1);
+    const ST=[300,800,1300], AG=["7 ans","14 ans","vers 21 ans"];
+    ST.forEach((x,i)=>{ el("line",{x1:x,y1:GY+46,x2:x,y2:GY+74,stroke:C.ink,"stroke-width":5},s1); T(s1,x,GY+106,AG[i],{size:26,w:800}); });
+    R.age=T(s1,800,92,"",{size:40,w:800,col:"#A8431F"});
+    const CARD=[["PAGE","Il est confié à un seigneur.\nIl sert à table et apprend\nles bonnes manières.","#2E8B57"],["ÉCUYER","Il suit un chevalier, soigne\nses chevaux, porte son écu\net s'entraîne au combat.","#2563A8"],["CHEVALIER","Il est adoubé : il reçoit\nses armes et devient\nun guerrier à cheval.","#B03A2E"]];
+    R.cards=CARD.map((c,i)=>{ const g=el("g",{},s1); const x=ST[i]-215; el("rect",{x,y:130,width:430,height:220,rx:16,fill:"#fff",stroke:c[2],"stroke-width":4},g); T(g,ST[i],176,c[0],{size:32,w:800,col:c[2]}); TL(g,x+24,222,c[1],{size:25,w:600}); return g; });
+    // accessoires
+    const pr1=el("g",{},s1); el("rect",{x:395,y:GY-92,width:140,height:14,fill:"#8A5A2B",stroke:C.ink,"stroke-width":2.5},pr1); el("rect",{x:405,y:GY-78,width:12,height:78,fill:"#6B4524"},pr1); el("rect",{x:513,y:GY-78,width:12,height:78,fill:"#6B4524"},pr1);
+    el("path",{d:"M430,-92 L430,-132 Q456,-146 482,-132 L482,-92Z".replace(/-92/g,GY-92).replace(/-132/g,GY-132).replace(/-146/g,GY-146),fill:"#C89B5A",stroke:C.ink,"stroke-width":3},pr1); el("circle",{cx:500,cy:GY-102,r:9,fill:"#E8B923",stroke:C.ink,"stroke-width":2},pr1);
+    const pr2=el("g",{},s1); el("rect",{x:896,y:GY-330,width:14,height:330,fill:"#6B4524"},pr2); el("rect",{x:830,y:GY-330,width:160,height:12,fill:"#6B4524"},pr2); const shp=shieldG(pr2,.8); a.tr(shp,830,GY-290,1); el("rect",{x:975,y:GY-320,width:24,height:40,rx:6,fill:"#C89B5A",stroke:C.ink,"stroke-width":2.5},pr2);
+    R.pr=[pr1,pr2];
+    R.kid=makeFig(a,s1,{layers:[baseLayer("#2E8B57","#6B4524",{hat:"hair"})]});
+    R.kidSword=swordG(s1); R.star=el("g",{},s1); for(let i=0;i<8;i++) el("line",{x1:0,y1:-40,x2:0,y2:-80,stroke:"#F2C230","stroke-width":7,"stroke-linecap":"round",transform:`rotate(${i*45})`},R.star);
+    /* ============ 2. l'équipement (manipulation : équiper le chevalier) ============ */
+    const s2=a.layer("equip"); R.s2=s2;
+    el("rect",{x:0,y:GY+50,width:1600,height:80,fill:"#E6DCC6"},s2);
+    R.kn=knightFig(s2,"#B03A2E","#4A5468");
+    R.sw=swordG(s2); R.sh=shieldG(s2,1.15);
+    R.pn=panel(s2,880,80,700,760,null,"#A8431F");
+    T(R.pn,1230,126,"À vous : équipez le chevalier",{size:30,w:800,col:"#A8431F"});
+    T(R.pn,1230,154,"poids : des ordres de grandeur, arrondis",{size:22,w:600,col:C.gris});
+    R.rows=PIECES.map((pc,i)=>{ const g=el("g",{},R.pn); const y=172+i*78; g.rect=el("rect",{x:900,y,width:660,height:68,rx:12,stroke:"#A8431F","stroke-width":3},g); g.dot=el("circle",{cx:934,cy:y+34,r:15,stroke:C.ink,"stroke-width":3},g);
+      g.chk=el("path",{d:`M926,${y+34} l6,7 l12,-14`,fill:"none",stroke:"#fff","stroke-width":4.5,"stroke-linecap":"round","stroke-linejoin":"round"},g);
+      T(g,966,y+30,pc.nom,{size:27,w:800,anchor:"start"}); T(g,966,y+57,pc.desc,{size:22,w:500,col:C.gris,anchor:"start"}); g.kg=T(g,1540,y+42,"≈ "+pc.kg+" kg",{size:28,w:800,anchor:"end"});
+      g.style.cursor="pointer"; g.onclick=()=>toggle(i); return g; });
+    T(R.pn,910,712,"Poids porté :",{size:30,w:800,anchor:"start"});
+    R.tot=T(R.pn,1550,716,"0 kg",{size:46,w:800,col:C.red,anchor:"end"});
+    el("rect",{x:910,y:736,width:640,height:34,rx:10,fill:"#E6E9EF",stroke:C.ink,"stroke-width":2.5},R.pn);
+    R.bar=el("rect",{x:910,y:736,width:0,height:34,rx:10,fill:C.red,stroke:C.ink,"stroke-width":2.5},R.pn);
+    el("path",{d:`M${910+30/36*640},774 l-9,16 l18,0Z`,fill:"#2563A8"},R.pn);
+    T(R.pn,1550,822,"Repère : un élève de CM1 pèse environ 30 kg",{size:22,w:700,col:"#2563A8",anchor:"end"});
+    R.ph1=a.photo(s2,{id:"h-b3-armure",x:70,y:120,w:340,h:240,cap:"Une armure de plates (musée)",rot:-2});
+    /* ============ 3. lance + destrier ============ */
+    const s3=a.layer("armes"); R.s3=s3;
+    R.horse=makeHorse(s3,"#7A4A22","#2563A8"); R.horseLab=el("g",{},s3);
+    R.lanceG=el("g",{},s3); el("line",{x1:0,y1:0,x2:0,y2:-430,stroke:"#8A5A2B","stroke-width":10,"stroke-linecap":"round"},R.lanceG); el("path",{d:"M-8,-430 L0,-470 L8,-430Z",fill:"#C9D1DA",stroke:C.ink,"stroke-width":2.5},R.lanceG); el("path",{d:"M0,-400 L-70,-370 L0,-340Z",fill:C.red,stroke:C.ink,"stroke-width":2.5},R.lanceG);
+    R.lab3=[["épée",null],["écu (bouclier)",null],["lance",null],["destrier : cheval de guerre,\nfort et dressé",null]].map((l,i)=>{ const g=el("g",{},s3); a.label(g,0,0,l[0],{size:26,stroke:"#A8431F",color:C.ink}); return g; });
+    R.lead3=[0,1,2,3].map(()=>el("path",{fill:"none",stroke:"#A8431F","stroke-width":3.5,"stroke-dasharray":"2 7","stroke-linecap":"round"},s3));
+    R.cost=el("g",{},s3); a.label(R.cost,800,845,"Tout cela coûte très cher : seuls les plus riches peuvent s'équiper.",{size:28,stroke:C.red,color:C.red,fill:"#FDECEA"});
+    /* ============ 4. adoubement ============ */
+    const s4=a.layer("adoub"); R.s4=s4;
+    R.win=[0,1,2].map(i=>{ const x=190+i*500; return el("path",{d:`M${x-70},470 L${x-70},230 Q${x-70},140 ${x},140 Q${x+70},140 ${x+70},230 L${x+70},470Z`,fill:"#243B6B",stroke:"#8C7A5B","stroke-width":5},s4); });
+    R.moon=el("circle",{cx:190,cy:230,r:30,fill:"#F2EAC0"},s4);
+    el("rect",{x:0,y:GY,width:1600,height:130,fill:"#D9CDB4"},s4); el("rect",{x:0,y:GY-6,width:1600,height:8,fill:"#B8A988"},s4);
+    // autel
+    R.autel=el("g",{},s4); el("rect",{x:1130,y:GY-120,width:200,height:120,fill:"#CFC3AA",stroke:"#8C7A5B","stroke-width":4},R.autel); el("rect",{x:1112,y:GY-136,width:236,height:20,fill:"#E1D6BD",stroke:"#8C7A5B","stroke-width":4},R.autel);
+    R.candle=el("g",{},R.autel); el("rect",{x:1150,y:GY-176,width:14,height:40,fill:"#F6F0E0",stroke:C.ink,"stroke-width":2.5},R.candle); R.flame=el("path",{d:`M1157,${GY-182} q-9,-14 0,-30 q9,16 0,30Z`,fill:"#F2A22B",stroke:"#C0392B","stroke-width":2},R.candle);
+    R.y=makeFig(a,s4,{layers:[baseLayer("#F2F2F2","#9AA3AF",{hat:"hair"})]});
+    R.god=makeFig(a,s4,{layers:[baseLayer("#B03A2E","#4A5468",{hat:"hair"}),{name:"mail",flat:true,stroke:"#3C4650",fill:"#AEB7C2",grow:12,dash:"2 6",dashCol:"#4C5762",head:g=>{}}]});
+    R.aSword=swordG(s4); R.spurs=el("g",{},s4); [0,1].forEach(i=>{ const q=el("g",{transform:`translate(${i*60},0)`},R.spurs); el("path",{d:"M-18,0 Q0,-26 18,0",fill:"none",stroke:"#B08A12","stroke-width":6,"stroke-linecap":"round"},q); el("circle",{cx:22,cy:-2,r:9,fill:"#E8B923",stroke:C.ink,"stroke-width":2.5},q); });
+    R.flash=el("g",{},s4); for(let i=0;i<10;i++) el("line",{x1:0,y1:-34,x2:0,y2:-72,stroke:"#F2C230","stroke-width":8,"stroke-linecap":"round",transform:`rotate(${i*36})`},R.flash);
+    R.aLab=[["1  La veillée d'armes : une nuit de prière",800,100],["2  La remise des armes : l'épée et les éperons",800,100],["3  La colée : un coup sur l'épaule. Il est chevalier !",800,100]].map(l=>{ const g=el("g",{},s4); a.label(g,l[1],l[2],l[0],{size:30,stroke:"#A8431F",color:C.ink,fill:"#FFF3E3"}); return g; });
+    /* ============ 5. code ============ */
+    const s5=a.layer("code"); R.s5=s5;
+    T(s5,800,90,"Un idéal : le code de la chevalerie",{size:38,w:800,col:"#A8431F"});
+    const sh5=shieldG(s5,3.4); a.tr(sh5,800,380,1);
+    const VAL=[["Loyauté","il reste fidèle à son seigneur","#2563A8"],["Protéger les faibles","veuves, orphelins, paysans","#2E8B57"],["Défendre l'Église","et la religion chrétienne","#6B3FA0"],["Courage","il ne fuit pas au combat","#C0392B"],["Courtoisie et générosité","politesse, respect des dames","#B08A12"]];
+    const VP=[[310,250],[310,500],[1290,250],[1290,500],[800,720]];
+    R.val=VAL.map((v,i)=>{ const g=el("g",{},s5); const [x,y]=VP[i]; el("rect",{x:x-250,y:y-60,width:500,height:128,rx:16,fill:"#fff",stroke:v[2],"stroke-width":4},g); const ic=el("g",{transform:`translate(${x-190},${y+4})`},g); el("circle",{r:34,fill:v[2],opacity:.15},ic);
+      if(i===0){ el("path",{d:"M-24,6 Q-12,-14 0,-4 L0,14 Q-14,18 -24,6Z",fill:"#F1C9A5",stroke:C.ink,"stroke-width":2.5},ic); el("path",{d:"M24,6 Q12,-14 0,-4 L0,14 Q14,18 24,6Z",fill:"#F7D9BC",stroke:C.ink,"stroke-width":2.5},ic); }
+      if(i===1){ const b=person(ic,"#2E8B57",.9,{helm:true}); a.tr(b,-6,26,1); const c=person(ic,"#C9A36B",.5); a.tr(c,18,28,1); }
+      if(i===2){ el("rect",{x:-5,y:-24,width:10,height:48,fill:"#6B3FA0"},ic); el("rect",{x:-18,y:-12,width:36,height:9,fill:"#6B3FA0"},ic); }
+      if(i===3){ const sw=swordG(ic); a.tr(sw,0,18,.5); }
+      if(i===4){ el("path",{d:"M0,18 Q-30,-2 -22,-14 Q-12,-24 0,-10 Q12,-24 22,-14 Q30,-2 0,18Z",fill:"#C0392B",stroke:C.ink,"stroke-width":2.5},ic); }
+      T(g,x+30,y-12,v[0],{size:i===4?26:30,w:800,col:v[2]}); TL(g,x-140,y+34,v[1],{size:23,w:500}); return g; });
+    R.note5=el("g",{},s5); a.label(R.note5,800,840,"C'est un idéal : tous les chevaliers ne le respectaient pas.",{size:28,stroke:C.or,color:"#8A4A0E",fill:"#FFF3E3"});
+    /* ============ 6. tournoi ============ */
+    const s6=a.layer("tournoi"); R.s6=s6;
+    el("rect",{x:0,y:0,width:1600,height:900,fill:"#E6F1FA"},s6); el("rect",{x:0,y:GY-20,width:1600,height:150,fill:"#C7D79A"},s6);
+    // tribunes
+    const tr=el("g",{},s6); el("rect",{x:380,y:150,width:840,height:210,fill:"#B58A56",stroke:C.ink,"stroke-width":3},tr); for(let r=0;r<2;r++) for(let i=0;i<14;i++){ const x=420+i*58+(r?29:0), y=215+r*70; el("circle",{cx:x,cy:y,r:14,fill:"#F1C9A5",stroke:C.ink,"stroke-width":2},tr); el("rect",{x:x-15,y:y+14,width:30,height:26,rx:6,fill:["#C0392B","#2563A8","#E8B923","#2E8B57","#6B3FA0"][(i*3+r*2)%5],stroke:C.ink,"stroke-width":2},tr); }
+    [400,800,1200].forEach((x,i)=>{ el("line",{x1:x,y1:100,x2:x,y2:150,stroke:C.ink,"stroke-width":5},s6); el("path",{d:`M${x},102 L${x+84},122 L${x},142Z`,fill:["#C0392B","#2563A8","#E8B923"][i],stroke:C.ink,"stroke-width":2.5},s6); });
+    R.hA=makeHorse(s6,"#7A4A22","#C0392B"); R.hB=makeHorse(s6,"#4E3017","#2563A8");
+    R.rA=knightFig(s6,"#B03A2E","#4A5468"); R.rB=knightFig(s6,"#2563A8","#4A5468");
+    R.lA=lanceG(R.rA.g,260); R.lB=lanceG(R.rB.g,260); R.hit=el("g",{},s6); for(let i=0;i<12;i++) el("line",{x1:0,y1:-30,x2:0,y2:-80,stroke:"#F2C230","stroke-width":8,"stroke-linecap":"round",transform:`rotate(${i*30})`},R.hit);
+    R.t6=el("g",{},s6); a.label(R.t6,800,70,"Le tournoi : un entraînement et un spectacle (parfois dangereux)",{size:30,stroke:"#A8431F",color:C.ink,fill:"#FFF3E3"});
+    R.ph2=a.photo(s6,{id:"h-b3-bayeux",x:50,y:130,w:290,h:160,cap:"Chevaliers (tapisserie de Bayeux)",rot:-1.5,size:20});
+    /* ============ 7. se relever ============ */
+    const s7=a.layer("relever"); R.s7=s7;
+    el("rect",{x:0,y:GY+30,width:1600,height:100,fill:"#D8E7C0"},s7); el("rect",{x:0,y:GY+24,width:1600,height:8,fill:"#A9C27F"},s7);
+    R.kn7=knightFig(s7,"#B03A2E","#4A5468"); ["gamb","mail","plate","helm"].forEach(n=>{});
+    R.j7=[["hip"],["k1"],["k2"],["sh"],["e1"]].map(([n])=>{ const c=el("circle",{r:26,fill:"none",stroke:C.or,"stroke-width":6},R.kn7.g); return [n,c]; });
+    R.step7=[["1  Il est à terre, en armure.",800,110],["2  Il se redresse en s'appuyant sur les bras.",800,110],["3  Il ramène ses jambes sous lui.",800,110],["4  Il se relève, tout seul.",800,110]].map(l=>{ const g=el("g",{},s7); a.label(g,l[1],l[2],l[0],{size:32,stroke:"#A8431F",color:C.ink,fill:"#FFF3E3"}); return g; });
+    R.p7=panel(s7,1060,200,500,420,null,"#2E8B57"); T(R.p7,1310,246,"Pourquoi il peut bouger",{size:30,w:800,col:"#2E8B57"});
+    R.p7t=["20 à 25 kg répartis sur\ntout le corps.","Des plaques articulées,\nreliées par des rivets\net des lanières de cuir.","Une armure faite sur mesure\npour son propriétaire."].map((s,i)=>{ const g=el("g",{},s7); TL(g,1090,300+i*110,s,{size:23,w:600}); return g; });
+    /* ============ synthèse ============ */
+    const sy=a.layer("synthese"); R.sy=sy; el("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy); T(sy,800,80,"Le chevalier : l'essentiel",{size:36,w:800});
+    const i1=g=>{ [[-52,16,.5],[0,0,.75],[52,-12,1]].forEach(([x,y,s])=>{ const p=person(g,"#2563A8",s); a.tr(p,x,y+30,1); }); };
+    const i2=g=>{ const sw=swordG(g); a.tr(sw,0,28,.55); const sh=shieldG(g,.55); a.tr(sh,-58,6,1); };
+    const i3=g=>{ el("path",{d:"M-34,-26 L34,-26 L34,4 Q34,34 0,48 Q-34,34 -34,4Z",fill:"#CFE0F7",stroke:C.bl,"stroke-width":5},g); el("path",{d:"M0,-14 L0,32 M-18,-4 L18,-4",stroke:C.bl,"stroke-width":5},g); };
+    R.sy3=[[i1,"De page à chevalier","Page vers 7 ans, écuyer vers\n14 ans, puis l'adoubement\nvers 18-21 ans."],[i2,"Un équipement qui s'empile","Mailles, plaques d'acier,\népée, écu, destrier :\ntrès coûteux."],[i3,"Un idéal, des tournois","Loyauté, protection des faibles,\ncourage : un code que\ntous ne respectent pas."]].map((f,i)=>{ const g=el("g",{},sy); const x=290+i*510; el("rect",{x:x-230,y:120,width:460,height:320,rx:18,fill:"#FBF6EE",stroke:"#A8431F","stroke-width":3},g); const ig=el("g",{transform:`translate(${x},205)`},g); f[0](ig); T(g,x,305,f[1],{size:28,w:800,col:"#A8431F"}); TL(g,x,345,f[2],{size:23,w:500,anchor:"middle"}); return g; });
+    R.myth=a.layer("myth"); a.myth(R.myth,120,500,1360,"Un chevalier en armure, lourd et raide, ne pouvait pas se relever s'il tombait.","Une armure de plates pèse 20 à 25 kg, répartis sur tout le corps, et ses plaques articulées permettent de courir, de monter à cheval et de se relever.");
+    a.manip.innerHTML="Équipement : "+PIECES.map((p,i)=>`<button id="eqB${i}" class="sel">${p.nom.replace(/^(Le |La |Les |L')/,"")}</button>`).join("")+`<button id="eqNone">Tout enlever</button><button id="eqAll">Tout remettre</button>`;
+    PIECES.forEach((p,i)=>{ document.getElementById("eqB"+i).onclick=()=>toggle(i); });
+    document.getElementById("eqNone").onclick=()=>{ EQ.fill(0); syncBtns(); a.redraw(); };
+    document.getElementById("eqAll").onclick=()=>{ EQ.fill(1); syncBtns(); a.redraw(); };
+  },
+  reset(a){ [R.s1,R.s2,R.s3,R.s4,R.s5,R.s6,R.s7,R.sy,R.myth,R.kidSword,R.star,R.ph1,R.ph2,R.cost,R.note5,R.flash,R.hit,R.t6].forEach(e=>a.op(e,0)); },
+  etapes:[
+  { titre:"De page à chevalier", duree:12000,
+    legende:"Un jeune noble devient page vers 7 ans, écuyer vers 14 ans, puis chevalier vers 18-21 ans. À chaque âge, il apprend de nouvelles choses.",
+    voix:"Pour un fils de famille noble, le chemin vers la chevalerie est long. Vers sept ans, il devient page : il sert à table et apprend les bonnes manières. Vers quatorze ans, il devient écuyer : il suit un chevalier, soigne ses chevaux et s'entraîne au combat. Vers dix-huit à vingt et un ans, il est adoubé : il devient chevalier.",
+    anim(t,a){ const s=a.seg; a.op(R.s1,1);
+      const k=(u0,u1)=>s(t,u0,u1,true);
+      let x=130,age=7; const w1=k(.0,.14), w2=k(.34,.5), w3=k(.66,.82);
+      x=a.lerp(130,300,w1); if(t>=.34) x=a.lerp(300,800,w2); if(t>=.66) x=a.lerp(800,1300,w3);
+      age=7+7*w2+7*w3; const moving=(t<.14)||(t>=.34&&t<.5)||(t>=.66&&t<.82);
+      const sc=a.lerp(.55,1.05,(age-7)/14);
+      const ph=t*14; const p=moving?WALK(ph):pose({ua1:10,fa1:-28});
+      R.kid.update(p,x,GY,sc,false);
+      R.age.textContent="Âge : "+Math.round(age)+" ans"; R.age.setAttribute("opacity",1);
+      R.cards.forEach((c,i)=>a.op(c,s(t,[.1,.4,.72][i],[.18,.48,.8][i])));
+      a.op(R.pr[0],1); a.op(R.pr[1],1);
+      a.op(R.kidSword,s(t,.84,.9)); a.tr(R.kidSword,1362,GY-90-(1-s(t,.84,.9))*60,.8); a.set(R.kidSword,{transform:`translate(1368,${GY-98-(1-s(t,.84,.92))*70}) rotate(0) scale(.85)`}); a.op(R.star,s(t,.86,.9)*(1-s(t,.96,1)*0)); a.tr(R.star,1368,GY-230,1.2,t*90); } },
+  { titre:"À vous : équipez le chevalier", duree:12000,
+    legende:"Le chevalier s'équipe en couches. À vous : mettez ou enlevez chaque pièce et regardez le poids porté. Une armure de plates complète pèse 20 à 25 kg.",
+    voix:"Le chevalier s'équipe en couches : un vêtement matelassé, le gambison, puis la cotte de mailles, des plaques d'acier, un casque, une épée et un écu. À vous de jouer ! Mettez ou enlevez chaque pièce, et regardez le poids porté. Ce sont des ordres de grandeur : une armure de plates complète pèse vingt à vingt-cinq kilogrammes. Prenez votre temps.",
+    anim(t,a){ const s=a.seg; a.op(R.s1,1-s(t,0,.06)); a.op(R.s2,s(t,0,.06)); a.op(R.ph1,s(t,.06,.16)); a.op(R.pn,1);
+      const P=R.kn.update(pose({ua1:-92,fa1:-168,ua2:-40,fa2:-72}),560,GY+34,1.15,false);
+      const X=q=>[560+1.15*q[0],GY+34+1.15*q[1]];
+      const L=[[.1,.22],[.28,.42],[.46,.6],[.64,.74],[.76,.84],[.86,.94]]; const v=L.map(l=>s(t,l[0],l[1])*EQ[L.indexOf(l)]); const vv=L.map(l=>s(t,l[0],l[1]));
+      ["gamb","mail","plate","helm"].forEach((n,i)=>{ a.op(R.kn.layers[n],v[i]); R.kn.layers[n].setAttribute("transform",`translate(0,${(1-vv[i])*-70})`); });
+      const w1=X(P.w1), w2=X(P.w2);
+      a.op(R.sw,v[4]); a.tr(R.sw,w1[0],w1[1]+(1-vv[4])*-60,1.15);
+      a.op(R.sh,v[5]); a.tr(R.sh,w2[0]+22,w2[1]-8+(1-vv[5])*-60,1);
+      let tot=0; R.rows.forEach((g,i)=>{ const on=EQ[i]; const ro=s(t,Math.max(0,L[i][0]-.06),L[i][0]+.04); a.op(g,ro); g.rect.setAttribute("fill",on?"#FFF3E3":"#F3F4F7"); g.rect.setAttribute("stroke",on?"#A8431F":"#C9CED8"); g.dot.setAttribute("fill",on?"#2E8B57":"#fff"); g.chk.setAttribute("opacity",on?1:0); g.setAttribute("opacity",ro*(on?1:.55)); tot+=PIECES[i].kg*v[i]; });
+      R.tot.textContent=Math.round(tot)+" kg"; R.bar.setAttribute("width",Math.max(0,tot/36*640)); } },
+  { titre:"La lance et le cheval", duree:11000,
+    legende:"Il faut aussi une lance, et surtout un destrier : un grand cheval de guerre, fort et dressé pour le combat. Tout cela coûte très cher.",
+    voix:"À cela s'ajoutent une lance et surtout un destrier, un grand cheval de guerre, fort et dressé pour le combat. Tout cela coûte très cher : seuls les plus riches peuvent s'équiper ainsi.",
+    anim(t,a){ const s=a.seg; a.op(R.s1,0); a.op(R.s2,1); a.op(R.ph1,1-s(t,0,.08)); a.op(R.pn,1-s(t,0,.08)); a.op(R.s3,1);
+      ["gamb","mail","plate","helm"].forEach(n=>{ a.op(R.kn.layers[n],1); R.kn.layers[n].setAttribute("transform","translate(0,0)"); });
+      const mv=s(t,0,.12); const px=a.lerp(560,420,mv); const P=R.kn.update(pose({ua1:-92,fa1:-168,ua2:-40,fa2:-72}),px,GY+34,1.15,false);
+      const X=(q)=>[px+1.15*q[0],GY+34+1.15*q[1]];
+      const w1=X(P.w1), w2=X(P.w2);
+      a.op(R.sw,1); a.tr(R.sw,w1[0],w1[1],1.15); a.op(R.sh,1); a.tr(R.sh,w2[0]+22,w2[1]-8,1);
+      const vl=s(t,.2,.4); a.op(R.lanceG,vl); a.tr(R.lanceG,830,GY+34+(1-vl)*-80,1);
+      const vd=s(t,.45,.7); a.op(R.horse.g,vd); a.tr(R.horse.g,1200+(1-vd)*260,GY+34,1.12); gallop(R.horse,0.0);
+      const LP=[[230,240],[640,610],[980,330],[1250,200]]; const SP=[[300,240],[600,588],[940,330],[1250,224]]; const tg=[[w1[0]-6,w1[1]-70],[w2[0]+30,w2[1]+30],[830,GY+34-400],[1260,GY+34-330]];
+      [0,1,2,3].forEach(i=>{ const v=s(t,[.02,.06,.24,.5][i],[.1,.14,.34,.6][i]); a.op(R.lab3[i],v); a.tr(R.lab3[i],LP[i][0],LP[i][1],1); R.lead3[i].setAttribute("d",`M${SP[i][0]},${SP[i][1]} L${tg[i][0]},${tg[i][1]}`); a.op(R.lead3[i],v); });
+      a.op(R.cost,s(t,.8,.92)); } },
+  { titre:"L'adoubement", duree:15000,
+    legende:"L'adoubement fait le chevalier : souvent après une veillée d'armes, un chevalier lui remet l'épée et les éperons, puis lui donne un coup sur l'épaule.",
+    voix:"Le jour de l'adoubement, le jeune homme devient chevalier. Souvent, il passe la nuit à prier : c'est la veillée d'armes. Au matin, un chevalier lui remet l'épée et les éperons. Puis il lui donne un coup sur l'épaule, la colée. Le jeune homme est désormais chevalier.",
+    anim(t,a){ const s=a.seg; a.op(R.s2,1-s(t,0,.05)); a.op(R.s3,1-s(t,0,.05)); a.op(R.s4,s(t,0,.06));
+      // ciel : nuit -> aube
+      const dawn=s(t,.28,.45); const mix=(c1,c2,u)=>c1.map((v,i)=>Math.round(v+(c2[i]-v)*u)); const col=mix([36,59,107],[196,222,244],dawn); R.win.forEach(w=>w.setAttribute("fill",`rgb(${col})`)); a.op(R.moon,1-dawn); a.op(R.candle,1-s(t,.7,.8)*0); R.flame.setAttribute("opacity",.7+.3*Math.sin(t*60));
+      const G=GY, SC=1.2; const AX=640;
+      const stand=pose({ua1:10,fa1:-28}); const pray=pose({torso:10,th1:-92,sh1:2,th2:8,sh2:84,ua1:-104,fa1:-120,ua2:-108,fa2:-118});
+      const recv=pose({torso:8,th1:-92,sh1:2,th2:8,sh2:84,ua1:-80,fa1:-100,ua2:-84,fa2:-100});
+      const knee=pose({torso:6,th1:-92,sh1:2,th2:8,sh2:84,ua1:12,fa1:-20,ua2:6,fa2:-18,head:6});
+      // jeune homme
+      let py=pray; if(t>.4) py=mixPose(pray,recv,s(t,.4,.5)); if(t>.58) py=mixPose(recv,knee,s(t,.58,.66)); if(t>.9) py=mixPose(knee,stand,s(t,.9,.98));
+      const kn0=s(t,.0,.08); py=t<.08?mixPose(stand,pray,kn0):py; py=Object.assign({},py,{ax:AX});
+      const PY=R.y.update(py,0,G,SC,false);
+      // parrain
+      const gx=a.lerp(1560,AX+300,s(t,.3,.42)); const gpose=t<.42?WALK(t*14):(t<.6?pose({ua1:-72,fa1:-92,ua2:-60,fa2:-88}):pose({ua1:-120,fa1:-140,ua2:-20,fa2:-40}));
+      const gp=t>=.6?mixPose(pose({ua1:-72,fa1:-92,ua2:-60,fa2:-88}),pose({ua1:-110,fa1:-130,ua2:-20,fa2:-40}),s(t,.6,.7)):gpose;
+      const PG=R.god.update(gp,gx,G,SC,true);
+      const gv=s(t,.28,.34)*(1-s(t,.94,.99)); a.op(R.god.g,gv);
+      const wg=[gx-SC*PG.w1[0],G+SC*PG.w1[1]]; const sh=[SC*PY.sh[0],G+SC*PY.sh[1]];
+      // épée
+      let sx,sy,ang,so=1;
+      if(t<.3){ sx=1230; sy=GY-136-6; ang=75; so=s(t,.0,.06); }                                  // posée sur l'autel
+      else if(t<.5){ const u=s(t,.3,.4); sx=a.lerp(1230,wg[0],u); sy=a.lerp(GY-142,wg[1],u); ang=a.lerp(75,-90,u); }       // le parrain la prend
+      else if(t<.62){ const wy=[SC*PY.w1[0],G+SC*PY.w1[1]]; const u=s(t,.5,.6); sx=a.lerp(wg[0],wy[0]+10,u); sy=a.lerp(wg[1],wy[1],u); ang=-90; }
+      else { const dx=sh[0]-wg[0], dy=sh[1]-wg[1]; sx=wg[0]; sy=wg[1]; ang=Math.atan2(dx,-dy)*180/Math.PI; }
+      a.op(R.aSword,so*(1-s(t,.9,.96))); a.set(R.aSword,{transform:`translate(${sx},${sy}) rotate(${ang}) scale(${SC})`});
+      // éperons
+      const spv=s(t,.5,.58); a.op(R.spurs,spv*(1-s(t,.9,.96))); a.tr(R.spurs,AX+SC*PY.a1[0]+10,G-20-(1-spv)*50,1);
+      // éclair de la colée
+      a.op(R.flash,s(t,.7,.74)*(1-s(t,.8,.86))); a.tr(R.flash,sh[0],sh[1]-20,1.1,t*200);
+      [0,1,2].forEach(i=>a.op(R.aLab[i],i===0?s(t,.02,.08)*(1-s(t,.28,.32)):(i===1?s(t,.34,.4)*(1-s(t,.62,.66)):s(t,.66,.72)))); } },
+  { titre:"Le code de la chevalerie", duree:9000,
+    legende:"Le chevalier doit respecter un idéal : rester loyal, protéger les faibles, défendre l'Église, montrer du courage et de la courtoisie.",
+    voix:"Un chevalier doit aussi respecter un idéal, que l'on appelle le code de la chevalerie. Il doit rester loyal envers son seigneur, protéger les faibles, défendre l'Église, être courageux, et se montrer courtois et généreux. C'est un idéal : tous les chevaliers ne le respectaient pas.",
+    anim(t,a){ const s=a.seg; a.op(R.s4,1-s(t,0,.06)); a.op(R.s5,s(t,0,.08)); R.val.forEach((g,i)=>{ const v=s(t,.12+i*.14,.24+i*.14); a.op(g,v); a.tr(g,0,(1-v)*30); }); a.op(R.note5,s(t,.85,.95)); } },
+  { titre:"Le tournoi", duree:11000,
+    legende:"Pour s'entraîner et se montrer, les chevaliers participent à des tournois. Lors d'une joute, deux chevaliers chargent lance en avant : l'un peut être jeté à terre.",
+    voix:"Pour s'entraîner et se faire remarquer, les chevaliers participent à des tournois, devant un public. Lors d'une joute, deux chevaliers chargent l'un vers l'autre, lance en avant. Au choc, la lance se brise, et l'un des deux peut être jeté à terre. Les tournois étaient un spectacle, mais aussi un entraînement, et ils pouvaient être dangereux.",
+    anim(t,a){ const s=a.seg; a.op(R.s5,1-s(t,0,.06)); a.op(R.s6,s(t,0,.08)); a.op(R.t6,s(t,.02,.1)); a.op(R.ph2,s(t,.1,.2)*(1-s(t,.6,.7)));
+      ["gamb","mail","plate","helm"].forEach(n=>{ a.op(R.rA.layers[n],1); a.op(R.rB.layers[n],1); });
+      const ch=s(t,.1,.56,true); const gx=a.lerp(150,640,ch), gx2=a.lerp(1450,960,ch); const bob=Math.abs(Math.sin(t*50))*5; const FY=GY+20;
+      const hit=s(t,.56,.58); const after=s(t,.58,1,true);
+      const hs=.9; gallop(R.hA,t*7*(1-after*.7)); gallop(R.hB,t*7*(1-after*.7));
+      const retreatA=after*60; const bx=gx2+after*210;
+      R.hA.g.setAttribute("transform",`translate(${gx-retreatA*0},${FY-bob*(1-after)}) scale(${hs},${hs})`);
+      R.hB.g.setAttribute("transform",`translate(${gx2+after*140},${FY-bob*(1-after)}) scale(${-hs},${hs})`);
+      // cavaliers
+      const RP=riderPose(); const rs=.78;
+      R.rA.update(RP,0,0,1,false); R.rB.update(RP,0,0,1,false);
+      R.rA.g.setAttribute("transform",`translate(${gx-10*hs},${FY-bob*(1-after)-245*hs}) scale(${rs},${rs})`);
+      // le chevalier B est jeté en arrière
+      const fall=s(t,.6,.9); const fx=gx2+10*hs+after*140+fall*150, fy=FY-bob*(1-after)-245*hs+fall*(245*hs-90)-Math.sin(fall*Math.PI)*120;
+      R.rB.g.setAttribute("transform",`translate(${fx},${fy}) rotate(${-fall*95}) scale(${-rs},${rs})`);
+      // lances
+      const P=R.rA.P||fk(RP); const w=fk(RP).w1;
+      R.lA.setAttribute("transform",`translate(${w[0]-40},${w[1]+6}) rotate(${hit>0?-9*hit:0})`); R.lB.setAttribute("transform",`translate(${w[0]-40},${w[1]+6}) rotate(${hit>0?-12*hit:0})`);
+      const lbA=a.op(R.lB,1-s(t,.62,.66)*0); 
+      a.op(R.hit,s(t,.56,.6)*(1-s(t,.66,.74))); a.tr(R.hit,(gx+gx2)/2+200,FY-300,1.1,t*120);
+      a.op(R.lA,1-s(t,.62,.66)); } },
+  { titre:"Peut-il se relever ?", duree:14000,
+    legende:"Idée fausse : un chevalier tombé ne pourrait plus se relever. En réalité, l'armure est articulée et répartit son poids : il se redresse et se relève seul.",
+    voix:"Un chevalier en armure, tombé à terre, pouvait-il se relever ? Regardons. Il est allongé, tout équipé. Il se redresse en s'appuyant sur les bras, ramène ses jambes sous lui, et se relève, tout seul. L'armure pèse vingt à vingt-cinq kilogrammes, mais ce poids est réparti sur tout le corps, et les plaques sont articulées.",
+    anim(t,a){ const s=a.seg; a.op(R.s6,1-s(t,0,.06)); a.op(R.s7,s(t,0,.08)); ["gamb","mail","plate","helm"].forEach(n=>a.op(R.kn7.layers[n],1));
+      const u=s(t,.12,.78,true); const p=risePose(u); p.ax=0; const P=R.kn7.update(p,430,GY+30,1.15,false);
+      const nm=u<.25?0:(u<.5?1:(u<.75?2:3)); R.step7.forEach((g,i)=>a.op(g,u<.01?(i===0?1:0):(i===(u<.25?0:u<.5?1:u<.75?2:3)?1:0)));
+      R.j7.forEach(([n,c],i)=>{ const q=P[n]; c.setAttribute("cx",q[0]); c.setAttribute("cy",q[1]); a.op(c,s(t,.82,.88)); c.setAttribute("stroke-opacity",.6+.4*Math.sin(t*40)); });
+      a.op(R.p7,s(t,.2,.3)); R.p7t.forEach((g,i)=>a.op(g,s(t,.25+i*.2,.35+i*.2))); } },
+  { titre:"Synthèse", duree:11000,
+    legende:"On devient chevalier en trois étapes ; l'équipement est lourd mais articulé et très coûteux ; la chevalerie est un idéal. Non, un chevalier pouvait se relever !",
+    voix:"Retenons trois idées. Un : on devient chevalier en passant par page, écuyer, puis l'adoubement. Deux : l'équipement est coûteux, et l'armure, bien que lourde, est articulée. Trois : la chevalerie est un idéal, de loyauté et de protection des faibles. Et non, un chevalier en armure pouvait se relever.",
+    anim(t,a){ const s=a.seg; a.op(R.s7,1-s(t,0,.08)); a.op(R.sy,s(t,0,.1)); R.sy3.forEach((f,i)=>{ const v=s(t,.1+i*.14,.24+i*.14); a.op(f,v); a.tr(f,0,(1-v)*40); }); a.op(R.myth,s(t,.62,.78)); a.cls(R.myth.faux,"pulse",t>.8&&t<1); } },
+  ]
+});
+})();

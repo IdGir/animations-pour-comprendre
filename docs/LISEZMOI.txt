@@ -1,0 +1,25 @@
+ANIMATIONS POUR COMPRENDRE — cycle 3 (CM1-CM2) — 52 animations
+
+1) UTILISER
+   - Ouvrir index.html (double-clic, de préférence avec Edge ou Chrome).
+   - Choisir une animation, cliquer sur la grande flèche.
+   - Espace = lecture/pause ; flèches gauche/droite = étape précédente/suivante ;
+     R = recommencer ; F = plein écran ; V = voix off.
+   - A l'étape "A vous", l'animation s'arrête : laissez les élèves manipuler aussi
+     longtemps que nécessaire, puis cliquez sur "Continuer".
+
+2) INSTALLER LES PHOTOS (une seule fois, nécessite Internet et Node.js)
+   Outil : Node.js (https://nodejs.org, version 18 ou plus — déjà installé si la commande "node -v" répond).
+   - Ouvrir le dossier "photos".
+   - Double-cliquer sur telecharger-photos.bat. Une fenêtre noire s'ouvre et télécharge
+     les photos depuis Wikimedia Commons (licences libres ; durée : quelques minutes).
+   - Quand c'est terminé, ouvrir photos/apercu.html pour vérifier que chaque photo
+     correspond bien à son sujet.
+   - Pour remplacer une photo : ouvrir manifest.json avec le Bloc-notes, remplacer la ligne "q": "..."
+     de la photo par  "file": "Nom_exact_du_fichier.jpg"  (nom du fichier sur commons.wikimedia.org),
+     puis relancer telecharger-photos.bat.
+   Le crédit (auteur, licence) s'affiche automatiquement sous chaque photo.
+   Sans les photos, les animations fonctionnent normalement.
+
+   Autre méthode (invite de commandes) : ouvrir "Invite de commandes", taper
+   cd "chemin\du\dossier\photos"   puis   node telecharger-photos.mjs   puis Entrée.

@@ -1,0 +1,9 @@
+[
+ {"id":"h-a1-chapelle-palatine","q":"Aachen Cathedral Palatine Chapel interior octagon Charlemagne","must":["Aachen"],"alt":"la chapelle palatine de Charlemagne à Aix-la-Chapelle (intérieur ou extérieur)"},
+ {"id":"h-a1-denier-charlemagne","q":"Denier Charlemagne silver coin Carolus monogram","must":["Charlemagne"],"alt":"une pièce d'argent (denier) de Charlemagne, avec son monogramme"},
+ {"id":"h-a1-baptistere-poitiers","q":"Baptistère Saint-Jean Poitiers intérieur","must":["Poitiers"],"alt":"le baptistère Saint-Jean de Poitiers, très ancien édifice chrétien de Gaule"},
+ {"id":"h-a1b-hospices-beaune","q":"Hospices de Beaune Hôtel-Dieu cour toit tuiles vernissées","must":["Beaune"],"alt":"l'Hôtel-Dieu de Beaune et son toit de tuiles vernissées"},
+ {"id":"h-a1b-manuscrit-enlumine","q":"Illuminated manuscript medieval monk scribe scriptorium","must":["manuscript"],"alt":"un manuscrit médiéval enluminé ou un moine copiste dans un scriptorium"},
+ {"id":"h-a1c-vezelay-nef","q":"Basilique Sainte-Marie-Madeleine Vézelay nef intérieur","must":["Vézelay"],"alt":"la nef romane de la basilique de Vézelay : arcs en plein cintre, murs épais"},
+ {"id":"h-a1c-sens-voute","q":"Cathédrale Saint-Étienne de Sens nef voûte croisée d'ogives","must":["Sens"],"alt":"la nef gothique de la cathédrale de Sens avec ses voûtes sur croisée d'ogives"}
+]

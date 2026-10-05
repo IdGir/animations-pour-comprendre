@@ -1,0 +1,574 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La guerre de Cent Ans et Jeanne d'Arc</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>const FRANCE1429={"W":880,"H":740,"land":"M859.1 800L851.8 796L845.4 793.6L842.2 790.6L840 788.5L841 785.4L843.6 782.1L843.8 779.5L837 777.3L833.8 775.7L833.5 772.5L835.3 767.3L833.9 763.2L830.3 763.8L827.2 763.3L826.8 761.1L828.6 758.2L831.2 754.4L830.6 750.4L827.2 749L823.9 745.9L822.3 741.6L824.5 738.4L828 736.1L825 731.9L823 731.9L821.5 731.1L822.5 728.9L825.1 725.5L828.6 715.7L833.8 710.9L843.7 707.1L846.4 705.7L848.5 702.2L851.1 699.8L854.4 699.8L857.7 700.7L859.6 702L861.1 700.4L861.9 696.2L860.8 692.7L860.3 682.8L861.6 677L864.6 676.4L867.5 679.3L867.5 682L869.1 688.3L869.7 692.5L869.3 703.7L870.7 707L872.9 709.1L874.1 711.6L878.5 741.1L878.4 743.5L872.6 756.2L871.5 759.8L872.4 774.7L871.6 778.8L869.5 783L866.3 796.1L864.1 800L859.1 800ZM363.1 -60L373.7 -52.2L376 -52.4L378.5 -53.5L380.7 -55.9L383.5 -60L420.4 -60L424.7 -57.9L437.4 -47.1L440.1 -41.3L441.3 -33.7L441.5 -25.3L439.2 -17.6L436.7 -10.7L435.1 -1.9L434 1.5L432.5 3.8L425.5 10.9L420.9 13.7L419 12.5L417 12.6L416.8 14.3L418.8 17.9L418.9 22.3L414.8 25.4L410.5 26.7L403.8 24.9L394 30.7L400.9 33.8L402.2 37.2L400.4 42.8L396.1 45.4L391.1 46.4L386.1 46.5L382 47.9L378 50.5L383 49.1L386.4 50.5L388.5 55.3L390.4 56.8L400.1 59L406 59.1L417.6 58.1L423.1 58.3L425.2 59.1L425.1 63.1L424.2 73L422.6 75L407.2 83L403.8 88.8L402.9 92.2L393.9 91.5L389.6 95L382.1 97.4L376.5 99.9L370.9 103.1L366.2 103.9L346.7 99.4L334.7 99.4L318.4 102.2L314.3 101.4L308.4 98L302 95.5L294.8 94.2L288.5 90.9L292.2 96.9L283.1 102L279.1 102.9L274.9 102.6L266.2 103.7L258.2 102.5L259.2 106.5L261.1 110.1L259.5 111.5L257.5 111.8L242.6 108.3L240.3 108.7L238.4 110.9L232.9 109.4L227.8 105L222.2 101.8L216.4 100.1L211.5 100.4L191.6 105.3L187.1 111.5L184.6 120.5L181.2 128.4L176 134.2L170.5 134.7L165.6 130L156.2 124.4L152.9 120.8L151.9 120.6L150.8 121.7L146.8 122.9L142.8 122.5L136.6 123.3L125.4 126.2L120.8 128.5L110.9 134.9L108.7 136.7L104.7 143.6L99.4 144.4L95.1 139.4L89.8 137.1L84 138.3L80.3 140.3L78.9 138.2L79.1 134.1L83.8 129.5L95.4 126.9L105.9 118L111.3 112.6L113.4 109.4L116 107.5L119 107L120.9 103.5L135.6 89.9L137.1 86.7L138.3 80.7L139.8 75L151 72L157.2 60.2L158.6 59.4L173.9 58.3L185.1 59.3L196.1 62.5L201.7 63.2L207.4 62.6L212.1 59.6L220.6 48.2L225.2 43.2L230.5 38.8L235.4 33.6L243.5 24L238.2 27.1L231.8 32.3L228.1 35.3L216.7 37.7L211.7 40.7L202.6 47.5L201 48.1L188.3 45.3L179.5 35.1L173.8 30.7L171.3 29.9L168.7 30.9L163 31.7L157.3 31.1L160.6 26.8L164.7 24.6L156.2 22.2L153.8 20.7L151.3 17.4L144.6 16.3L141.3 16.8L135.3 20.4L126.2 24L116.3 16.9L114.5 14.1L115 9L113.8 4.7L111.1 3.1L115.3 -1.8L120 -5L130.1 -7.6L145.8 -14.5L154.4 -17.4L162.6 -22.8L166.1 -26.2L168.9 -31.2L171.6 -37.3L175.3 -42.2L172.2 -43.6L171 -47.6L171.8 -51.4L173.5 -54.7L172.6 -59.2L363.1 -60ZM73.4 -60L71.7 -51.8L64.6 -41.8L61.8 -39.4L58.6 -38.1L64.3 -29.9L58.6 -27.1L52.7 -26.7L46.6 -29.3L42.7 -29.6L38.7 -27.5L37.2 -26.2L36.1 -27.1L34.5 -33.5L31.9 -27.3L28 -25.8L21.8 -26.9L11.2 -26.5L7 -25.2L5 -22.6L3.2 -19.5L1.3 -17.9L-0.7 -17L-9.1 -15.7L-10.7 -14.8L-15.3 -10.1L-20.6 -7.7L-24.7 -7.3L-27.9 -10.8L-29.1 -12.9L-30.7 -14.1L-36.3 -14.6L-34.7 -13.5L-33.8 -11.2L-33.9 -6.9L-35.1 -2.9L-38.1 -1.3L-41.3 -1.4L-47.1 2.1L-54.2 2.3L-58.5 5.7L-60 5.9L-60 -60ZM940 680.3L938.9 678.2L937 675.7L933.3 674.4L930.3 675.1L926 674.5L925.4 667L925.6 661.2L924.5 656.4L919.1 644.2L910.9 634.2L904.3 608.9L900.2 602L891.9 597.2L874.1 592.9L848.6 578.5L843.5 578.7L828.5 573.5L819.4 573.2L808.4 579.9L795.5 596.9L785.2 614.3L781.3 617.9L766.9 624.7L753.8 628.2L741.5 634.5L737.1 637.6L720.7 655.4L712.8 660.9L711.4 663.9L710.1 669.6L705.6 674.6L701.3 677.1L691 680L680.7 685.6L676 683.7L663.5 684.4L655.7 678.7L640.7 675.5L635.5 666.8L628.9 666.6L624.5 667L621.9 665.8L621 662.7L620.9 659.8L616.4 661.3L612.8 661.4L610.6 662.7L609.1 664.1L607 663.2L605.9 663.7L606.1 665.4L601.7 665.9L597.1 665L584.8 660.7L583 660.1L574.6 658.6L571.2 656.9L568.3 652.3L566 651L564.8 650.1L557.1 652.6L554.4 656.2L550.3 660.5L521.5 681.5L516.2 690.1L510.1 702.9L509.8 708.7L512.6 727.5L518.8 737.4L519.6 739.7L521.1 744.5L524 746.3L525.1 750.4L520.2 752.7L517.2 753L516.4 760.2L517.7 762.3L520.6 764.1L521.4 766.2L522.2 776.8L516.5 783.3L508.4 790.5L492.3 800L-60 800L-60 618.2L-58.9 619.7L-48.2 624.1L-39 622.7L-23.6 624.1L-15.8 625.9L-1.7 625.5L6.1 627.1L19.2 624.6L28.8 630.3L47.7 634.5L58.9 639.5L90.4 648.9L102.2 650L118.8 647.6L125.9 645.4L132.2 647.6L141.7 645.1L146.3 646L151.7 651L172 658.6L177.7 653.8L181.7 652.8L196.3 656.9L210.8 664.3L218.6 665.1L230 664L239.4 660.3L241.3 659.9L250.3 658.1L259 648.8L268.3 614.4L275.6 573.5L279.8 566L285 564L281.2 558.3L278.5 560.9L277.4 563.9L276 565.4L280.5 527.9L283.2 514.1L287.5 499.9L294.8 505.9L300.7 511.9L303.8 517.2L307.2 534.1L310 537.8L314.5 541.4L312.9 537.5L309.7 534.5L305.7 511.9L302.9 505.4L298.3 499.9L283.4 488.1L282 485.8L281.4 481.5L286.5 481.9L290.8 484.2L290.4 481.8L289.1 479.2L287.6 470L286.8 448.7L287.1 445L286.6 440.4L281.7 439.3L277.9 438.9L273.9 437L253.7 423.4L247.4 410.1L240.6 400.2L239.2 395.9L239.6 391.7L243.8 383.1L240.7 377.2L237.6 376L235 373L237.9 368.6L240.1 365.7L244.2 365.1L249.7 366.4L254.8 369.3L258.7 370.2L247.1 362.5L227.5 363.8L223.3 362.6L219.9 360.8L218.9 355.4L221.8 353.2L224.5 348.9L221.9 345.7L218.3 344.3L212.5 344L207.1 344.6L205.9 342.7L209.4 338L206.7 336L203 336.7L197.6 337.3L192.5 335.5L188.1 329.6L185 329.4L182.7 329.9L179.6 327.5L176.1 326.8L173.7 327.3L170.6 323.9L151.1 315.9L142.5 314.4L134.4 316.7L130 315.4L127.1 310.9L125.1 303.8L112.8 297.3L115.7 294L121.6 293.7L128.5 291.8L131.3 289L126.4 284.8L122.4 283.6L120.9 282.1L119.6 278.8L122.1 277.4L123.6 278.4L128.3 279.3L136.5 279.2L133.9 275.6L130.7 274.6L129.3 273.7L122.8 272.7L119.6 273.6L113 272.5L111.6 268.8L111.4 265.7L114 259.2L124.1 254L148.3 249.2L158.3 250.9L165.6 250.3L174.4 246.9L178.3 243.4L190.5 242.2L201.6 246.8L211.3 261.8L216 267L228.9 259.4L247.3 260.7L250.9 265.6L252.5 261.7L256.2 257.2L258.8 259.4L260.1 262.4L279.5 262.6L282.6 261.9L277.5 258.2L273.8 249.8L274.3 219.6L269.4 210.8L264 197.1L261.6 189L261.5 186.2L262.6 182.3L270.1 182.8L275.7 184.1L286.8 181.6L292 184L291.4 190.2L292.7 198.2L294.5 201.9L296.9 206.4L305.9 206.4L315.4 209.3L327.6 210.1L345.1 215.2L352.7 212.8L360.2 207.5L374.2 204.3L375.4 202.5L367.4 203.1L360 199.5L359.2 195.6L360.2 192.3L363.2 184.7L384.8 173L399.9 169.6L415.7 163.2L423.7 156.4L429 147.5L430.8 145.6L432.9 143.9L430.9 140.7L432.5 106.8L434.1 100.8L437.1 95.8L441.8 91.9L448.8 87.7L474.3 81.9L478.1 79.6L498.9 66.6L511.4 59.9L517.3 57.8L520.9 56.6L528.8 55.9L534.9 58.2L542.8 59.1L548.9 55.7L553.7 58.4L559 56.3L554.9 55.2L548.4 52.2L539.8 55L533.5 52L528.6 51.8L525.3 49.3L521.9 45.3L524.3 42.4L526.5 41.5L535.7 40.8L542.6 42.4L554.9 51.1L558 50.9L561.2 49.7L559.5 47.3L556.4 46.2L551.8 43.9L548.2 40.5L556.5 39.2L555.3 37.6L554.2 34.5L545.1 24.3L546.5 21.3L548.6 15.2L551.2 10.1L553.4 8.7L557 5L564.5 -5.8L569.3 -14.6L572.7 -24.8L577.2 -53.1L578.7 -57.9L579.6 -60L940 -60ZM229.5 194.9L227.4 199.8L222.9 197.8L222.6 196.4L227.9 193.8L229 193.9ZM252.8 216.2L252.9 220.1L250.7 220.9L249 219.4L245.3 219.2L241.6 219.8L242.9 213L249.7 214.3ZM283.5 471.4L281.3 477.9L278.2 471.7L273.7 466.1L272.9 461.1L273 459.8L278.3 463.6ZM304.8 107.4L300.5 109.9L299.2 112.9L298.1 114L295.5 114.7L292.8 114.7L283 108L280.6 108.2L283 105.4L289.5 103.4L293.1 100.5L301.2 103.8ZM920.3 683.5L922.4 686.2L922.7 687.9L921.8 690L922.8 694.3L917.6 691.1L910.8 693.7L906.5 693.7L905 690.7L905.8 688.6L912.4 687.5L914.5 686.4L918.5 686.4ZM545.2 29.7L550.1 33.7L551 35L551.3 36.5L545.6 38.2L539.1 33.3L535.1 34.6L533.5 32.2L533.5 30.6L537.7 29.3Z","zones":{"ANGN":"M260.1 188.5L359 184.8L418.5 155.4L443 148L462.5 186.2L477.5 224.3L502.6 246.9L508.1 292.6L462.5 311.9L426.9 307.9L380.9 318.7L310 305.1L281.6 258.2Z","ANGG":"M277.5 463.8L329.1 503.9L360 550.5L364.2 604L340.8 656.8L240.5 668L256.8 562Z","BOURGS":"M518.2 284.8L541.7 200.6L580.6 176.8L621.8 221L692.8 240.4L707.4 315.8L715.8 368.7L668 447.6L615.3 449.9L588.5 435.6L546.1 413.8L509.2 383.9L508.5 323Z","BOURGN":"M433.4 132.7L467.3 71.8L523.7 10.2L621.2 -23.4L644.2 67.4L593.2 115.3L580.4 169.1L541.6 193L501.9 178.4L462.5 163.3Z","FR":"M104.7 261.4L202.3 238.5L271.6 257.7L260.1 188.5L285.5 174.5L359.2 177.2L418.6 147.8L433.4 132.7L462.5 79.4L481.8 94.6L506.1 117.3L560.5 162.1L594.6 153.4L625.8 198L660.4 196.4L701.8 224.6L732.7 237.8L742.5 305.8L739.6 336.6L709.8 353.8L667.2 432.4L662.7 447.9L706.2 468.4L720 521L757.9 602.5L754 625.7L718.7 681.5L618.2 678.6L518.8 734.4L423.1 742.2L339.1 717.8L240.5 668L278.4 563L282.7 464.1L248.6 409.1L235 370.2L180.4 336.2L112.1 292.6Z"},"villes":{"Paris":[470.1,250.2],"Orleans":[447.7,323.3],"Reims":[553.5,218.7],"Compiegne":[493.8,207.4],"Rouen":[408,205.6],"Auxerre":[532.6,330.3],"Troyes":[557.8,291.7],"Chinon":[361.1,377.6],"Domremy":[637.8,278.3],"Bordeaux":[312.4,553.6],"Castillon":[341.6,553.8],"Calais":[445.7,90.8],"Gien":[484.6,339.2],"Chalons":[571.1,241.1],"Dijon":[609.1,364.8],"Londres":[351.8,46.5],"Bourges":[472.9,385.7],"Arras":[490.8,141.1],"Lyon":[602.2,483.9],"Caen":[334.6,223.7],"Formigny":[308.7,210.6],"Azincourt":[459.1,128.2],"Poitiers":[365.2,422.6],"Crecy":[446.9,144.2]}};
+/* META {"id":"histoire-C4-guerre-cent-ans-jeanne-arc","matiere":"histoire","annee":"connexe","periode":1,"theme":"connexe","resume":"La guerre de Cent Ans (1337-1453) : 116 ans mais pas sans arrêt, le royaume partagé de 1429, Jeanne d'Arc (Orléans, Reims, Compiègne, Rouen) et la reconquête jusqu'à Castillon (manipulation : un curseur d'année qui fait évoluer la carte).","motsCles":["guerre de Cent Ans","Jeanne d'Arc","Orléans","Reims","Charles VII","Édouard III","Azincourt","Castillon","trêve","royaume partagé","Moyen Âge"]} */
+//@data france1429
+(function(){
+const F=FRANCE1429, V=F.villes;
+const C={ink:"#1E2430",paper:"#FBF6EE",sea:"#DCEBF5",land:"#F5EFE2",fr:"#2F6DB5",ang:"#C0392B",bg:"#7B4FA3",or:"#E07A1F",ok:"#2E8B57",gray:"#4A5468"};
+let R={}, a0, YEAR=1429;
+const L=(a,b,t)=>a+(b-a)*t;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+// projection latitude / longitude -> repère de la carte (ajustement quadratique sur les villes de la carte)
+const KX=[169.127078,97.011904,5.40358,-0.96034,0.004736,-0.033827], KY=[3913.168494,1.921017,-73.825272,-0.010518,-0.324004,-0.02406];
+const LL=(la,lo)=>{ const q=[1,lo,la,lo*la,lo*lo,la*la]; return [q.reduce((s,v,i)=>s+v*KX[i],0), q.reduce((s,v,i)=>s+v*KY[i],0)]; };
+const PD=pts=>"M"+pts.map(p=>LL(p[0],p[1]).map(v=>v.toFixed(1)).join(" ")).join("L")+"Z";
+const PT={Vaucouleurs:LL(48.6,5.667),Blois:LL(47.586,1.335),Patay:LL(48.05,1.69),Beaurevoir:LL(49.99,3.2),Crotoy:LL(50.22,1.62)};
+// vues de la carte : s = échelle, (cx,cy) point de la carte placé en (tx,ty) à l'écran
+const ZA={s:1,cx:440,cy:372,tx:465,ty:400}, Z4={s:2.4,cx:505,cy:320,tx:465,ty:400}, Z6={s:3,cx:460,cy:185,tx:465,ty:400};
+const PZ=(Z,p)=>[Z.tx+Z.s*(p[0]-Z.cx), Z.ty+Z.s*(p[1]-Z.cy)];
+function setZ(Z){ R.inner.setAttribute("transform",`translate(${Z.tx-Z.s*Z.cx},${Z.ty-Z.s*Z.cy}) scale(${Z.s})`); }
+// périodes de trêve ou de paix (dates approximatives)
+const TRUCES=[[1347,1355],[1360,1369],[1389,1415],[1444,1449]];
+const inTruce=y=>TRUCES.some(t=>y>=t[0]&&y<=t[1]);
+// événements (pour le curseur d'année)
+const EV=[
+ [1337,"Philippe VI confisque la Guyenne au roi d'Angleterre."],
+ [1340,"Édouard III prend le titre de roi de France."],
+ [1346,"Bataille de Crécy : victoire des Anglais."],
+ [1347,"Édouard III prend Calais."],
+ [1348,"La peste noire frappe le royaume de France."],
+ [1356,"Bataille de Poitiers : le roi Jean II est capturé."],
+ [1360,"Traité de Brétigny : le roi d'Angleterre reçoit un grand sud-ouest et Calais."],
+ [1369,"Charles V reprend la guerre et reconquiert des terres."],
+ [1380,"Mort de Charles V : aux Anglais, il reste Calais et la côte de Guyenne."],
+ [1396,"Une trêve de 28 ans est signée entre les deux rois."],
+ [1415,"Bataille d'Azincourt : grande défaite française."],
+ [1418,"Paris est prise par les Bourguignons."],
+ [1419,"Le duc de Bourgogne est assassiné : son fils s'allie aux Anglais."],
+ [1420,"Traité de Troyes : Henri V d'Angleterre doit hériter du trône de France."],
+ [1422,"Mort de Charles VI : Charles VII et Henri VI se disputent la couronne."],
+ [1429,"Jeanne d'Arc délivre Orléans (8 mai) ; Charles VII est sacré à Reims (17 juillet)."],
+ [1430,"Jeanne d'Arc est capturée devant Compiègne (23 mai)."],
+ [1431,"Jeanne d'Arc est brûlée à Rouen (30 mai)."],
+ [1435,"Traité d'Arras : le duc de Bourgogne quitte l'alliance anglaise."],
+ [1436,"Charles VII reprend Paris."],
+ [1444,"Trêve de Tours entre la France et l'Angleterre."],
+ [1449,"La guerre reprend : Charles VII attaque la Normandie."],
+ [1450,"Bataille de Formigny : la Normandie est reprise."],
+ [1451,"Bordeaux et Bayonne se rendent à Charles VII."],
+ [1452,"Les Anglais reviennent à Bordeaux (octobre)."],
+ [1453,"Castillon (juillet), puis Bordeaux (octobre) : la guerre s'arrête, sans traité. Calais reste anglaise."]];
+const LAYERS=()=>[R.fond,R.map,R.band,R.o1,R.o3,R.o4,R.o5,R.o6,R.o7,R.p1,R.p3,R.p4,R.p5,R.p6,R.p7,R.s2,R.myth2,R.s8,R.ph4,R.ph5,R.hi1];
+function only(a,...ls){ LAYERS().forEach(e=>a.op(e,0)); ls.forEach(e=>a.op(e,1)); }
+function txt(p,x,y,s,o){ o=o||{}; const t=a0.el("text",{x,y,"text-anchor":o.anchor||"middle","font-size":o.size||26,"font-weight":o.weight||800,fill:o.fill||C.ink,stroke:o.stroke===undefined?"#fff":o.stroke,"stroke-width":o.sw||5,"paint-order":"stroke"},p); t.textContent=s; return t; }
+function crown(p,x,y,s,col){ const g=a0.el("g",{transform:`translate(${x},${y}) scale(${s})`},p); a0.el("path",{d:"M-26,12 L-30,-14 L-14,-2 L0,-20 L14,-2 L30,-14 L26,12Z",fill:col||"#F2C230",stroke:C.ink,"stroke-width":3,"stroke-linejoin":"round"},g); return g; }
+function pin(g,Z,p,text,o){ o=o||{}; const q=PZ(Z,p); const gg=a0.el("g",{transform:`translate(${q[0]},${q[1]})`},g);
+  a0.el("circle",{r:o.r||9,fill:o.fill||"#fff",stroke:o.stroke||C.ink,"stroke-width":3.5},gg);
+  if(text){ text.split("\n").forEach((ln,i)=>{ const t=a0.el("text",{x:o.dx===undefined?16:o.dx,y:(o.dy||0)+8+i*26,"text-anchor":o.anchor||"start","font-size":i?22:(o.size||26),"font-weight":i?700:800,fill:i?(o.c2||C.gray):C.ink,stroke:"#fff","stroke-width":5,"paint-order":"stroke"},gg); t.textContent=ln; }); }
+  return gg; }
+function route(g,Z,pts,col,w){ const d="M"+pts.map(p=>PZ(Z,p).map(v=>v.toFixed(1)).join(" ")).join("L"); const gg=a0.el("g",{},g);
+  const h=a0.el("path",{d,fill:"none",stroke:"#fff","stroke-width":(w||8)+6,"stroke-linecap":"round","stroke-linejoin":"round"},gg);
+  const l=a0.el("path",{d,fill:"none",stroke:col,"stroke-width":w||8,"stroke-linecap":"round","stroke-linejoin":"round"},gg); gg.h=h; gg.l=l; return gg; }
+function drawRoute(a,r,t){ a.draw(r.h,t); a.draw(r.l,t); }
+function card(p,x,y,w,h,date,text,col,fs){ fs=fs||28; const g=a0.el("g",{},p);
+  a0.el("rect",{x,y,width:w,height:h,rx:16,fill:"#fff",stroke:col,"stroke-width":4},g); a0.el("rect",{x,y,width:14,height:h,rx:7,fill:col},g);
+  a0.el("text",{x:x+34,y:y+46,"font-size":36,"font-weight":800,fill:col,text:date},g);
+  const t=a0.el("text",{x:x+34,y:y+92,"font-size":fs,"font-weight":600,fill:C.ink},g); a0.wrap(t,text,Math.floor((w-60)/(fs*.52)),1.25); return g; }
+function jeanne(p){ const g=a0.el("g",{},p); a0.el("line",{x1:0,y1:0,x2:0,y2:-42,stroke:C.ink,"stroke-width":4,"stroke-linecap":"round"},g); a0.el("path",{d:"M0,-42 L30,-34 L0,-24Z",fill:"#fff",stroke:C.ink,"stroke-width":3,"stroke-linejoin":"round"},g); a0.el("circle",{r:14,fill:C.or,stroke:"#fff","stroke-width":4},g); return g; }
+// zones de la carte selon l'année
+function setState(y,noEncl){
+  const ang=(y<=1450||y===1452)?1:0, aq=y<1360?0:(y<=1368?1:clamp(1-(y-1368)/11,0,1)), cal=y>=1347?1:0;
+  const nw=y<1417?0:(y<=1435?clamp((y-1416)/3,0,1):0), norm=(y>=1436&&y<=1448)?1:(y===1449?.5:0);
+  const bg=(y>=1419&&y<=1434)?1:0, bgp=y>=1435?1:0;
+  const o=(e,v)=>{ e.setAttribute("opacity",v); e.style.display=v<=0.001?"none":""; };
+  o(R.zAq,aq); o(R.zAng,ang); o(R.zNorm,norm); o(R.zNw,nw); o(R.zBg,bg*Math.max(.001,1)); o(R.zBgp,bgp); o(R.zEncl,(!noEncl&&y>=1419&&y<=1434)?1:0); o(R.zCal,cal);
+}
+function bandAt(y,big,sub){ a0.tr(R.cur,R.X(y),0); R.bandY.textContent=big; R.bandS.textContent=sub||""; }
+
+Anim.run({
+  titre:"La guerre de Cent Ans et Jeanne d'Arc",
+  sousTitre:"Histoire · CM1-CM2 · Le Moyen Âge et la fin du Moyen Âge",
+  matiere:"histoire", badge:"Histoire",
+  accroche:"Une guerre de cent ans, sans jamais s'arrêter ? Et que fait une jeune paysanne au milieu des rois ?",
+  manipDes:6, manipJusqua:6,
+  init(a){
+    a0=a; const {el}=a;
+    // ===== fond + carte
+    R.fond=a.layer("fond"); el("rect",{x:0,y:0,width:1600,height:900,rx:14,fill:C.paper},R.fond);
+    const defs=el("defs",{},a.svg); const cp=el("clipPath",{id:"terreC4"},defs); el("path",{d:F.land},cp);
+    const cv=el("clipPath",{id:"vpC4"},defs); el("rect",{x:30,y:30,width:870,height:740,rx:14},cv); a.svg.insertBefore(defs,a.svg.firstChild);
+    const map=a.layer("map"); R.map=map; const mc=el("g",{"clip-path":"url(#vpC4)"},map);
+    el("rect",{x:-2000,y:-2000,width:6000,height:5000,fill:C.sea},mc);
+    R.inner=el("g",{},mc); el("path",{d:F.land,fill:C.land,stroke:"#B8AC93","stroke-width":1.2,"vector-effect":"non-scaling-stroke"},R.inner);
+    const zg=el("g",{"clip-path":"url(#terreC4)"},R.inner);
+    const zp=(d,fill,op,stroke,extra)=>el("path",Object.assign({d,fill,"fill-opacity":op,stroke:stroke||"#33415C","stroke-width":2,"vector-effect":"non-scaling-stroke","stroke-linejoin":"round"},extra||{}),zg);
+    zp(F.zones.FR,"#7FA6E6",.5,"#33518F");
+    R.zAq=zp(PD([[47.1,-3],[47.0,0.3],[46.6,1.4],[46.2,2.0],[45.5,2.3],[44.5,3.0],[44.0,3.0],[43.7,2.2],[43.2,1.6],[42.9,0.9],[42.9,-3]]),"#E06A5E",.5,"#8E2A20",{"stroke-dasharray":"7 5"});
+    R.zAng=zp(F.zones.ANGG,"#E06A5E",.66,"#8E2A20");
+    R.zNorm=zp(PD([[50.3,1.3],[49.8,1.8],[49.3,1.85],[49.0,1.6],[48.75,1.2],[48.6,0.7],[48.4,0.1],[48.4,-0.8],[48.55,-1.5],[48.9,-2.1],[50.3,-2.1]]),"#E06A5E",.66,"#8E2A20");
+    R.zNw=zp(F.zones.ANGN,"#E06A5E",.66,"#8E2A20");
+    R.zBg=el("g",{},zg); ["BOURGS","BOURGN"].forEach(k=>el("path",{d:F.zones[k],fill:"#A07CC8","fill-opacity":.62,stroke:"#4F2F78","stroke-width":2,"vector-effect":"non-scaling-stroke","stroke-linejoin":"round"},R.zBg));
+    R.zBgp=el("g",{},zg); ["BOURGS","BOURGN"].forEach(k=>el("path",{d:F.zones[k],fill:"#C9B8E3","fill-opacity":.4,stroke:"#4F2F78","stroke-width":2,"stroke-dasharray":"8 6","vector-effect":"non-scaling-stroke","stroke-linejoin":"round"},R.zBgp));
+    R.zEncl=el("circle",{cx:637.5,cy:272,r:8,fill:"#2F6DB5","fill-opacity":.85,stroke:"#fff","stroke-width":2,"vector-effect":"non-scaling-stroke"},zg);
+    R.zCal=el("circle",{cx:V.Calais[0],cy:V.Calais[1],r:7,fill:"#E06A5E","fill-opacity":.9,stroke:"#8E2A20","stroke-width":2,"vector-effect":"non-scaling-stroke"},R.inner);
+    R.hi1=el("path",{d:F.zones.ANGG,fill:"none",stroke:C.or,"stroke-width":6,"vector-effect":"non-scaling-stroke","stroke-linejoin":"round"},R.inner);
+    el("rect",{x:30,y:30,width:870,height:740,rx:14,fill:"none",stroke:"#B8AC93","stroke-width":3},map);
+    txt(map,48,757,"Carte simplifiée",{size:22,anchor:"start",weight:700,fill:C.gray});
+    // ===== bande des dates (en bas)
+    const bd=a.layer("bande"); R.band=bd; el("rect",{x:0,y:786,width:1600,height:114,fill:"#F7F1E6"},bd); el("line",{x1:0,y1:786,x2:1600,y2:786,stroke:"#B8AC93","stroke-width":3},bd);
+    const X=y=>200+(y-1337)/116*1300; R.X=X;
+    TRUCES.forEach(t=>el("rect",{x:X(t[0]),y:830,width:X(t[1])-X(t[0]),height:32,rx:5,fill:"#BFE3CD",stroke:"#2E8B57","stroke-width":2},bd));
+    el("rect",{x:X(1337),y:840,width:X(1453)-X(1337),height:12,rx:4,fill:"none"},bd); el("line",{x1:X(1337),y1:846,x2:X(1453),y2:846,stroke:C.ink,"stroke-width":4},bd);
+    [1337,1350,1375,1400,1425,1453].forEach(y=>{ el("line",{x1:X(y),y1:836,x2:X(y),y2:856,stroke:C.ink,"stroke-width":3},bd); el("text",{x:X(y),y:886,"text-anchor":"middle","font-size":22,fill:C.gray,text:String(y)},bd); });
+    el("rect",{x:300,y:797,width:26,height:16,rx:3,fill:"#BFE3CD",stroke:"#2E8B57","stroke-width":2},bd); el("text",{x:336,y:812,"font-size":22,fill:C.gray,text:"trêve ou paix (dates approximatives)"},bd);
+    R.bandY=el("text",{x:100,y:840,"text-anchor":"middle","font-size":36,"font-weight":800,fill:C.fr},bd); R.bandS=el("text",{x:100,y:872,"text-anchor":"middle","font-size":22,"font-weight":700,fill:C.gray},bd);
+    R.cur=el("g",{},bd); el("path",{d:"M0,822 L0,868",stroke:C.ang,"stroke-width":5},R.cur); el("path",{d:"M-13,812 L13,812 L0,828Z",fill:C.ang},R.cur);
+
+    // ===== étape 1 : 1337, deux rois
+    R.o1=a.layer("o1"); R.p1=a.layer("p1");
+    const lp=PZ(ZA,V.Londres), pp=PZ(ZA,V.Paris), bp=PZ(ZA,V.Bordeaux);
+    R.cL=el("g",{},R.o1); crown(R.cL,lp[0],lp[1]-34,1.1,"#F2C230"); pin(R.cL,ZA,V.Londres,null,{fill:C.ang});
+    R.cLl=a.label(R.cL,lp[0]-185,lp[1]+4,"Édouard III\nroi d'Angleterre",{size:25,fill:"#fff",stroke:C.ang,w:290,h:84});
+    R.cP=el("g",{},R.o1); crown(R.cP,pp[0],pp[1]-34,1.1,"#F2C230"); pin(R.cP,ZA,V.Paris,null,{fill:C.fr});
+    R.cPl=a.label(R.cP,pp[0]+175,pp[1]+4,"Philippe VI\nroi de France",{size:25,fill:"#fff",stroke:C.fr,w:270,h:84});
+    R.cG=el("g",{},R.o1); pin(R.cG,ZA,V.Bordeaux,null,{fill:C.ang});
+    R.cGl=a.label(R.cG,bp[0]+245,bp[1]+62,"La Guyenne : terre tenue par\nle roi d'Angleterre, vassal du roi de France",{size:24,fill:"#FFF1EE",stroke:C.ang,w:540,h:88});
+    R.arr1=a.arrow(R.o1,`M${lp[0]+20},${lp[1]+36} C${lp[0]+70},${lp[1]+120} ${pp[0]-80},${pp[1]-100} ${pp[0]-8},${pp[1]-44}`,{color:C.or,w:7,head:4,dash:"14 10"});
+    R.c1=[card(R.p1,940,45,630,215,"1337","Philippe VI confisque la Guyenne, que le roi d'Angleterre tenait comme vassal.",C.ang),
+          card(R.p1,940,275,630,215,"1340","Édouard III, petit-fils de Philippe le Bel par sa mère, prend le titre de roi de France.",C.or),
+          card(R.p1,940,505,630,215,"La guerre","Deux rois veulent la même couronne : c'est le début de la guerre.",C.ink)];
+
+    // ===== étape 2 : frise 1337-1453 et idée fausse
+    const g2=a.layer("frise"); R.s2=g2; el("rect",{x:0,y:0,width:1600,height:900,rx:14,fill:C.paper},g2);
+    txt(g2,800,72,"La guerre de Cent Ans",{size:46,stroke:C.paper});
+    R.cnt=txt(g2,800,128,"De 1337 à 1453 : 116 ans",{size:40,fill:C.ang,stroke:C.paper});
+    const FX=y=>100+(y-1337)/116*1400, FY=330;
+    TRUCES.forEach((t,i)=>{ if(!R.fb) R.fb=[]; R.fb.push(el("rect",{x:FX(t[0]),y:FY-18,width:FX(t[1])-FX(t[0]),height:36,rx:6,fill:"#BFE3CD",stroke:C.ok,"stroke-width":3},g2)); });
+    R.fl=el("path",{d:`M${FX(1337)},${FY} L${FX(1453)},${FY}`,stroke:C.ink,"stroke-width":6,"stroke-linecap":"round"},g2);
+    [1350,1400,1450].forEach(y=>{ el("line",{x1:FX(y),y1:FY+20,x2:FX(y),y2:FY+34,stroke:C.ink,"stroke-width":3},g2); el("text",{x:FX(y),y:FY+62,"text-anchor":"middle","font-size":22,fill:C.gray,text:String(y)},g2); });
+    const EVF=[[1337,"1337","Début",410,"start",C.ink],[1346,"","Crécy 1346",265,"middle",C.ang],[1356,"","Poitiers 1356",205,"middle",C.ang],[1360,"","Brétigny 1360",410,"middle",C.ok],[1415,"","Azincourt 1415",265,"middle",C.ang],[1420,"","Troyes 1420",410,"middle",C.bg],[1429,"","Orléans 1429",205,"middle",C.fr],[1453,"1453","Castillon 1453",265,"end",C.fr]];
+    R.fe=EVF.map(e=>{ const g=el("g",{},g2); const x=FX(e[0]); const up=e[3]<FY; el("line",{x1:x,y1:FY,x2:x,y2:up?e[3]+8:e[3]-28,stroke:e[5],"stroke-width":3},g);
+      el("circle",{cx:x,cy:FY,r:11,fill:e[5],stroke:"#fff","stroke-width":3},g);
+      const t=el("text",{x:e[4]==="start"?x-8:(e[4]==="end"?x+8:x),y:e[3],"text-anchor":e[4],"font-size":26,"font-weight":800,fill:e[5],stroke:C.paper,"stroke-width":6,"paint-order":"stroke"},g); t.textContent=e[2]; return g; });
+    el("rect",{x:100,y:476,width:30,height:20,rx:4,fill:"#BFE3CD",stroke:C.ok,"stroke-width":3},g2); el("text",{x:142,y:494,"font-size":24,"font-weight":600,fill:C.gray,text:"périodes de trêve ou de paix (dates approximatives, selon les historiens)"},g2);
+    R.myth2=a.layer("myth2"); a.myth(R.myth2,150,545,1300,"« La guerre de Cent Ans, ce sont cent ans de combats sans arrêt. »","Elle dure 116 ans, avec de longues trêves : on se bat par périodes. Le nom « guerre de Cent Ans » a été donné bien plus tard par les historiens.");
+
+    // ===== étape 3 : 1429, un royaume partagé
+    R.o3=a.layer("o3"); R.p3=a.layer("p3");
+    [["Londres",V.Londres,-16,"end"],["Calais",V.Calais,16,"start"],["Paris",V.Paris,16,"start"],["Rouen",V.Rouen,-16,"end"],["Reims",V.Reims,16,"start"],["Chinon",V.Chinon,-16,"end"],["Bordeaux",V.Bordeaux,-16,"end"]].forEach(c=>pin(R.o3,ZA,c[1],c[0],{dx:c[2],anchor:c[3]}));
+    const op3=PZ(ZA,V.Orleans); R.siege=el("g",{},R.o3); el("circle",{cx:op3[0],cy:op3[1],r:28,fill:"none",stroke:C.ang,"stroke-width":6,"stroke-dasharray":"9 7"},R.siege); pin(R.o3,ZA,V.Orleans,"Orléans\nassiégée",{dx:18,dy:-6,c2:C.ang});
+    R.zl=[a.label(R.o3,330,285,"Anglais",{size:26,fill:"#fff",stroke:C.ang,w:140,h:48}),a.label(R.o3,665,440,"Bourguignons",{size:26,fill:"#fff",stroke:C.bg,w:210,h:48}),a.label(R.o3,330,655,"Anglais",{size:26,fill:"#fff",stroke:C.ang,w:140,h:48}),a.label(R.o3,570,570,"Charles VII",{size:26,fill:"#fff",stroke:C.fr,w:200,h:48})];
+    txt(R.p3,1250,95,"1429",{size:76,fill:C.fr,stroke:C.paper});
+    R.lg3=[[C.fr,"#7FA6E6","Fidèle à Charles VII : le centre et le sud"],[C.ang,"#E06A5E","Tenu par les Anglais : Normandie, Paris, Guyenne, Calais"],[C.bg,"#A07CC8","Terres du duc de Bourgogne, allié des Anglais"]].map((r,i)=>{ const g=el("g",{},R.p3); const y=150+i*105; el("rect",{x:940,y,width:630,height:92,rx:14,fill:"#fff",stroke:r[0],"stroke-width":4},g); el("rect",{x:962,y:y+22,width:52,height:48,rx:8,fill:r[1],stroke:r[0],"stroke-width":3},g); const t=el("text",{x:1034,y:y+40,"font-size":27,"font-weight":700,fill:C.ink},g); a.wrap(t,r[2],34,1.2); return g; });
+    R.note3=el("g",{},R.p3); el("rect",{x:940,y:480,width:630,height:250,rx:14,fill:"#FFF8E6",stroke:C.or,"stroke-width":4},R.note3);
+    { const t=el("text",{x:966,y:526,"font-size":29,"font-weight":600,fill:C.ink},R.note3); a.wrap(t,"Charles VII n'est pas encore sacré.\nHenri VI, un enfant de 7 ans, est roi d'Angleterre ; pour les Anglais et leurs alliés, il est aussi roi de France (traité de Troyes, 1420).",36,1.3); }
+
+    // ===== étape 4 : Jeanne, de Domrémy à Orléans
+    R.o4=a.layer("o4"); R.p4=a.layer("p4");
+    { const Z=Z4; R.rA=route(R.o4,Z,[V.Domremy,PT.Vaucouleurs,V.Auxerre,V.Gien,V.Chinon],C.or,8); R.rB=route(R.o4,Z,[V.Chinon,PT.Blois,V.Orleans],C.or,8);
+      pin(R.o4,Z,V.Domremy,"Domrémy",{dx:-16,dy:12,anchor:"end"}); pin(R.o4,Z,PT.Vaucouleurs,"Vaucouleurs",{dx:-16,dy:-10,anchor:"end"});
+      pin(R.o4,Z,V.Auxerre,"Auxerre",{dx:0,dy:36,anchor:"middle"}); pin(R.o4,Z,V.Gien,"Gien",{dx:0,dy:36,anchor:"middle"}); pin(R.o4,Z,V.Chinon,"Chinon",{dx:0,dy:-34,anchor:"middle"}); pin(R.o4,Z,PT.Blois,"Blois",{dx:0,dy:36,anchor:"middle"});
+      const o=PZ(Z,V.Orleans); R.ring4=el("circle",{cx:o[0],cy:o[1],r:26,fill:"none",stroke:C.ok,"stroke-width":7},R.o4); pin(R.o4,Z,V.Orleans,"Orléans\n8 mai 1429",{dx:-18,dy:-22,anchor:"end",c2:C.ok});
+      const e=PZ(Z,[637.5,272]); R.encl4=a.label(R.o4,e[0]-20,e[1]-95,"Domrémy et Vaucouleurs :\nfidèles à Charles VII",{size:22,fill:"#fff",stroke:C.fr,w:300,h:76});
+      R.jj4=jeanne(R.o4); }
+    R.k4=[["Février 1429","Jeanne, une jeune paysanne d'environ 17 ans, part de Vaucouleurs. Elle traverse des régions ennemies jusqu'à Chinon."],["Mars 1429","À Chinon, elle est reçue par Charles VII. Elle dit avoir reçu la mission de délivrer Orléans."],["8 mai 1429","À Orléans, les Anglais lèvent le siège, après près de sept mois."]].map(c=>{ const g=el("g",{},R.p4); el("rect",{x:940,y:385,width:630,height:365,rx:16,fill:"#fff",stroke:C.or,"stroke-width":5},g); el("text",{x:972,y:446,"font-size":40,"font-weight":800,fill:C.or,text:c[0]},g); const t=el("text",{x:972,y:500,"font-size":32,"font-weight":600,fill:C.ink},g); a.wrap(t,c[1],33,1.3); return g; });
+
+    // ===== étape 5 : Loire, Reims, Paris
+    R.o5=a.layer("o5"); R.p5=a.layer("p5");
+    { const Z=Z4; R.rC=route(R.o5,Z,[V.Orleans,V.Gien,V.Auxerre,V.Troyes,V.Chalons,V.Reims],C.or,8); R.rD=route(R.o5,Z,[V.Reims,V.Compiegne,V.Paris],C.ang,7); R.rD.l.setAttribute("stroke-dasharray","14 10");
+      pin(R.o5,Z,V.Orleans,"Orléans",{dx:-16,dy:18,anchor:"end"}); pin(R.o5,Z,V.Gien,"Gien",{dx:0,dy:36,anchor:"middle"}); pin(R.o5,Z,V.Auxerre,"Auxerre",{dx:0,dy:36,anchor:"middle"}); pin(R.o5,Z,V.Troyes,"Troyes",{dx:16,dy:6}); pin(R.o5,Z,V.Chalons,"Châlons",{dx:16,dy:6});
+      const r=PZ(Z,V.Reims); crown(R.o5,r[0],r[1]-38,1.1,"#F2C230"); R.reims5=pin(R.o5,Z,V.Reims,"Reims\n17 juillet 1429",{dx:20,dy:-4,anchor:"start",c2:C.ok,r:11,fill:C.ok});
+      const pa=PZ(Z,V.Paris); pin(R.o5,Z,V.Paris,"Paris\n8 sept. 1429",{dx:-18,dy:-4,anchor:"end",c2:C.ang}); R.x5=el("g",{transform:`translate(${pa[0]},${pa[1]})`},R.o5); el("line",{x1:-16,y1:-16,x2:16,y2:16,stroke:C.ang,"stroke-width":8,"stroke-linecap":"round"},R.x5); el("line",{x1:16,y1:-16,x2:-16,y2:16,stroke:C.ang,"stroke-width":8,"stroke-linecap":"round"},R.x5);
+      const pt=PZ(Z,PT.Patay); R.pat5=el("g",{transform:`translate(${pt[0]},${pt[1]})`},R.o5); el("circle",{r:13,fill:C.ok,stroke:"#fff","stroke-width":4},R.pat5);
+      R.lp5=a.label(R.o5,258,330,"Jargeau, Meung, Beaugency, Patay\njuin 1429 : victoires",{size:23,fill:"#E8F6EE",stroke:C.ok,w:440,h:84});
+      R.jj5=jeanne(R.o5); }
+    R.k5=[["Juin 1429","Victoires sur la Loire : Jargeau, Meung, Beaugency, puis Patay le 18 juin."],["17 juillet 1429","Charles VII est sacré roi dans la cathédrale de Reims, comme les rois de France avant lui."],["8 septembre 1429","L'attaque de Paris échoue : la ville reste aux Anglais et aux Bourguignons."]].map((c,i)=>{ const col=i===2?C.ang:C.ok; const g=el("g",{},R.p5); el("rect",{x:940,y:385,width:630,height:365,rx:16,fill:"#fff",stroke:col,"stroke-width":5},g); el("text",{x:972,y:446,"font-size":40,"font-weight":800,fill:col,text:c[0]},g); const t=el("text",{x:972,y:500,"font-size":32,"font-weight":600,fill:C.ink},g); a.wrap(t,c[1],33,1.3); return g; });
+
+    // ===== étape 6 : Compiègne et Rouen
+    R.o6=a.layer("o6"); R.p6=a.layer("p6");
+    { const Z=Z6; R.rE=route(R.o6,Z,[V.Compiegne,PT.Beaurevoir,V.Arras,PT.Crotoy,V.Rouen],C.ang,8);
+      pin(R.o6,Z,V.Compiegne,"Compiègne\n23 mai 1430",{dx:16,dy:2,c2:C.ang,r:11,fill:C.ang}); pin(R.o6,Z,PT.Beaurevoir,"Beaurevoir",{dx:16,dy:0}); pin(R.o6,Z,V.Arras,"Arras",{dx:-16,dy:0,anchor:"end"}); pin(R.o6,Z,PT.Crotoy,"Le Crotoy",{dx:-16,dy:0,anchor:"end"});
+      pin(R.o6,Z,V.Rouen,"Rouen\n30 mai 1431",{dx:-18,dy:6,anchor:"end",c2:C.ang,r:11,fill:C.ink}); pin(R.o6,Z,V.Calais,"Calais",{dx:16,dy:0}); pin(R.o6,Z,V.Paris,"Paris",{dx:16,dy:0});
+      R.jj6=jeanne(R.o6); }
+    R.c6=[card(R.p6,940,45,630,165,"23 mai 1430","Capturée devant Compiègne par les Bourguignons.",C.ang),card(R.p6,940,222,630,165,"Fin 1430","Vendue aux Anglais, elle est conduite à Rouen.",C.ang),card(R.p6,940,399,630,165,"30 mai 1431","Brûlée à Rouen, après un procès. Elle a environ 19 ans.",C.ink),card(R.p6,940,576,630,165,"1456","Un nouveau procès annule sa condamnation.",C.ok)];
+
+    // ===== étape 7 : curseur d'année
+    R.o7=a.layer("o7"); R.p7=a.layer("p7");
+    [["Londres",V.Londres,-16,"end"],["Calais",V.Calais,16,"start"],["Paris",V.Paris,16,"start"],["Rouen",V.Rouen,-16,"end"],["Orléans",V.Orleans,16,"start"],["Reims",V.Reims,16,"start"],["Bordeaux",V.Bordeaux,-16,"end"]].forEach(c=>pin(R.o7,ZA,c[1],c[0],{dx:c[2],anchor:c[3]}));
+    R.yr7=txt(R.p7,1250,150,"1429",{size:120,fill:C.fr,stroke:C.paper,sw:8});
+    R.bd7=el("g",{},R.p7); R.bd7r=el("rect",{x:1000,y:182,width:500,height:50,rx:25,fill:"#fff",stroke:C.ang,"stroke-width":4},R.bd7); R.bd7t=el("text",{x:1250,y:217,"text-anchor":"middle","font-size":27,"font-weight":800,fill:C.ang,text:""},R.bd7);
+    el("rect",{x:940,y:258,width:630,height:300,rx:16,fill:"#fff",stroke:C.or,"stroke-width":4},R.p7); el("text",{x:966,y:298,"font-size":24,"font-weight":700,fill:C.gray,text:"Dernier événement connu"},R.p7);
+    R.ev7y=el("text",{x:966,y:352,"font-size":38,"font-weight":800,fill:C.or},R.p7); R.ev7t=el("text",{x:966,y:402,"font-size":29,"font-weight":600,fill:C.ink},R.p7);
+    [[C.fr,"#7FA6E6","Fidèle au roi de France"],[C.ang,"#E06A5E","Tenu par les Anglais"],[C.bg,"#A07CC8","Terres du duc de Bourgogne"]].forEach((r,i)=>{ const y=585+i*56; el("rect",{x:950,y:y,width:44,height:36,rx:7,fill:r[1],stroke:r[0],"stroke-width":3},R.p7); el("text",{x:1010,y:y+28,"font-size":26,"font-weight":600,fill:C.ink,text:r[2]},R.p7); });
+
+    // ===== étape 8 : synthèse
+    const sg=a.layer("synthese"); R.s8=sg; el("rect",{x:0,y:0,width:1600,height:900,rx:14,fill:C.paper},sg);
+    R.sc8=[["Une longue guerre","De 1337 à 1453 : 116 ans, mais avec de longues trêves. Deux rois, celui de France et celui d'Angleterre, veulent la même couronne.",C.fr],["Un tournant : 1429","Le royaume est partagé. Avec Jeanne d'Arc, Orléans est délivrée (8 mai) et Charles VII est sacré à Reims (17 juillet). Jeanne est brûlée à Rouen en 1431.",C.or],["Une fin sans traité","Après 1435, le roi de France reprend Paris, la Normandie, puis la Guyenne. La guerre s'arrête à Castillon en 1453 ; Calais reste anglaise.",C.ok]].map((c,i)=>{ const g=el("g",{},sg); const y=110+i*230; el("rect",{x:80,y,width:1440,height:200,rx:18,fill:"#fff",stroke:c[2],"stroke-width":5},g); el("rect",{x:80,y,width:340,height:200,rx:18,fill:c[2]},g); const tt=el("text",{x:250,y:y+100,"text-anchor":"middle","font-size":36,"font-weight":800,fill:"#fff"},g); a.wrap(tt,c[0],14,1.2); tt.querySelectorAll("tspan").forEach(s=>s.setAttribute("x",250)); tt.setAttribute("text-anchor","middle"); const t=el("text",{x:460,y:y+78,"font-size":29,"font-weight":600,fill:C.ink},g); a.wrap(t,c[1],56,1.3); return g; });
+    // ===== photos
+    const lph=a.layer("photos");
+    R.ph4=a.photo(lph,{id:"h-c4-jeanne-darc-fauquembergue",x:1010,y:42,w:330,h:215,cap:"Jeanne d'Arc, dessin de 1429",rot:-1.5,size:21});
+    R.ph5=a.photo(lph,{id:"h-c4-reims-cathedrale",x:1010,y:42,w:330,h:215,cap:"La cathédrale de Reims",rot:1.5,size:21});
+    // manipulation : curseur d'année
+    a.manip.innerHTML=`Année : <input type="range" id="mY" min="1337" max="1453" step="1" value="${YEAR}" aria-label="Année"> <b id="mYv">${YEAR}</b>`;
+    const sl=a.manip.querySelector("#mY"), lb=a.manip.querySelector("#mYv");
+    sl.oninput=()=>{ YEAR=+sl.value; lb.textContent=YEAR; a.redraw(); };
+  },
+  reset(a){ LAYERS().forEach(e=>a.op(e,0)); a.op(R.hi1,0); setZ(ZA); setState(1337); },
+  etapes:[
+  { titre:"1337 : deux rois, une couronne", duree:12000,
+    legende:"En 1337, le roi de France Philippe VI confisque la Guyenne, tenue par le roi d'Angleterre Édouard III. Celui-ci réclame ensuite la couronne de France : la guerre commence.",
+    voix:"Nous sommes en mille trois cent trente-sept. Le roi de France, Philippe six, confisque la Guyenne. C'est une région du sud-ouest, que le roi d'Angleterre, Édouard trois, tenait comme vassal du roi de France. Quelques années plus tard, en mille trois cent quarante, Édouard trois, petit-fils de Philippe le Bel par sa mère, prend le titre de roi de France. Deux rois veulent la même couronne : la guerre commence.",
+    anim(t,a){ const s=a.seg; only(a,R.fond,R.map,R.band,R.o1,R.p1); setZ(ZA); setState(1337); bandAt(1337,"1337","");
+      a.op(R.cL,s(t,.03,.13)); a.op(R.cP,s(t,.03,.13)); a.op(R.cG,s(t,.16,.26));
+      a.op(R.hi1,s(t,.18,.28)*(.65+.35*Math.sin(t*70))); a.op(R.cGl,s(t,.2,.3));
+      R.c1.forEach((g,i)=>{ const v=s(t,[.2,.5,.78][i],[.32,.62,.9][i]); a.op(g,v); a.tr(g,(1-v)*60,0); });
+      a.op(R.arr1,s(t,.5,.6)); a.draw(R.arr1.path,s(t,.5,.72)); } },
+  { titre:"Cent seize ans, mais pas sans arrêt", duree:16000,
+    legende:"La guerre dure de 1337 à 1453, soit 116 ans, mais pas sans arrêt : les périodes de combats alternent avec de longues trêves.",
+    voix:"On l'appelle la guerre de Cent Ans, mais elle dure en réalité cent seize ans, de mille trois cent trente-sept à mille quatre cent cinquante-trois. Et on ne se bat pas tout le temps ! Sur la frise, les zones vertes sont des périodes de trêve ou de paix. Entre les grandes batailles, Cressi, Poitiers, Azaincour, puis Castillon, il y a de longues pauses. Le nom de guerre de Cent Ans a été donné bien plus tard, par les historiens.",
+    anim(t,a){ const s=a.seg; only(a,R.s2);
+      a.draw(R.fl,s(t,.03,.2,true)); a.op(R.cnt,s(t,.05,.15));
+      R.fe.forEach((g,i)=>{ a.op(g,s(t,.12+i*.045,.2+i*.045)); });
+      R.fb.forEach((r,i)=>a.op(r,s(t,.3+i*.05,.38+i*.05)));
+      a.op(R.myth2,s(t,.68,.84)); a.cls(R.myth2.faux,"pulse",t>.88); } },
+  { titre:"1429 : un royaume partagé", duree:13000,
+    legende:"En 1429, le royaume est partagé : les Anglais tiennent la Normandie, Paris et la Guyenne, le duc de Bourgogne est leur allié, et Charles VII garde le centre et le sud.",
+    voix:"Voici le royaume de France en mille quatre cent vingt-neuf. En rouge, les régions tenues par les Anglais : la Normandie, Paris et la Guyenne. En violet, les terres du duc de Bourgogne, qui est l'allié des Anglais. En bleu, les régions fidèles à Charles sept, qui n'est pas encore sacré. Henri six, un enfant de sept ans, est roi d'Angleterre, et pour les Anglais et leurs alliés, aussi roi de France. Et la ville d'Orléans est assiégée.",
+    anim(t,a){ const s=a.seg; only(a,R.fond,R.map,R.band,R.o3,R.p3); setZ(ZA); setState(1429); bandAt(1429,"1429","");
+      R.zl.forEach((g,i)=>a.op(g,s(t,[.18,.3,.42,.54][i],[.28,.4,.52,.64][i])));
+      R.lg3.forEach((g,i)=>{ const v=s(t,[.1,.3,.5][i],[.22,.42,.62][i]); a.op(g,v); a.tr(g,(1-v)*60,0); });
+      a.op(R.note3,s(t,.7,.84)); a.op(R.siege,s(t,.64,.76)*(.6+.4*Math.sin(t*80))); } },
+  { titre:"Jeanne d'Arc : de Domrémy à Orléans", duree:16000,
+    legende:"Jeanne, jeune paysanne d'environ 17 ans, part de Vaucouleurs, rencontre Charles VII à Chinon, puis arrive à Orléans, dont les Anglais lèvent le siège le 8 mai 1429.",
+    voix:"Jeanne est une jeune paysanne d'environ dix-sept ans, née à Domrémi, en Lorraine. Elle dit avoir reçu la mission d'aider le roi Charles sept. En février mille quatre cent vingt-neuf, elle part de Vaucouleurs et traverse des régions tenues par les ennemis jusqu'à Chinon, où elle est reçue par Charles sept. Elle rejoint ensuite Orléans, assiégée. Le huit mai mille quatre cent vingt-neuf, les Anglais lèvent le siège.",
+    anim(t,a){ const s=a.seg; only(a,R.fond,R.map,R.band,R.o4,R.p4,R.ph4); setZ(Z4); setState(1429);
+      const pA=s(t,.06,.46,true), pB=s(t,.5,.74,true); drawRoute(a,R.rA,pA); drawRoute(a,R.rB,pB);
+      const q=pB>0?a.along(R.rB.l,pB):a.along(R.rA.l,pA); a.tr(R.jj4,q.x,q.y); a.op(R.jj4,s(t,.03,.08));
+      a.op(R.encl4,s(t,.03,.12)*(1-s(t,.3,.36))); a.op(R.ring4,s(t,.76,.86)*(.6+.4*Math.sin(t*90)));
+      R.k4.forEach((g,i)=>a.op(g,i===0?s(t,.04,.1)*(1-s(t,.46,.5)):(i===1?s(t,.46,.52)*(1-s(t,.74,.78)):s(t,.76,.82))));
+      a.op(R.ph4,s(t,.03,.12));
+      bandAt(1429+L(1/12,4/12,t),"1429",t<.5?"févr.-mars":"mars-mai"); } },
+  { titre:"Patay et le sacre de Reims", duree:15000,
+    legende:"En juin 1429, l'armée royale gagne sur la Loire, notamment à Patay. Charles VII est sacré à Reims le 17 juillet ; l'attaque de Paris, le 8 septembre, échoue.",
+    voix:"Après Orléans, l'armée du roi libère d'autres villes au bord de la Loire, puis gagne la bataille de Patè, le dix-huit juin. Ensuite, Jeanne conduit Charles sept vers Rinss, à travers des régions tenues par les Bourguignons. Troa et Châlons ouvrent leurs portes. Le dix-sept juillet mille quatre cent vingt-neuf, Charles sept est sacré à Rinss, dans la cathédrale, comme les rois de France avant lui. Mais l'attaque de Paris, le huit septembre, échoue.",
+    anim(t,a){ const s=a.seg; only(a,R.fond,R.map,R.band,R.o5,R.p5,R.ph5); setZ(Z4); setState(1429,1);
+      a.op(R.lp5,s(t,.04,.12)); a.op(R.pat5,s(t,.06,.14));
+      const pC=s(t,.2,.62,true), pD=s(t,.7,.86,true); drawRoute(a,R.rC,pC); drawRoute(a,R.rD,pD);
+      const q=pD>0?a.along(R.rD.l,pD):a.along(R.rC.l,pC); a.tr(R.jj5,q.x,q.y); a.op(R.jj5,s(t,.16,.22));
+      a.op(R.reims5,s(t,.58,.66)); a.op(R.x5,s(t,.86,.94));
+      R.k5.forEach((g,i)=>a.op(g,i===0?s(t,.04,.1)*(1-s(t,.24,.3)):(i===1?s(t,.56,.62)*(1-s(t,.68,.72)):s(t,.82,.88))));
+      a.op(R.ph5,s(t,.56,.66)*(1-s(t,.68,.72)));
+      bandAt(t<.3?1429.45:(t<.66?1429.55:1429.7),"1429",t<.3?"juin":(t<.7?"juillet":"sept.")); } },
+  { titre:"Compiègne et Rouen (1430-1431)", duree:15000,
+    legende:"Le 23 mai 1430, Jeanne est capturée devant Compiègne par les Bourguignons, qui la vendent aux Anglais. Jugée à Rouen, elle est brûlée le 30 mai 1431.",
+    voix:"Mais la guerre continue. Le vingt-trois mai mille quatre cent trente, Jeanne est capturée devant Compiègne par les Bourguignons. Ils la vendent aux Anglais, qui la conduisent à Rouan. Après un long procès, Jeanne est condamnée et brûlée le trente mai mille quatre cent trente et un, sur la place du Vieux-Marché. Elle avait environ dix-neuf ans. En mille quatre cent cinquante-six, un nouveau procès annule cette condamnation.",
+    anim(t,a){ const s=a.seg; only(a,R.fond,R.map,R.band,R.o6,R.p6); setZ(Z6); setState(1429,1);
+      const p=s(t,.1,.7,true); drawRoute(a,R.rE,p); const q=a.along(R.rE.l,p); a.tr(R.jj6,q.x,q.y); a.op(R.jj6,s(t,.06,.12));
+      R.c6.forEach((g,i)=>{ const v=s(t,[.06,.4,.62,.84][i],[.18,.52,.74,.96][i]); a.op(g,v); a.tr(g,(1-v)*60,0); });
+      bandAt(L(1430.4,1431.4,p),"1430-31",""); } },
+  { titre:"À vous : l'année sur la carte", duree:9000,
+    legende:"Déplacez le curseur entre 1337 et 1453 : la carte montre les terres tenues par les Anglais, et la frise indique les périodes de trêve.",
+    voix:"À vous de jouer ! Déplacez le curseur pour changer l'année, de mille trois cent trente-sept à mille quatre cent cinquante-trois. Regardez la carte : les terres tenues par les Anglais, en rouge, changent. En mille quatre cent vingt-neuf, elles sont très étendues. En mille quatre cent cinquante-trois, il ne reste que Calais. Regardez aussi la frise : l'année choisie est-elle une période de trêve ?",
+    anim(t,a){ const s=a.seg; only(a,R.fond,R.map,R.band,R.o7,R.p7); setZ(ZA); setState(YEAR);
+      R.yr7.textContent=String(YEAR); bandAt(YEAR,String(YEAR),inTruce(YEAR)?"trêve":"");
+      const tr=inTruce(YEAR); R.bd7r.setAttribute("stroke",tr?C.ok:C.ang); R.bd7r.setAttribute("fill",tr?"#E8F6EE":"#FDECEA"); R.bd7t.setAttribute("fill",tr?"#14532D":"#7A1D12"); R.bd7t.textContent=tr?"Période de trêve ou de paix":"Période de combats";
+      let e=EV[0]; EV.forEach(v=>{ if(v[0]<=YEAR) e=v; }); R.ev7y.textContent=String(e[0]); a.wrap(R.ev7t,e[1],36,1.25);
+      a.op(R.p7,s(t,.04,.16)); } },
+  { titre:"Synthèse", duree:12000,
+    legende:"Une guerre de 116 ans, avec des trêves ; un tournant en 1429 avec Jeanne d'Arc ; une fin sans traité de paix, à Castillon, en 1453.",
+    voix:"Pour résumer : la guerre de Cent Ans dure cent seize ans, de mille trois cent trente-sept à mille quatre cent cinquante-trois, avec de longues trêves. En mille quatre cent vingt-neuf, le royaume est partagé. Jeanne d'Arc aide Charles sept : Orléans est délivrée, et le roi est sacré à Rinss. Après mille quatre cent trente-cinq, le roi de France reprend Paris, la Normandie, puis la Guyenne. La guerre s'arrête à Castillon, en mille quatre cent cinquante-trois, sans traité de paix.",
+    anim(t,a){ const s=a.seg; only(a,R.s8); R.sc8.forEach((g,i)=>{ const v=s(t,.05+i*.28,.2+i*.28); a.op(g,v); a.tr(g,(1-v)*70,0); }); } },
+  ]
+});
+})();
+</script></body></html>

@@ -1,0 +1,9 @@
+node_modules/
+build/
+__pycache__/
+*.whl
+# photos téléchargées (à régénérer avec photos/telecharger-photos.bat) : ne pas versionner les images ni l'aperçu
+photos/*.jpg
+photos/apercu.html
+photos/infos.json
+photos/.fake

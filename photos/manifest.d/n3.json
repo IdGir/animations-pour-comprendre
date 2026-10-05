@@ -1,0 +1,12 @@
+[
+ {"id":"h-c1-peste-enterrement-tournai","q":"Gilles li Muisis Tournai peste enterrement miniature 1349","must":["Tournai","peste"],"alt":"miniature des Annales de Gilles li Muisis : des habitants de Tournai enterrent des morts de la peste (1349)"},
+ {"id":"h-c1-puce-xenopsylla","q":"Xenopsylla cheopis flea rat flea","must":["Xenopsylla"],"alt":"puce du rat (Xenopsylla cheopis) vue de près"},
+ {"id":"h-c2-chantier-fouquet-temple","q":"Fouquet Construction du Temple de Jérusalem miniature chantier grue","must":["Fouquet","Temple"],"alt":"miniature de Jean Fouquet (vers 1470) montrant un chantier médiéval : tailleurs de pierre, maçons, grue à roue"},
+ {"id":"h-c2-grue-ecureuil-guedelon","q":"Guédelon grue à écureuil roue treadwheel crane","must":["Guédelon","grue"],"alt":"grue à roue (cage à écureuil) reconstituée sur le chantier de Guédelon"},
+ {"id":"h-c2-notre-dame-paris-facade","q":"Cathédrale Notre-Dame de Paris façade ouest","must":["Notre-Dame","Paris"],"alt":"façade occidentale de Notre-Dame de Paris avec ses deux tours"},
+ {"id":"h-c3-presse-gutenberg","q":"Gutenberg press replica Gutenberg-Museum Mainz Druckerpresse","must":["Gutenberg","press"],"alt":"reconstitution d'une presse à imprimer de type Gutenberg (musée Gutenberg, Mayence)"},
+ {"id":"h-c3-bible-gutenberg","q":"Gutenberg Bible page 42 lines Genesis","must":["Gutenberg","Bible"],"alt":"page d'une Bible de Gutenberg (Bible à 42 lignes) : texte en deux colonnes, initiales enluminées à la main"},
+ {"id":"h-c3-caracteres-mobiles","q":"caractères mobiles plomb typographie casse imprimerie movable type","must":["type"],"alt":"caractères mobiles en plomb (lettres en relief, à l'envers) dans une casse d'imprimeur"},
+ {"id":"h-c4-jeanne-darc-fauquembergue","q":"Jeanne d'Arc Clément de Fauquembergue dessin 1429 registre Parlement","must":["Jeanne","Arc"],"alt":"seul portrait de Jeanne d'Arc de son vivant : dessin dans la marge d'un registre du Parlement de Paris (1429)"},
+ {"id":"h-c4-reims-cathedrale","q":"Cathédrale Notre-Dame de Reims façade occidentale","must":["Reims"],"alt":"façade de la cathédrale Notre-Dame de Reims, où Charles VII est sacré en 1429"}
+]

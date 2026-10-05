@@ -1,0 +1,537 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le levier : soulever lourd en forçant moins</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-D2-levier-balance-romaine","matiere":"sciences","annee":"connexe","periode":1,"theme":"Mouvement, objets techniques : le levier","resume":"Un levier (pivot, charge, effort) permet de soulever une lourde charge avec moins d'effort si le bras est long, mais la main parcourt plus de distance ; balance romaine et balançoire.","motsCles":["levier","pivot","effort","charge","bras de levier","brouette","balance romaine","équilibre"]} */
+(function(){
+let R={}, E=null, a=null;
+let xP=1, spin=0; // manipulation : distance pivot–charge (m) ; temps écoulé dans l'étape de manipulation (ms)
+const KM=2, M0=70, MS=190, MY=540, MLEN=4; // étape de manip ; planche de 4 m : x0, px par mètre, hauteur, longueur (m)
+const C={piv:"#4A5468",ch:"#C0392B",ef:"#2E8B57",wood:"#C58B4B",woodD:"#8A5A2B",ink:"#1E2430",gris:"#5A6478",blue:"#2563A8",or:"#E07A1F"};
+const f1=v=>(Math.round(v*10)/10).toString().replace(".",",");
+const f0=v=>Math.round(v).toString();
+const f2=v=>(Math.round(v*100)/100).toString().replace(".",",");
+const fm=v=>Math.round(v).toLocaleString("fr-FR");
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const rotP=(x,y,deg)=>{ const r=deg*Math.PI/180; return [x*Math.cos(r)-y*Math.sin(r), x*Math.sin(r)+y*Math.cos(r)]; };
+const panel=(parent,x,y,w,h,col)=>E("rect",{x,y,width:w,height:h,rx:16,fill:"#fff",stroke:col||"#D6DBE4","stroke-width":3},parent);
+const txt=(parent,x,y,s,o)=>{ o=o||{}; return E("text",{x,y,"font-size":o.size||24,"font-weight":o.w||700,fill:o.color||C.ink,"text-anchor":o.anchor||"start",text:s,stroke:o.halo?"#fff":null,"stroke-width":o.halo?5:null,"paint-order":o.halo?"stroke":null},parent); };
+const ar=(parent,col,w)=>a.arrow(parent,"M0,0 L0,10",{color:col,w:w||10,head:3});
+function setArrow(g,x1,y1,x2,y2){ g.path.setAttribute("d",`M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}`); }
+// dimension : trait horizontal avec petits repères et texte
+function dim(parent,x1,x2,y,label,col,size){ const g=E("g",{},parent); E("line",{x1,y1:y,x2,y2:y,stroke:col,"stroke-width":4},g); E("line",{x1,y1:y-12,x2:x1,y2:y+12,stroke:col,"stroke-width":4},g); E("line",{x1:x2,y1:y-12,x2,y2:y+12,stroke:col,"stroke-width":4},g);
+  txt(g,(x1+x2)/2,y+34,label,{size:size||24,color:col,anchor:"middle"}); return g; }
+function person(parent,s,col){ const g=E("g",{},parent); E("rect",{x:-20*s,y:-75*s,width:40*s,height:75*s,rx:12*s,fill:col,stroke:"#fff","stroke-width":2},g); E("circle",{cx:0,cy:-95*s,r:20*s,fill:"#F2C79C",stroke:C.ink,"stroke-width":2},g); return g; }
+
+// ---------- levier horizontal commun (étapes 1, 2, 6)
+const PX=430, PY=560;
+function bar(){ }
+
+Anim.run({
+  titre:"Le levier : soulever lourd en forçant moins",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Mouvement et objets techniques",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Comment soulever une charge très lourde avec un petit effort ?",
+  manipDes:KM, manipJusqua:KM,
+  init(api){
+    a=api; E=a.el;
+    // ================= levier de base
+    const LV=a.layer("lev"); R.LV=LV;
+    E("line",{x1:0,y1:PY+120,x2:1600,y2:PY+120,stroke:"#B8BEC8","stroke-width":6},LV);
+    R.plankG=E("g",{},LV); R.plankR=E("rect",{x:-150,y:-12,width:760,height:24,rx:5,fill:C.wood,stroke:C.woodD,"stroke-width":3},R.plankG);
+    R.crate=E("g",{},R.plankG); E("rect",{x:-155,y:-112,width:110,height:100,rx:6,fill:"#E8B7B0",stroke:C.ch,"stroke-width":4},R.crate); E("line",{x1:-155,y1:-112,x2:-45,y2:-12,stroke:C.ch,"stroke-width":3,opacity:.5},R.crate); E("line",{x1:-45,y1:-112,x2:-155,y2:-12,stroke:C.ch,"stroke-width":3,opacity:.5},R.crate);
+    R.crateT=txt(R.crate,-100,-50,"60 kg",{size:30,w:800,anchor:"middle",color:C.ch,halo:1});
+    E("path",{d:`M${PX-55},${PY+120} L${PX+55},${PY+120} L${PX},${PY+14} Z`,fill:C.piv,stroke:"#2E3644","stroke-width":3,"stroke-linejoin":"round"},LV);
+    // flèches
+    R.aEff=ar(LV,C.ef,14); R.aCh=ar(LV,C.ch,12);
+    R.tEff=txt(LV,0,0,"",{size:30,w:800,color:C.ef,halo:1});
+    // étiquettes vocabulaire
+    R.lP=E("g",{},LV); a.label(R.lP,PX,PY+190,"pivot",{size:28,stroke:C.piv,color:C.piv}); a.arrow(R.lP,`M${PX},${PY+168} L${PX},${PY+90}`,{color:C.piv,w:5,head:3});
+    R.lC=E("g",{},LV); a.label(R.lC,235,PY-250,"charge",{size:28,stroke:C.ch,color:C.ch}); a.arrow(R.lC,`M265,${PY-226} L310,${PY-150}`,{color:C.ch,w:5,head:3});
+    R.lE=E("g",{},LV);
+    // cotes
+    R.dCh=dim(LV,PX-100,PX,PY+175,"bras de la charge : 1 m",C.ch,24);
+    R.dEf=E("g",{},LV); R.dEfLine=E("line",{x1:PX,y1:PY+235,x2:PX+100,y2:PY+235,stroke:C.ef,"stroke-width":4},R.dEf); R.dEfA=E("line",{x1:PX,y1:PY+223,x2:PX,y2:PY+247,stroke:C.ef,"stroke-width":4},R.dEf); R.dEfB=E("line",{x1:PX+100,y1:PY+223,x2:PX+100,y2:PY+247,stroke:C.ef,"stroke-width":4},R.dEf); R.dEfT=txt(R.dEf,PX+50,PY+282,"",{size:24,color:C.ef,anchor:"middle"});
+    // panneau de droite (étapes 1, 2, 6)
+    R.pn=E("g",{},LV); panel(R.pn,1130,110,430,430);
+    R.pnT=txt(R.pn,1160,160,"",{size:28,w:800});
+    R.pn1=E("g",{},R.pn); R.pn1a=txt(R.pn1,1160,225,"pivot",{size:30,color:C.piv}); R.pn1b=txt(R.pn1,1160,325,"charge",{size:30,color:C.ch}); R.pn1c=txt(R.pn1,1160,425,"effort",{size:30,color:C.ef});
+    E("text",{x:1160,y:260,"font-size":22,"font-weight":600,fill:C.gris,text:"le point qui ne bouge pas"},R.pn1); E("text",{x:1160,y:360,"font-size":22,"font-weight":600,fill:C.gris,text:"ce qu'on veut soulever"},R.pn1); E("text",{x:1160,y:460,"font-size":22,"font-weight":600,fill:C.gris,text:"la force que je fournis"},R.pn1);
+    R.pn2=E("g",{},R.pn); R.v1=txt(R.pn2,1160,230,"",{size:28,color:C.ch}); R.v2=txt(R.pn2,1160,290,"",{size:28,color:C.ef}); R.v3=txt(R.pn2,1160,360,"",{size:34,w:800,color:C.ef});
+    R.gaugeBG=E("rect",{x:1160,y:405,width:370,height:34,rx:17,fill:"#fff",stroke:C.ink,"stroke-width":2},R.pn2); R.gauge=E("rect",{x:1162,y:407,width:0,height:30,rx:15,fill:C.ef},R.pn2);
+    R.gl=txt(R.pn2,1160,478,"",{size:22,color:C.gris,w:600},R.pn2);
+    R.pn3=E("g",{},R.pn); R.w1=txt(R.pn3,1160,230,"",{size:30,w:800,color:C.ef}); R.w2=txt(R.pn3,1160,264,"",{size:22,w:600,color:C.gris}); R.w3=txt(R.pn3,1160,335,"",{size:28,w:800,color:C.ef}); R.w4=txt(R.pn3,1160,390,"",{size:28,w:800,color:C.ch}); R.w5=txt(R.pn3,1160,455,"",{size:26,w:700,color:C.ink}); R.w6=txt(R.pn3,1160,500,"",{size:26,w:700,color:C.ink});
+    R.ph1=a.photo(LV,{id:"s-d2-brouette",x:1190,y:575,w:300,h:200,cap:"Une brouette",rot:2});
+    // ================= MANIPULATION : on déplace le pivot sous une planche de 4 m
+    const LM=a.layer("lm"); R.LM=LM;
+    E("line",{x1:0,y1:MY+120,x2:1600,y2:MY+120,stroke:"#B8BEC8","stroke-width":6},LM);
+    R.mPiv=E("g",{},LM); E("path",{d:"M-55,"+(MY+120)+" L55,"+(MY+120)+" L0,"+(MY+14)+" Z",fill:C.piv,stroke:"#2E3644","stroke-width":3,"stroke-linejoin":"round"},R.mPiv); a.label(R.mPiv,0,MY+158,"pivot",{size:26,stroke:C.piv,color:C.piv});
+    R.mPl=E("g",{},LM); R.mPlR=E("rect",{y:-12,height:24,rx:5,fill:C.wood,stroke:C.woodD,"stroke-width":3},R.mPl);
+    R.mCr=E("g",{},R.mPl); E("rect",{x:-52,y:-112,width:104,height:100,rx:6,fill:"#E8B7B0",stroke:C.ch,"stroke-width":4},R.mCr); E("line",{x1:-52,y1:-112,x2:52,y2:-12,stroke:C.ch,"stroke-width":3,opacity:.5},R.mCr); E("line",{x1:52,y1:-112,x2:-52,y2:-12,stroke:C.ch,"stroke-width":3,opacity:.5},R.mCr); txt(R.mCr,0,-50,"60 kg",{size:30,w:800,anchor:"middle",color:C.ch,halo:1});
+    R.mEnd=E("circle",{r:9,fill:C.ef,stroke:"#fff","stroke-width":3},R.mPl);
+    R.mAr=a.arrow(LM,"M0,0 L0,10",{color:C.ef,w:14,head:3}); R.mAt=txt(LM,0,0,"",{size:34,w:800,color:C.ef,anchor:"end",halo:1});
+    R.mD1=E("g",{},LM); R.mD2=E("g",{},LM);
+    const mdim=(g,col)=>{ const l=E("line",{stroke:col,"stroke-width":4},g), a1=E("line",{y1:-12,y2:12,stroke:col,"stroke-width":4},g), a2=E("line",{y1:-12,y2:12,stroke:col,"stroke-width":4},g), t=txt(g,0,34,"",{size:26,color:col,anchor:"middle"}); return {l,a1,a2,t}; };
+    R.mDa=mdim(R.mD1,C.ch); R.mDb=mdim(R.mD2,C.ef);
+    R.mP=E("g",{},LM); panel(R.mP,950,110,610,640,C.ef); txt(R.mP,980,162,"Combien faut-il forcer ?",{size:30,w:800});
+    R.m1=txt(R.mP,980,225,"",{size:28,color:C.ch}); R.m2=txt(R.mP,980,275,"",{size:28,color:C.ch}); R.m3=txt(R.mP,980,325,"",{size:28,color:C.ef});
+    E("line",{x1:980,y1:355,x2:1530,y2:355,stroke:"#D6DBE4","stroke-width":3},R.mP);
+    R.m4=txt(R.mP,980,420,"",{size:38,w:800,color:C.ef}); R.m5=txt(R.mP,980,470,"",{size:26,w:600,color:C.gris});
+    E("rect",{x:980,y:505,width:540,height:34,rx:17,fill:"#fff",stroke:C.ink,"stroke-width":2},R.mP); R.mG=E("rect",{x:982,y:507,width:0,height:30,rx:15,fill:C.ef},R.mP);
+    E("line",{x1:980+162,y1:495,x2:980+162,y2:548,stroke:C.ch,"stroke-width":4},R.mP); txt(R.mP,980+162,578,"charge : 60 kg",{size:22,color:C.ch,anchor:"middle"});
+    R.m6=E("text",{x:980,y:640,"font-size":28,"font-weight":800,fill:C.ink},R.mP);
+    // ================= étape 3 : exemples
+    const L3=a.layer("s3"); R.L3=L3; const PY3=95; panel(L3,40,PY3,750,640); panel(L3,810,PY3,750,640);
+    txt(L3,415,PY3+48,"La brouette",{size:32,w:800,anchor:"middle"}); txt(L3,1185,PY3+48,"Le pied-de-biche",{size:32,w:800,anchor:"middle"});
+    // brouette
+    const bx=70, by=PY3+360; R.bb=E("g",{},L3);
+    E("line",{x1:40,y1:by+60,x2:790,y2:by+60,stroke:"#B8BEC8","stroke-width":5},R.bb);
+    E("path",{d:`M${bx+90},${by-110} L${bx+370},${by-110} L${bx+330},${by-20} L${bx+130},${by-20} Z`,fill:"#E9ECF2",stroke:C.ink,"stroke-width":4,"stroke-linejoin":"round"},R.bb);
+    E("path",{d:`M${bx+60},${by-12} L${bx+390},${by-70}`,stroke:C.woodD,"stroke-width":12,"stroke-linecap":"round"},R.bb);
+    E("circle",{cx:bx+80,cy:by,r:58,fill:"none",stroke:C.ink,"stroke-width":14},R.bb); E("circle",{cx:bx+80,cy:by,r:12,fill:C.piv},R.bb);
+    E("circle",{cx:bx+245,cy:by-150,r:42,fill:"#E8B7B0",stroke:C.ch,"stroke-width":4},R.bb); txt(R.bb,bx+245,by-140,"45 kg",{size:24,w:800,color:C.ch,anchor:"middle"});
+    ar(R.bb,C.ch,10).path.setAttribute("d",`M${bx+245},${by-240} L${bx+245},${by-196}`);
+    ar(R.bb,C.ef,10).path.setAttribute("d",`M${bx+390},${by+50} L${bx+390},${by-45}`);
+    R.bbP=E("g",{},R.bb); a.label(R.bbP,bx+80,by+130,"pivot",{size:24,stroke:C.piv,color:C.piv});
+    txt(R.bb,bx+420,by-140,"effort",{size:26,color:C.ef}); txt(R.bb,bx+420,by-110,"15 kg",{size:34,w:800,color:C.ef});
+    dim(R.bb,bx+80,bx+245,by+175,"50 cm",C.ch,24); dim(R.bb,bx+80,bx+390,by+240,"150 cm",C.ef,24);
+    txt(R.bb,415,PY3+88,"bras de l'effort 3 fois plus long que celui de la charge",{size:22,w:600,anchor:"middle",color:C.gris});
+    // pied-de-biche
+    const cx=830; R.pb=E("g",{},L3); const gy=PY3+400;
+    E("rect",{x:cx+10,y:gy,width:710,height:56,fill:"#D9B98A",stroke:C.woodD,"stroke-width":3},R.pb);
+    E("rect",{x:cx+90-7,y:gy-34,width:14,height:34,fill:"#7B8494",stroke:C.ink,"stroke-width":2},R.pb); E("rect",{x:cx+90-18,y:gy-42,width:36,height:9,rx:3,fill:"#7B8494",stroke:C.ink,"stroke-width":2},R.pb); E("line",{x1:cx+90,y1:gy,x2:cx+90,y2:gy+50,stroke:"#7B8494","stroke-width":10},R.pb);
+    E("path",{d:`M${cx+82},${gy-22} L${cx+170},${gy-2} L${cx+650},${gy-140}`,fill:"none",stroke:"#5A6478","stroke-width":16,"stroke-linejoin":"round","stroke-linecap":"round"},R.pb);
+    E("circle",{cx:cx+170,cy:gy-2,r:11,fill:C.piv,stroke:"#fff","stroke-width":3},R.pb);
+    ar(R.pb,C.ch,10).path.setAttribute("d",`M${cx+82},${gy-150} L${cx+82},${gy-62}`);
+    txt(R.pb,cx+82,gy-190,"le clou résiste",{size:22,w:800,color:C.ch,anchor:"middle"}); txt(R.pb,cx+82,gy-168,"comme 60 kg",{size:22,w:800,color:C.ch,anchor:"middle"});
+    ar(R.pb,C.ef,10).path.setAttribute("d",`M${cx+650},${gy-250} L${cx+650},${gy-160}`);
+    txt(R.pb,cx+620,gy-275,"effort : 10 kg",{size:30,w:800,color:C.ef,anchor:"middle"});
+    R.pbP=E("g",{},R.pb); a.label(R.pbP,cx+250,gy+130,"pivot",{size:24,stroke:C.piv,color:C.piv}); a.arrow(R.pbP,`M${cx+235},${gy+108} L${cx+175},${gy+14}`,{color:C.piv,w:4,head:3});
+    dim(R.pb,cx+90,cx+170,gy+95,"5 cm",C.ch,24); dim(R.pb,cx+170,cx+650,gy+170,"30 cm",C.ef,24);
+    txt(R.pb,1185,PY3+88,"bras de l'effort 6 fois plus long : 60 kg ÷ 6 = 10 kg",{size:22,w:600,anchor:"middle",color:C.gris});
+    // ================= étape 4 : balançoire
+    const L4=a.layer("s4"); R.L4=L4; const SX=800, SY=600, S=130; R.SX=SX; R.SY=SY; R.S=S;
+    E("line",{x1:0,y1:SY+120,x2:1600,y2:SY+120,stroke:"#B8BEC8","stroke-width":6},L4);
+    E("path",{d:`M${SX-60},${SY+120} L${SX+60},${SY+120} L${SX},${SY+14} Z`,fill:C.piv,stroke:"#2E3644","stroke-width":3,"stroke-linejoin":"round"},L4);
+    R.sw=E("g",{},L4); E("rect",{x:-3.2*S,y:-11,width:6.4*S,height:22,rx:5,fill:C.wood,stroke:C.woodD,"stroke-width":3},R.sw);
+    for(let m=-3;m<=3;m++){ if(!m) continue; E("line",{x1:m*S,y1:11,x2:m*S,y2:24,stroke:C.woodD,"stroke-width":3},R.sw); E("text",{x:m*S,y:50,"text-anchor":"middle","font-size":22,"font-weight":700,fill:C.gris,text:Math.abs(m)+" m"},R.sw); }
+    R.pAd=person(L4,1.15,C.blue); R.pK1=person(L4,.85,C.or); R.pK2=person(L4,.7,C.Cc||"#2E8B57");
+    R.b4l=E("g",{},L4); panel(R.b4l,170,120,500,190,C.blue); txt(R.b4l,200,165,"adulte : 60 kg à 1 m du pivot",{size:24,color:C.blue}); R.e4l=txt(R.b4l,200,230,"",{size:40,w:800,color:C.blue}); txt(R.b4l,200,282,"poids × distance",{size:24,w:600,color:C.gris});
+    R.b4r=E("g",{},L4); panel(R.b4r,930,120,500,190,C.or); R.t4r=txt(R.b4r,960,165,"",{size:24,color:C.or}); R.e4r=txt(R.b4r,960,230,"",{size:40,w:800,color:C.or}); txt(R.b4r,960,282,"poids × distance",{size:24,w:600,color:C.gris});
+    R.eq4=E("g",{},L4); a.label(R.eq4,800,380,"équilibre : 60 = 60",{size:34,stroke:C.ef,color:C.ef,fill:"#E8F6EE"});
+    // ================= étape 5 : balance romaine
+    const L5=a.layer("s5"); R.L5=L5; const BX=420, BY=330, K=9; R.BX=BX; R.BY=BY; R.K=K;
+    R.ring=E("g",{},L5); E("line",{x1:BX,y1:BY,x2:BX,y2:180,stroke:C.piv,"stroke-width":6},R.ring); E("circle",{cx:BX,cy:166,r:20,fill:"none",stroke:C.piv,"stroke-width":8},R.ring);
+    R.beam=E("g",{},L5); E("rect",{x:-120,y:-10,width:1020,height:20,rx:5,fill:C.wood,stroke:C.woodD,"stroke-width":3},R.beam);
+    for(let k=1;k<=10;k++){ E("line",{x1:k*10*K,y1:10,x2:k*10*K,y2:26,stroke:C.woodD,"stroke-width":4},R.beam); E("text",{x:k*10*K,y:58,"text-anchor":"middle","font-size":26,"font-weight":800,fill:C.ink,text:String(k)},R.beam); }
+    E("text",{x:10*10*K+56,y:58,"font-size":24,"font-weight":700,fill:C.gris,text:"kg"},R.beam);
+    E("circle",{cx:0,cy:0,r:9,fill:C.piv},R.beam);
+    R.cordS=E("line",{stroke:C.piv,"stroke-width":4},L5); R.sac=E("g",{},L5); R.sacB=E("rect",{rx:18,fill:"#E8B7B0",stroke:C.ch,"stroke-width":4},R.sac); R.sacT=txt(R.sac,0,0,"?",{size:32,w:800,color:C.ch,anchor:"middle"});
+    R.cordC=E("line",{stroke:C.piv,"stroke-width":4},L5); R.cur=E("g",{},L5); E("circle",{cx:0,cy:0,r:30,fill:"#3A4256",stroke:"#1E2430","stroke-width":3},R.cur); txt(R.cur,0,9,"1 kg",{size:24,w:800,color:"#fff",anchor:"middle"});
+    R.lab5=E("g",{},L5); a.label(R.lab5,BX-60,BY+210,"un côté : le sac à peser",{size:24,stroke:C.ch,color:C.ch});
+    R.rd=E("g",{},L5); R.rd1=txt(R.rd,80,720,"",{size:28,w:700}); R.rd2=txt(R.rd,80,770,"",{size:30,w:800,color:C.ef}); R.rd3=txt(R.rd,80,820,"",{size:24,w:600,color:C.gris});
+    R.ph5=a.photo(L5,{id:"s-d2-romaine",x:1190,y:590,w:320,h:213,cap:"Une balance romaine",rot:-2});
+    // ================= synthèse
+    const sy=a.layer("syn"); R.syn=sy; E("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy);
+    txt(sy,800,70,"À retenir",{size:38,w:800,anchor:"middle"});
+    R.pts=[["1","Un levier a un pivot, une charge et un effort.",C.piv],["2","Plus le bras de l'effort est long, moins il faut forcer.",C.ef],["3","On force moins, mais la main parcourt plus de distance : le levier ne fabrique pas d'énergie.",C.or]].map(([n,t,c],i)=>{
+      const g=E("g",{},sy); E("rect",{x:150,y:110+i*105,width:1300,height:88,rx:16,fill:"#fff",stroke:c,"stroke-width":4},g); E("circle",{cx:205,cy:154+i*105,r:28,fill:c},g); E("text",{x:205,y:166+i*105,"text-anchor":"middle","font-size":34,"font-weight":800,fill:"#fff",text:n},g);
+      E("text",{x:255,y:164+i*105,"font-size":26,"font-weight":700,fill:C.ink,text:t},g); return g; });
+    R.myth=a.layer("myth"); a.myth(R.myth,150,450,1300,"Un levier fabrique de la force ou de l'énergie en plus.","Non ! Il change seulement la façon de la fournir : on force moins, mais on déplace la main sur une plus grande distance.");
+    a.manip.innerHTML=`Place du pivot (distance à la charge) : <input type="range" id="mX" min="0.5" max="3" step="0.25" value="${xP}" aria-label="Distance entre le pivot et la charge"> <b id="mXv" style="min-width:70px">${String(xP).replace(".",",")} m</b>`;
+    document.getElementById("mX").oninput=e=>{ xP=+e.target.value; document.getElementById("mXv").textContent=String(xP).replace(".",",")+" m"; a.redraw(); };
+    let last=performance.now();
+    setInterval(()=>{ const now=performance.now(), dt=Math.min(now-last,100); last=now; if(a.step()===KM){ spin+=dt; a.redraw(); } },40);
+  },
+  reset(a){ [R.LM,R.mP,R.LV,R.L3,R.L4,R.L5,R.syn,R.myth,R.pn,R.pn1,R.pn2,R.pn3,R.lP,R.lC,R.aEff,R.aCh,R.tEff,R.dCh,R.dEf,R.ph1,R.ph5,R.bb,R.pb,R.b4l,R.b4r,R.eq4,R.lab5,R.rd,R.pAd,R.pK1,R.pK2,R.cordS,R.cordC,R.sac,R.cur].forEach(e=>a.op(e,0));
+    R.pts.forEach(g=>a.op(g,0)); },
+  etapes:[
+  { titre:"Pivot, charge, effort", duree:9000,
+    legende:"Un levier est une barre qui tourne autour d'un pivot. On pousse d'un côté (l'effort) pour soulever la charge de l'autre côté.",
+    voix:"Voici un levier : une barre rigide qui peut tourner autour d'un point fixe, le pivot. D'un côté, il y a la charge, c'est ce qu'on veut soulever : ici, une caisse de soixante kilos. De l'autre côté, on appuie : c'est l'effort. Quand je pousse la barre vers le bas, la charge monte.",
+    anim(t,a){ const s=a.seg; a.op(R.LV,1); a.op(R.pn,s(t,.08,.2)); a.op(R.pn1,1); a.op(R.pn2,0); a.op(R.pn3,0); R.pnT.textContent="Le vocabulaire du levier";
+      a.op(R.lP,s(t,.12,.24)); a.op(R.lC,s(t,.28,.4)); a.op(R.lE,0); a.op(R.ph1,s(t,.6,.8)); a.op(R.dCh,0); a.op(R.dEf,0);
+      a.set(R.plankR,{width:480}); const eps=8*s(t,.5,.9); R.eps=eps; a.set(R.plankG,{transform:`translate(${PX},${PY}) rotate(${eps})`});
+      const [ex,ey]=rotP(100,-12,eps); R.crateT.textContent="60 kg";
+      // effort : flèche au bout du bras (1 m)
+      const x=PX+ex, y=PY+ey; const len=a.lerp(0,200,s(t,.38,.5)); setArrow(R.aEff,x,y-len,x,y-2); a.op(R.aEff,s(t,.38,.46)); R.tEff.setAttribute("x",x+26); R.tEff.setAttribute("y",y-len/2+10); R.tEff.textContent="effort"; a.op(R.tEff,s(t,.4,.5));
+      const [cx,cy]=rotP(-100,-12,eps); a.op(R.aCh,0); } },
+  { titre:"Allonger le bras de l'effort", duree:15000,
+    legende:"Charge : 60 kg, à 1 m du pivot. Si je pousse à 1 m, il faut 60 kg d'effort. À 2 m : 30 kg. À 3 m : 20 kg. À 6 m : 10 kg seulement !",
+    voix:"Gardons la même charge de soixante kilos, à un mètre du pivot. Si je pousse à un mètre du pivot, il me faut un effort de soixante kilos : aucun gain. Je recule la main : à deux mètres, trente kilos suffisent. À trois mètres, vingt kilos. Et à six mètres du pivot, dix kilos seulement ! Plus le bras de l'effort est long, moins il faut forcer.",
+    anim(t,a){ const s=a.seg; a.op(R.LV,1); a.op(R.pn,1); a.op(R.pn1,0); a.op(R.pn2,1); a.op(R.pn3,0); R.pnT.textContent="Combien faut-il forcer ?";
+      a.op(R.lP,1-s(t,0,.08)); a.op(R.lC,1-s(t,0,.08)); a.op(R.lE,0); a.op(R.ph1,1-s(t,0,.1)); a.op(R.dCh,s(t,.02,.12)); a.op(R.dEf,s(t,.05,.15)); a.op(R.tEff,1);
+      a.set(R.plankR,{width:760}); const eps=8*(1-s(t,0,.1)); a.set(R.plankG,{transform:`translate(${PX},${PY}) rotate(${eps})`});
+      // distance d(t) par paliers : 1 -> 2 -> 3 -> 6
+      const d=1+1*s(t,.22,.34)+1*s(t,.42,.54)+3*s(t,.62,.78);
+      const eff=60/d; const [ex,ey]=rotP(100*d,-12,eps); const x=PX+ex, y=PY+ey; const len=eff*3.3; setArrow(R.aEff,x,y-len,x,y-2); a.op(R.aEff,s(t,.1,.18));
+      R.tEff.setAttribute("x",x+26); R.tEff.setAttribute("y",y-len/2+10); R.tEff.textContent=f0(eff)+" kg";
+      a.set(R.dEfLine,{x2:PX+100*d}); a.set(R.dEfB,{x1:PX+100*d,x2:PX+100*d}); R.dEfT.setAttribute("x",PX+50*d); R.dEfT.textContent="bras de l'effort : "+f1(d)+" m";
+      R.v1.textContent="charge : 60 kg à 1 m"; R.v2.textContent="effort à "+f1(d)+" m du pivot"; R.v3.textContent="effort : "+f0(eff)+" kg"; R.gauge.setAttribute("width",366*eff/60); R.gl.textContent="(la jauge se vide quand le bras s'allonge)";
+      a.op(R.dEf,s(t,.05,.15)); } },
+  { titre:"À vous : déplacez le pivot", duree:8000,
+    legende:"À vous : avec le curseur, déplacez le pivot sous la planche de 4 m et regardez l'effort nécessaire pour soulever la charge de 60 kg. Plus le pivot est près de la charge, moins on force.",
+    voix:"À vous ! Voici une planche de quatre mètres. À gauche, la charge de soixante kilos. À droite, la main qui pousse. Avec le curseur, déplacez le pivot, et regardez l'effort qu'il faut fournir. Plus le pivot est près de la charge, moins il faut forcer. Au milieu, à deux mètres, il faut autant d'effort que le poids de la charge : aucun gain. Et si le pivot est trop loin de la charge, il faut forcer plus que le poids ! Prenez votre temps.",
+    anim(t,a){ const s=a.seg; a.op(R.LM,s(t,0,.12)); a.op(R.LV,1-s(t,0,.12)); a.op(R.mP,s(t,.05,.2)); a.op(R.mD1,s(t,.1,.22)); a.op(R.mD2,s(t,.1,.22)); a.op(R.ph1,0);
+      const y=MLEN-xP, eff=60*xP/y, px=M0+MS*xP, eps=2.4+2.4*Math.sin(spin/450);
+      a.tr(R.mPiv,px,0); R.mPl.setAttribute("transform",`translate(${px},${MY}) rotate(${eps})`);
+      a.set(R.mPlR,{x:-xP*MS-30,width:MLEN*MS+60}); a.tr(R.mCr,-xP*MS,0); a.set(R.mEnd,{cx:y*MS,cy:0});
+      const [hx,hy]=rotP(y*MS,-12,eps), len=clamp(eff*1.15+18,34,215); setArrow(R.mAr,px+hx,MY+hy-len,px+hx,MY+hy-3); R.mAt.setAttribute("x",px+hx-26); R.mAt.setAttribute("y",MY+hy-len/2+10); R.mAt.textContent=fm(eff)+" kg";
+      const d1=MY+190, d2=MY+250, x0=M0, x2=M0+MLEN*MS;
+      a.set(R.mDa.l,{x1:x0,x2:px,y1:d1,y2:d1}); a.set(R.mDa.a1,{x1:x0,x2:x0,y1:d1-12,y2:d1+12}); a.set(R.mDa.a2,{x1:px,x2:px,y1:d1-12,y2:d1+12}); R.mDa.t.setAttribute("x",(x0+px)/2); R.mDa.t.setAttribute("y",d1+34); R.mDa.t.textContent="bras de la charge : "+f2(xP)+" m";
+      a.set(R.mDb.l,{x1:px,x2:x2,y1:d2,y2:d2}); a.set(R.mDb.a1,{x1:px,x2:px,y1:d2-12,y2:d2+12}); a.set(R.mDb.a2,{x1:x2,x2:x2,y1:d2-12,y2:d2+12}); R.mDb.t.setAttribute("x",(px+x2)/2); R.mDb.t.setAttribute("y",d2+34); R.mDb.t.textContent="bras de l'effort : "+f2(y)+" m";
+      R.m1.textContent="charge : 60 kg"; R.m2.textContent="bras de la charge : "+f2(xP)+" m"; R.m3.textContent="bras de l'effort : "+f2(y)+" m";
+      R.m4.textContent="effort : "+fm(eff)+" kg"; R.m5.textContent="60 × "+f2(xP)+" ÷ "+f2(y)+" = "+f1(eff);
+      R.mG.setAttribute("width",Math.min(536,eff*2.7));
+      const v=Math.abs(xP-2)<.01?["Bras égaux : aucun gain.",C.ink]:xP<2?["Bras de l'effort plus long : on force moins !",C.ef]:["Bras de l'effort plus court : on force plus !",C.ch];
+      a.wrap(R.m6,v[0],32); R.m6.setAttribute("fill",v[1]); R.m4.setAttribute("fill",v[1]); } },
+  { titre:"Brouette et pied-de-biche", duree:11000,
+    legende:"La brouette et le pied-de-biche sont des leviers. Avec la brouette, 45 kg se soulèvent avec 15 kg d'effort. Avec le pied-de-biche, un clou qui résiste comme 60 kg s'arrache avec 10 kg.",
+    voix:"Les leviers sont partout. Dans une brouette, le pivot est l'axe de la roue. La charge est près de la roue, à cinquante centimètres, et les mains sont tout au bout des bras, à un mètre cinquante. Quarante-cinq kilos se soulèvent avec seulement quinze kilos d'effort. Avec un pied-de-biche, le clou est à cinq centimètres du pivot et la main à trente centimètres : six fois plus loin. Pour un clou qui résiste comme soixante kilos, dix kilos d'effort suffisent.",
+    anim(t,a){ const s=a.seg; a.op(R.L3,1); a.op(R.LM,1-s(t,0,.1)); a.op(R.LV,0); a.op(R.bb,s(t,.05,.2)); a.op(R.pb,s(t,.5,.65)); } },
+  { titre:"La balançoire : poids × distance", duree:13000,
+    legende:"Sur une balançoire, un adulte de 60 kg à 1 m équilibre un enfant de 30 kg à 2 m, ou de 20 kg à 3 m : 60 × 1 = 30 × 2 = 20 × 3.",
+    voix:"Sur une balançoire, un adulte de soixante kilos est assis à un mètre du pivot. Un enfant de trente kilos, à un mètre aussi, est trop léger : la balançoire penche du côté de l'adulte. Éloignons l'enfant : à deux mètres du pivot, la balançoire est en équilibre ! Soixante fois un égale trente fois deux. Un enfant de vingt kilos, assis à trois mètres, équilibre aussi l'adulte : vingt fois trois égale soixante.",
+    anim(t,a){ const s=a.seg; a.op(R.L4,1); a.op(R.L3,0); a.op(R.pAd,s(t,0,.1)); a.op(R.b4l,s(t,.05,.15)); a.op(R.b4r,s(t,.05,.15));
+      // enfant 1 (30 kg) glisse de 1 m à 2 m ; puis enfant 2 (20 kg) à 3 m
+      const d1=1+1*s(t,.25,.55); const w2=s(t,.68,.78); const w1=1-w2;
+      const m=30*w1+20*w2, dd=d1*w1+3*w2; const torque=m*dd; const eps=clamp(0.35*(torque-60),-14,14);
+      a.set(R.sw,{transform:`translate(${R.SX},${R.SY}) rotate(${eps})`});
+      const place=(g,s_,k,w)=>{ const [px,py]=rotP(s_*R.S,-11,eps); g.setAttribute("transform",`translate(${R.SX+px},${R.SY+py})`); };
+      place(R.pAd,-1,1); place(R.pK1,d1,1); place(R.pK2,3,1);
+      a.op(R.pK1,s(t,.1,.2)*w1); a.op(R.pK2,w2);
+      R.e4l.textContent="60 × 1 = 60"; R.t4r.textContent=w2>.5?"enfant : 20 kg à 3 m du pivot":"enfant : 30 kg à "+f1(d1)+" m du pivot";
+      R.e4r.textContent=w2>.5?"20 × 3 = 60":("30 × "+f1(d1)+" = "+f0(30*d1));
+      a.op(R.eq4,Math.abs(eps)<.3?s(t,.55,.62)*(1-s(t,.62,.68))+s(t,.8,.88):0); } },
+  { titre:"La balance romaine", duree:17000,
+    legende:"Sur la balance romaine, un seul poids de 1 kg glisse le long de la règle. Plus le sac est lourd, plus il faut éloigner le poids du pivot pour équilibrer : 3 kg à 30 cm, 5 kg à 50 cm, 8 kg à 80 cm.",
+    voix:"La balance romaine est un levier à bras inégaux. Le sac à peser est accroché près du pivot, à dix centimètres. De l'autre côté, un seul poids d'un kilo glisse le long d'une règle graduée. On le déplace jusqu'à ce que la barre soit bien horizontale. Pour un sac de trois kilos, le poids doit être à trente centimètres. Pour cinq kilos, à cinquante centimètres. Pour huit kilos, à quatre-vingts centimètres. Un petit poids équilibre une grosse charge, en s'éloignant du pivot !",
+    anim(t,a){ const s=a.seg; a.op(R.L5,1); a.op(R.L4,0); a.op(R.ph5,s(t,.75,.9)); a.op(R.rd,s(t,.03,.12)); a.op(R.lab5,s(t,.02,.1)); a.op(R.sac,1); a.op(R.cur,1); a.op(R.cordS,1); a.op(R.cordC,1);
+      // charge M(t) et position du curseur d(t) en cm
+      const M=3+2*s(t,.37,.42)+3*s(t,.66,.71); const d=30*s(t,.06,.26)+20*s(t,.42,.6)+30*s(t,.71,.9);
+      const delta=M*10-d; const eps=-clamp(delta*0.22,-14,14);
+      a.set(R.beam,{transform:`translate(${R.BX},${R.BY}) rotate(${eps})`});
+      const [hx,hy]=rotP(-10*R.K,0,eps); const [cx,cy]=rotP(d*R.K,0,eps);
+      const w=48+7*M, hh=w*1.05; const hxw=R.BX+hx, hyw=R.BY+hy+10;
+      a.set(R.cordS,{x1:hxw,y1:hyw,x2:hxw,y2:hyw+50}); a.set(R.sacB,{x:hxw-w/2,y:hyw+50,width:w,height:hh}); a.set(R.sacT,{x:hxw,y:hyw+50+hh/2+11});
+      const cxw=R.BX+cx, cyw=R.BY+cy+10; a.set(R.cordC,{x1:cxw,y1:cyw,x2:cxw,y2:cyw+34}); R.cur.setAttribute("transform",`translate(${cxw},${cyw+34+30})`);
+      const bal=Math.abs(delta)<.8; R.sacT.textContent=bal?f0(M)+" kg":"? kg";
+      R.rd1.textContent="Le poids de 1 kg est à "+f0(d)+" cm du pivot";
+      R.rd2.textContent=bal?"Barre horizontale : le sac pèse "+f0(M)+" kg":"La barre penche : on continue de glisser le poids…";
+      R.rd3.textContent=bal?"1 kg × "+f0(d)+" cm = "+f0(M)+" kg × 10 cm":"";
+      R.rd2.setAttribute("fill",bal?C.ef:C.or); } },
+  { titre:"On force moins… mais on parcourt plus", duree:12000,
+    legende:"Avec un bras 3 fois plus long, la main force 3 fois moins (20 kg au lieu de 60 kg), mais elle descend de 60 cm pour que la charge ne monte que de 20 cm.",
+    voix:"Attention : le levier ne donne rien pour rien. Ici, le bras de l'effort est trois fois plus long que celui de la charge. Je force trois fois moins : vingt kilos au lieu de soixante. Mais regardez : ma main descend de soixante centimètres pour que la caisse monte seulement de vingt centimètres. J'ai gagné en force, mais j'ai perdu en distance. Le levier ne fabrique ni force, ni énergie : il change seulement la façon de la fournir.",
+    anim(t,a){ const s=a.seg; a.op(R.LV,s(t,0,.12)); a.op(R.L5,1-s(t,0,.12)); a.op(R.pn,1); a.op(R.pn1,0); a.op(R.pn2,0); a.op(R.pn3,1); R.pnT.textContent="Force et distance";
+      a.op(R.lP,0); a.op(R.lC,0); a.op(R.lE,0); a.op(R.ph1,0); a.op(R.dCh,0); a.op(R.dEf,0); a.op(R.tEff,1); a.op(R.aEff,1);
+      a.set(R.plankR,{width:480}); const u=s(t,.1,.7); const eps=Math.asin(.6/3)*180/Math.PI*u; a.set(R.plankG,{transform:`translate(${PX},${PY}) rotate(${eps})`});
+      const [ex,ey]=rotP(300,-12,eps); const x=PX+ex, y=PY+ey; setArrow(R.aEff,x,y-66,x,y-2); R.tEff.setAttribute("x",x+26); R.tEff.setAttribute("y",y-24); R.tEff.textContent="20 kg";
+      R.w1.textContent="effort : 20 kg"; R.w2.textContent="(au lieu de 60 kg)";
+      R.w3.textContent="main : descend de "+f0(60*u)+" cm"; R.w4.textContent="charge : monte de "+f0(20*u)+" cm";
+      a.op(R.w5,s(t,.75,.9)); a.op(R.w6,s(t,.82,.95)); R.w5.textContent="20 × 60 = 1 200"; R.w6.textContent="60 × 20 = 1 200"; } },
+  { titre:"Synthèse", duree:10000,
+    legende:"Pivot, charge, effort : plus le bras de l'effort est long, moins on force, mais plus la main se déplace. Le levier ne crée pas de force.",
+    voix:"Pour retenir. Un levier a un pivot, une charge et un effort. Plus le bras de l'effort est long, moins il faut forcer. Mais on ne gagne rien pour rien : la main parcourt plus de distance. Attention : un levier ne fabrique pas de force, il change seulement la façon de la fournir.",
+    anim(t,a){ const s=a.seg; a.op(R.syn,s(t,0,.1)); R.pts.forEach((g,i)=>a.op(g,s(t,.08+i*.12,.18+i*.12))); a.op(R.myth,s(t,.55,.7)); } },
+  ]
+});
+})();
+</script></body></html>

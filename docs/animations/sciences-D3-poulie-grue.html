@@ -1,0 +1,497 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les poulies : changer de direction, forcer moins</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-D3-poulie-grue","matiere":"sciences","annee":"connexe","periode":1,"theme":"Mouvement, objets techniques : les poulies","resume":"La poulie fixe change la direction de la force ; la poulie mobile et le palan divisent l'effort mais obligent à tirer plus de corde ; lien avec le puits et la grue à écureuil des cathédrales.","motsCles":["poulie","palan","moufle","grue","effort","charge","corde","puits","cathédrale"]} */
+(function(){
+let R={}, E=null, a=null;
+let mode=1, spin=0; // manipulation : montage choisi (0 fixe, 1 mobile, 2 palan) ; temps écoulé dans l'étape (ms)
+const KM=3; // indice de l'étape de manipulation
+const cyc=ms=>{ const x=(ms/3400)%2, v=x<1?x:2-x; return Math.max(0,Math.min(1,(v-.12)/.76)); }; // va-et-vient 0 -> 1 -> 0 avec petites pauses
+const C={ink:"#1E2430",gris:"#5A6478",ch:"#C0392B",ef:"#2E8B57",or:"#E07A1F",blue:"#2563A8",piv:"#4A5468",wood:"#C58B4B",woodD:"#8A5A2B",rope:"#8A6A3A"};
+const f2=v=>v.toFixed(2).replace(".",",");
+const f1=v=>(Math.round(v*10)/10).toString().replace(".",",");
+const f0=v=>Math.round(v).toString();
+const panel=(parent,x,y,w,h,col)=>E("rect",{x,y,width:w,height:h,rx:16,fill:"#fff",stroke:col||"#D6DBE4","stroke-width":3},parent);
+const txt=(parent,x,y,s,o)=>{ o=o||{}; return E("text",{x,y,"font-size":o.size||24,"font-weight":o.w||700,fill:o.color||C.ink,"text-anchor":o.anchor||"start",text:s,stroke:o.halo?"#fff":null,"stroke-width":o.halo?5:null,"paint-order":o.halo?"stroke":null},parent); };
+function pulley(parent,r){ const g=E("g",{},parent); const body=E("g",{},g); E("circle",{r,fill:"#E9ECF2",stroke:C.piv,"stroke-width":7},body); for(let i=0;i<6;i++){ const t=i/6*Math.PI; E("line",{x1:-(r-8)*Math.cos(t),y1:-(r-8)*Math.sin(t),x2:(r-8)*Math.cos(t),y2:(r-8)*Math.sin(t),stroke:"#9AA3B2","stroke-width":4},body); } E("circle",{cx:r*.75,cy:0,r:6,fill:C.or},body); E("circle",{r:9,fill:C.piv},g); g.body=body; return g; }
+function setP(g,x,y,deg){ g.setAttribute("transform",`translate(${x},${y})`); g.body.setAttribute("transform",`rotate(${deg})`); }
+function crate(parent,txtc){ const g=E("g",{},parent); E("rect",{x:-55,y:0,width:110,height:100,rx:6,fill:"#E8B7B0",stroke:C.ch,"stroke-width":4},g); E("line",{x1:-55,y1:0,x2:55,y2:100,stroke:C.ch,"stroke-width":3,opacity:.4},g); E("line",{x1:55,y1:0,x2:-55,y2:100,stroke:C.ch,"stroke-width":3,opacity:.4},g); const t=txt(g,0,62,txtc,{size:32,w:800,color:C.ch,anchor:"middle",halo:1}); g.t=t; return g; }
+function rope(parent,w){ return E("path",{fill:"none",stroke:C.rope,"stroke-width":w||8,"stroke-linecap":"round","stroke-linejoin":"round"},parent); }
+function hand(parent){ const g=E("g",{},parent); E("circle",{r:17,fill:"#F2C79C",stroke:C.ink,"stroke-width":3},g); return g; }
+function ceil(parent,x1,x2,y){ E("rect",{x:x1,y:y-14,width:x2-x1,height:24,fill:"#B8BEC8",stroke:C.piv,"stroke-width":3},parent); for(let x=x1+12;x<x2;x+=28) E("line",{x1:x,y1:y-14,x2:x-14,y2:y-30,stroke:"#9AA3B2","stroke-width":3},parent); }
+function ground(parent){ E("rect",{x:0,y:760,width:1600,height:140,fill:"#E3E7EC"},parent); E("line",{x1:0,y1:760,x2:1600,y2:760,stroke:"#B8BEC8","stroke-width":5},parent); }
+function effArrow(g,x,y,len){ g.path.setAttribute("d",`M${x},${y} L${x},${y+len}`); }
+function vals(parent,title,col,n){ const g=E("g",{},parent); panel(g,960,110,600,560,col||"#D6DBE4"); txt(g,990,162,title,{size:30,w:800}); txt(g,990,342,"brins qui portent la charge : "+n,{size:26,color:C.or}); return g; }
+function bar(parent,x,y,w,h,col){ return E("rect",{x,y,width:w,height:h,rx:8,fill:col},parent); }
+
+// ---- dessins des trois montages, pour une avancée u (0 -> 1) : la charge monte de u mètre
+const DEG=180/Math.PI;
+function dFixed(u){ const rise=100*u, ctop=660-rise, yh=960-ctop;
+  a.set(R.rope1,{d:`M352,${ctop} L352,170 A48,48 0 0 1 448,170 L448,${yh}`}); setP(R.pu1,400,170,rise/48*DEG);
+  R.cr1.setAttribute("transform",`translate(352,${ctop})`); R.h1.setAttribute("transform",`translate(448,${yh})`);
+  effArrow(R.ef1,498,yh,66); a.set(R.eft1,{x:520,y:yh+54,text:"effort : 20 kg"});
+  R.v1c.textContent="corde tirée : "+f2(rise/100)+" m"; R.v1d.textContent="charge monte de : "+f2(rise/100)+" m"; }
+function dMobile(u){ const rise=100*u, my=580-rise, yh=300+2*rise;
+  a.set(R.rope2,{d:`M352,80 L352,${my} A48,48 0 0 0 448,${my} L448,170 A48,48 0 0 1 544,170 L544,${yh}`});
+  setP(R.fp2,496,170,rise*2/48*DEG); setP(R.mp2,400,my,-rise/48*DEG);
+  a.set(R.hk2,{x1:400,y1:my+48,x2:400,y2:my+80}); R.cr2.setAttribute("transform",`translate(400,${my+80})`); R.h2.setAttribute("transform",`translate(544,${yh})`);
+  effArrow(R.ef2,594,yh,33); a.set(R.eft2,{x:616,y:yh+30,text:"effort : 10 kg"});
+  R.n2a.setAttribute("transform",`translate(352,${(80+my)/2})`); R.n2b.setAttribute("transform",`translate(448,${(my+170)/2})`);
+  R.v2c.textContent="corde tirée : "+f2(2*rise/100)+" m"; R.v2d.textContent="charge monte de : "+f2(rise/100)+" m"; }
+function dPalan(u){ const rise=100*u, by=570-rise, yh=300+4*rise;
+  a.set(R.rope3,{d:`M312,175 L312,${by} A36,36 0 0 0 384,${by} L384,215 A36,36 0 0 1 456,215 L456,${by} A36,36 0 0 0 528,${by} L528,215 A36,36 0 0 1 600,215 L600,${yh}`});
+  setP(R.pu3[0],420,215,rise*2/36*DEG); setP(R.pu3[1],564,215,rise*2/36*DEG); setP(R.bp3[0],348,by,-rise/36*DEG); setP(R.bp3[1],492,by,-rise/36*DEG);
+  a.set(R.bar3,{y:by+42}); a.set(R.hk3,{y1:by+66,y2:by+90}); R.cr3.setAttribute("transform",`translate(420,${by+90})`); R.h3.setAttribute("transform",`translate(600,${yh})`);
+  effArrow(R.ef3,650,yh,17); a.set(R.eft3,{x:672,y:yh+26,text:"effort : 5 kg"});
+  const ys=[(175+by)/2,(by+215)/2,(215+by)/2,(by+215)/2], xs=[312,384,456,528]; R.n3.forEach((g,i)=>g.setAttribute("transform",`translate(${xs[i]},${ys[i]})`));
+  R.v3c.textContent="corde tirée : "+f2(4*rise/100)+" m"; R.v3d.textContent="charge monte de : "+f2(rise/100)+" m"; }
+
+Anim.run({
+  titre:"Les poulies : changer de direction, forcer moins",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Mouvement et objets techniques",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Comment les bâtisseurs de cathédrales levaient-ils des pierres si lourdes ?",
+  manipDes:KM, manipJusqua:KM,
+  init(api){
+    a=api; E=a.el;
+    // ================= S1 poulie fixe
+    const L1=a.layer("p1"); R.L1=L1; ground(L1); ceil(L1,230,670,80);
+    E("line",{x1:400,y1:80,x2:400,y2:122,stroke:C.piv,"stroke-width":10},L1);
+    R.rope1=rope(L1); R.pu1=pulley(L1,48); setP(R.pu1,400,170,0);
+    R.cr1=crate(L1,"20 kg"); R.h1=hand(L1); R.ef1=a.arrow(L1,"M0,0 L0,10",{color:C.ef,w:12,head:3}); R.eft1=txt(L1,0,0,"",{size:28,w:800,color:C.ef,halo:1});
+    R.dir1=E("g",{},L1); a.arrow(R.dir1,"M500,196 L500,284",{color:C.or,w:8,head:3.2}); a.arrow(R.dir1,"M285,500 L285,330",{color:C.or,w:8,head:3.2}); txt(R.dir1,535,230,"on tire",{size:26,color:C.or,halo:1}); txt(R.dir1,535,262,"vers le bas…",{size:26,color:C.or,halo:1}); txt(R.dir1,60,260,"…la charge",{size:26,color:C.or,halo:1}); txt(R.dir1,60,292,"monte",{size:26,color:C.or,halo:1});
+    R.v1=vals(L1,"Poulie fixe",C.blue,1);
+    R.v1a=txt(R.v1,990,225,"charge : 20 kg",{size:30,color:C.ch}); R.v1b=txt(R.v1,990,285,"effort : 20 kg",{size:30,color:C.ef});
+    R.v1c=txt(R.v1,990,398,"",{size:28}); R.v1d=txt(R.v1,990,445,"",{size:28});
+    R.v1e=E("g",{},R.v1); R.v1e1=E("text",{x:990,y:510,"font-size":26,"font-weight":700,fill:C.blue},R.v1e); a.wrap(R.v1e1,"La poulie fixe change seulement la direction de la force : elle ne diminue pas l'effort.",34);
+    // ================= S2 poulie mobile
+    const L2=a.layer("p2"); R.L2=L2; ground(L2); ceil(L2,230,670,80);
+    R.rope2=rope(L2); R.fp2=pulley(L2,48); setP(R.fp2,496,170,0); E("line",{x1:496,y1:80,x2:496,y2:122,stroke:C.piv,"stroke-width":10},L2);
+    R.mp2=pulley(L2,48); R.hk2=E("line",{stroke:C.piv,"stroke-width":8},L2); R.cr2=crate(L2,"20 kg");
+    R.h2=hand(L2); R.ef2=a.arrow(L2,"M0,0 L0,10",{color:C.ef,w:12,head:3}); R.eft2=txt(L2,0,0,"",{size:28,w:800,color:C.ef,halo:1});
+    R.n2=E("g",{},L2); R.n2a=E("g",{},R.n2); R.n2b=E("g",{},R.n2);
+    [R.n2a,R.n2b].forEach((g,i)=>{ E("circle",{r:22,fill:C.or,stroke:"#fff","stroke-width":3},g); txt(g,0,9,String(i+1),{size:26,w:800,color:"#fff",anchor:"middle"}); });
+    R.t2s=E("g",{},L2); txt(R.t2s,200,330,"2 brins portent",{size:26,color:C.or,anchor:"end",halo:1}); txt(R.t2s,200,362,"la charge",{size:26,color:C.or,anchor:"end",halo:1});
+    R.v2=vals(L2,"Poulie mobile",C.blue,2);
+    R.v2a=txt(R.v2,990,225,"charge : 20 kg",{size:30,color:C.ch}); R.v2b=txt(R.v2,990,285,"effort : 10 kg",{size:30,color:C.ef});
+    R.v2c=txt(R.v2,990,398,"",{size:28}); R.v2d=txt(R.v2,990,445,"",{size:28});
+    R.v2e=E("g",{},R.v2); txt(R.v2e,990,500,"2 brins × 10 kg = 20 kg",{size:28,color:C.or}); txt(R.v2e,990,550,"effort 2 fois plus petit",{size:28,color:C.ef}); txt(R.v2e,990,600,"mais 2 fois plus de corde",{size:28,color:C.ch});
+    // ================= S3 palan
+    const L3=a.layer("p3"); R.L3=L3; ground(L3); ceil(L3,250,660,80);
+    E("line",{x1:455,y1:80,x2:455,y2:130,stroke:C.piv,"stroke-width":10},L3);
+    E("rect",{x:290,y:130,width:330,height:45,rx:8,fill:"#C9CFDA",stroke:C.piv,"stroke-width":4},L3);
+    R.rope3=rope(L3); R.pu3=[pulley(L3,36),pulley(L3,36)]; setP(R.pu3[0],420,215,0); setP(R.pu3[1],564,215,0);
+    R.bb3=E("g",{},L3); R.bp3=[pulley(L3,36),pulley(L3,36)]; R.bar3=E("rect",{x:300,width:240,height:24,rx:6,fill:"#C9CFDA",stroke:C.piv,"stroke-width":4},L3); R.hk3=E("line",{x1:420,x2:420,stroke:C.piv,"stroke-width":8},L3);
+    R.cr3=crate(L3,"20 kg"); R.h3=hand(L3); R.ef3=a.arrow(L3,"M0,0 L0,10",{color:C.ef,w:12,head:3}); R.eft3=txt(L3,0,0,"",{size:28,w:800,color:C.ef,halo:1});
+    R.n3=[1,2,3,4].map(i=>{ const g=E("g",{},L3); E("circle",{r:20,fill:C.or,stroke:"#fff","stroke-width":3},g); txt(g,0,8,String(i),{size:24,w:800,color:"#fff",anchor:"middle"}); return g; });
+    R.v3=vals(L3,"Palan : 2 poulies en haut, 2 en bas",C.blue,4);
+    R.v3a=txt(R.v3,990,225,"charge : 20 kg",{size:30,color:C.ch}); R.v3b=txt(R.v3,990,285,"effort : 5 kg",{size:30,color:C.ef});
+    R.v3c=txt(R.v3,990,398,"",{size:28}); R.v3d=txt(R.v3,990,445,"",{size:28});
+    R.v3e=E("g",{},R.v3); txt(R.v3e,990,500,"4 brins × 5 kg = 20 kg",{size:28,color:C.or}); txt(R.v3e,990,550,"effort 4 fois plus petit",{size:28,color:C.ef}); txt(R.v3e,990,600,"mais 4 fois plus de corde",{size:28,color:C.ch});
+    R.ph3=a.photo(L3,{id:"s-d3-moufle",x:730,y:130,w:200,h:134,cap:"",rot:0,size:20});
+    // ================= S4 puits + grue
+    const L4=a.layer("p4"); R.L4=L4; panel(L4,40,95,520,715); panel(L4,580,95,600,715);
+    txt(L4,300,143,"Le puits",{size:32,w:800,anchor:"middle"}); txt(L4,300,180,"une poulie fixe",{size:24,w:600,anchor:"middle",color:C.gris});
+    txt(L4,880,143,"Grue à écureuil (chantier de cathédrale)",{size:28,w:800,anchor:"middle"}); txt(L4,880,180,"poulie + grande roue qui tourne",{size:24,w:600,anchor:"middle",color:C.gris});
+    // puits
+    E("rect",{x:200,y:440,width:200,height:260,fill:"#3A4A5E"},L4); R.wat=E("rect",{x:200,y:640,width:200,height:60,fill:"#5AA2D8",opacity:.9},L4);
+    for(let r=0;r<5;r++) for(let c=0;c<3;c++){ E("rect",{x:130+c*24+(r%2)*12-12,y:440+r*52,width:22,height:50,fill:"#C9C2B4",stroke:"#8F887A","stroke-width":2},L4); E("rect",{x:400+c*24+(r%2)*12-12,y:440+r*52,width:22,height:50,fill:"#C9C2B4",stroke:"#8F887A","stroke-width":2},L4); }
+    E("rect",{x:120,y:700,width:360,height:14,fill:"#8F887A"},L4);
+    E("rect",{x:140,y:236,width:18,height:206,fill:C.woodD},L4); E("rect",{x:442,y:236,width:18,height:206,fill:C.woodD},L4); E("rect",{x:130,y:222,width:340,height:18,rx:4,fill:C.wood,stroke:C.woodD,"stroke-width":3},L4);
+    E("line",{x1:300,y1:240,x2:300,y2:272,stroke:C.piv,"stroke-width":8},L4);
+    R.rope4=rope(L4,7); R.pu4=pulley(L4,36); setP(R.pu4,300,300,0);
+    R.bk=E("g",{},L4); E("path",{d:"M-34,0 L34,0 L26,50 L-26,50 Z",fill:"#9AA3B2",stroke:C.ink,"stroke-width":3},R.bk); E("path",{d:"M-30,0 Q0,-26 30,0",fill:"none",stroke:C.ink,"stroke-width":3},R.bk); R.bkt=txt(R.bk,0,38,"10 kg",{size:19,w:800,color:C.ink,anchor:"middle"});
+    R.h4=hand(L4); R.ef4=a.arrow(L4,"M0,0 L0,10",{color:C.ef,w:10,head:3}); R.eft4=txt(L4,300,788,"effort pour tirer : 10 kg",{size:26,w:800,anchor:"middle",color:C.ef});
+    txt(L4,300,752,"seau d'eau : 10 litres = 10 kg",{size:24,w:700,anchor:"middle",color:C.ch});
+    // grue
+    const WX=760, WY=520, WR=150, DR=30; R.WX=WX; R.WY=WY; R.DR=DR;
+    E("line",{x1:1110,y1:700,x2:1110,y2:210,stroke:C.woodD,"stroke-width":16},L4); E("line",{x1:1110,y1:210,x2:990,y2:210,stroke:C.woodD,"stroke-width":12},L4); E("line",{x1:1110,y1:340,x2:1040,y2:210,stroke:C.woodD,"stroke-width":8},L4);
+    E("rect",{x:600,y:700,width:560,height:14,fill:"#8F887A"},L4);
+    E("line",{x1:760,y1:520,x2:700,y2:700,stroke:C.woodD,"stroke-width":12},L4); E("line",{x1:760,y1:520,x2:820,y2:700,stroke:C.woodD,"stroke-width":12},L4);
+    R.wheel=E("g",{},L4); R.wheelB=E("g",{},R.wheel); E("circle",{r:WR,fill:"#F6EBDD",stroke:C.woodD,"stroke-width":12},R.wheelB); E("circle",{r:WR-24,fill:"none",stroke:C.woodD,"stroke-width":5},R.wheelB);
+    for(let i=0;i<12;i++){ const t=i/12*Math.PI; E("line",{x1:-(WR-6)*Math.cos(t),y1:-(WR-6)*Math.sin(t),x2:(WR-6)*Math.cos(t),y2:(WR-6)*Math.sin(t),stroke:C.wood,"stroke-width":6},R.wheelB); }
+    E("circle",{cx:WR-12,cy:0,r:9,fill:C.or,stroke:"#fff","stroke-width":2},R.wheelB);
+    R.drum=E("g",{},L4); R.drumB=E("g",{},R.drum); E("circle",{r:DR,fill:"#DDBB8A",stroke:C.woodD,"stroke-width":5},R.drumB); E("line",{x1:0,y1:0,x2:DR-4,y2:0,stroke:C.woodD,"stroke-width":4},R.drumB);
+    R.man=E("g",{},L4); R.manL1=E("line",{stroke:C.ink,"stroke-width":10,"stroke-linecap":"round"},R.man); R.manL2=E("line",{stroke:C.ink,"stroke-width":10,"stroke-linecap":"round"},R.man); R.manB=E("g",{},R.man); E("line",{x1:0,y1:-56,x2:0,y2:0,stroke:"#2563A8","stroke-width":20,"stroke-linecap":"round"},R.manB); E("line",{x1:0,y1:-44,x2:-30,y2:-26,stroke:"#2563A8","stroke-width":9,"stroke-linecap":"round"},R.manB); E("circle",{cx:-2,cy:-78,r:16,fill:"#F2C79C",stroke:C.ink,"stroke-width":3},R.manB);
+    R.rope4b=rope(L4,6); R.pu4b=pulley(L4,30); setP(R.pu4b,1000,244,0); E("line",{x1:1000,y1:210,x2:1000,y2:244,stroke:C.piv,"stroke-width":6},L4);
+    R.st=E("g",{},L4); E("rect",{x:-45,y:0,width:90,height:66,rx:4,fill:"#CFC8BA",stroke:"#8F887A","stroke-width":4},R.st); E("line",{x1:-45,y1:22,x2:45,y2:22,stroke:"#8F887A","stroke-width":2},R.st); E("line",{x1:0,y1:22,x2:0,y2:66,stroke:"#8F887A","stroke-width":2},R.st);
+    R.tour=txt(L4,880,757,"",{size:24,w:700,color:C.or,anchor:"middle"});
+    R.mgr=txt(L4,880,788,"l'ouvrier marche dans la roue : il force peu",{size:22,w:600,color:C.gris,anchor:"middle"});
+    R.ph4=a.photo(L4,{id:"s-d3-grue-ecureuil",x:1215,y:125,w:330,h:220,cap:"Une grue à écureuil",rot:2,size:22});
+    R.ex4=E("g",{},L4); panel(R.ex4,1200,440,360,295,C.or); txt(R.ex4,1220,485,"Exemple chiffré",{size:26,w:800,color:C.or}); txt(R.ex4,1220,530,"roue : rayon 2 m",{size:24,w:600}); txt(R.ex4,1220,565,"tambour : rayon 0,4 m",{size:24,w:600}); txt(R.ex4,1220,610,"pierre : 150 kg",{size:26,color:C.ch}); R.ex4e=txt(R.ex4,1220,655,"effort : 30 kg",{size:28,w:800,color:C.ef}); txt(R.ex4,1220,700,"5 fois moins !",{size:26,w:800,color:C.ef});
+    // ================= S5 comparaison
+    const L5=a.layer("p5"); R.L5=L5; E("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},L5);
+    const cols=["sans poulie","poulie fixe","poulie mobile","palan (4 brins)"], vals_=[[20,20,20,20],[20,20,10,5],[1,1,2,4]], rowC=[C.ch,C.ef,C.or], cx0=480, dx=290; R.bars=[]; R.bt=[];
+    cols.forEach((c,i)=>txt(L5,cx0+i*dx,60,c,{size:28,w:800,anchor:"middle"}));
+    [["Poids de la charge","(ne change jamais)","kg"],["Effort à fournir","(il diminue)","kg"],["Corde à tirer","(pour monter de 1 m)","m"]].forEach((r,k)=>{
+      const base=[285,520,755][k]; txt(L5,40,base-95,r[0],{size:28,w:800,color:rowC[k]}); txt(L5,40,base-62,r[1],{size:24,w:600,color:C.gris}); E("line",{x1:360,y1:base,x2:1560,y2:base,stroke:"#B8BEC8","stroke-width":3},L5);
+      vals_[k].forEach((v,i)=>{ const h=k<2?v*5.5:v*30; const b=bar(L5,cx0+i*dx-55,base-h,110,h,rowC[k]); b._h=h; b._base=base; const tt=txt(L5,cx0+i*dx,base-h-12,"",{size:28,w:800,anchor:"middle",color:rowC[k]}); R.bars.push([k,i,v,b,tt]); }); });
+    R.cmp1=E("g",{},L5); a.label(R.cmp1,1380,110,"toujours 20 kg !",{size:28,stroke:C.ch,color:C.ch});
+    // ================= synthèse
+    const sy=a.layer("syn"); R.syn=sy; E("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy);
+    txt(sy,800,70,"À retenir",{size:38,w:800,anchor:"middle"});
+    R.pts=[["1","Poulie fixe : elle change la direction de la force, pas son intensité.",C.blue],["2","Poulie mobile, palan : l'effort est divisé par le nombre de brins, mais il faut tirer plus de corde.",C.ef],["3","La charge pèse toujours pareil : c'est l'effort qui diminue.",C.ch]].map(([n,t,c],i)=>{
+      const g=E("g",{},sy); E("rect",{x:150,y:110+i*105,width:1300,height:88,rx:16,fill:"#fff",stroke:c,"stroke-width":4},g); E("circle",{cx:205,cy:154+i*105,r:28,fill:c},g); E("text",{x:205,y:166+i*105,"text-anchor":"middle","font-size":34,"font-weight":800,fill:"#fff",text:n},g);
+      E("text",{x:255,y:164+i*105,"font-size":26,"font-weight":700,fill:C.ink,text:t},g); return g; });
+    R.myth=a.layer("myth"); a.myth(R.myth,150,450,1300,"Avec une poulie, la charge devient plus légère.","Non : la charge pèse toujours 20 kg. C'est l'effort qu'on doit fournir qui diminue, parce qu'on tire plus de corde.");
+    // manipulation : choix du montage ; la charge monte et descend en boucle tant qu'on est dans l'étape
+    const NOMS=["Poulie fixe","Poulie mobile","Palan (4 brins)"];
+    a.manip.innerHTML='Montage : '+NOMS.map((n,i)=>`<button data-m="${i}" class="${i===mode?"sel":""}">${n}</button>`).join(" ");
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ mode=+b.dataset.m; spin=0; a.manip.querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x===b)); a.redraw(); });
+    let last=performance.now();
+    setInterval(()=>{ const now=performance.now(), dt=Math.min(now-last,100); last=now; if(a.step()===KM){ spin+=dt; a.redraw(); } },40);
+  },
+  reset(a){ [R.L1,R.L2,R.L3,R.L4,R.L5,R.syn,R.myth,R.dir1,R.v1e,R.v2e,R.v3e,R.t2s,R.n2,R.ph3,R.ph4,R.ex4,R.cmp1,R.tour,R.mgr].forEach(e=>a.op(e,0)); R.n3.forEach(g=>a.op(g,0)); R.pts.forEach(g=>a.op(g,0)); R.bars.forEach(([k,i,v,b,tt])=>{ a.op(b,0); a.op(tt,0); }); },
+  etapes:[
+  { titre:"La poulie fixe", duree:12000,
+    legende:"Avec une poulie fixe, on tire la corde vers le bas et la charge monte. Elle change la direction de la force, mais l'effort reste le même : 20 kg pour 20 kg.",
+    voix:"Voici une poulie fixe : elle est accrochée au plafond et ne bouge pas. Une corde passe sur la poulie. D'un côté, une caisse de vingt kilos. De l'autre, je tire vers le bas, et la caisse monte. La poulie fixe change la direction de la force, c'est pratique. Mais regardez : pour soulever vingt kilos, il me faut un effort de vingt kilos. Et si je tire un mètre de corde, la caisse monte d'un mètre.",
+    anim(t,a){ const s=a.seg; a.op(R.L1,1); dFixed(s(t,.28,.85,true));
+      a.op(R.ef1,s(t,.1,.2)); a.op(R.eft1,s(t,.12,.22)); a.op(R.dir1,s(t,.35,.5)); a.op(R.v1,s(t,.05,.15)); a.op(R.v1e,s(t,.8,.95)); } },
+  { titre:"La poulie mobile", duree:13000,
+    legende:"Avec une poulie mobile, la charge est portée par 2 brins de corde. Chaque brin porte la moitié : l'effort tombe à 10 kg. Mais pour monter la charge de 1 m, il faut tirer 2 m de corde.",
+    voix:"Maintenant, la poulie est mobile : elle monte avec la caisse. Un bout de la corde est attaché au plafond, l'autre passe sur une poulie fixe pour que je tire vers le bas. Deux brins de corde portent la caisse : chaque brin supporte la moitié du poids, soit dix kilos. Mon effort n'est plus que de dix kilos ! Mais regardez la corde : pour monter la caisse d'un mètre, je dois tirer deux mètres de corde.",
+    anim(t,a){ const s=a.seg; a.op(R.L2,1); a.op(R.L1,1-s(t,0,.1)); dMobile(s(t,.28,.88,true));
+      a.op(R.ef2,s(t,.1,.2)); a.op(R.eft2,s(t,.12,.22)); a.op(R.n2,s(t,.15,.28)); a.op(R.t2s,s(t,.15,.28)); a.op(R.v2,s(t,.05,.15)); a.op(R.v2e,s(t,.8,.95)); } },
+  { titre:"Le palan : plusieurs poulies", duree:15000,
+    legende:"Un palan combine des poulies fixes et mobiles. Ici, 4 brins portent la charge : l'effort tombe à 5 kg. Mais pour monter la charge de 1 m, il faut tirer 4 m de corde.",
+    voix:"Pour forcer encore moins, on combine plusieurs poulies : c'est un palan, ou moufle. Ici, deux poulies en haut qui ne bougent pas, deux poulies en bas qui montent avec la caisse. Quatre brins de corde portent la charge : chacun ne supporte que cinq kilos. Mon effort est de cinq kilos seulement ! Mais pour monter la caisse d'un mètre, je dois tirer quatre mètres de corde.",
+    anim(t,a){ const s=a.seg; a.op(R.L3,1); a.op(R.L2,1-s(t,0,.1)); dPalan(s(t,.3,.9,true));
+      a.op(R.ef3,s(t,.1,.2)); a.op(R.eft3,s(t,.12,.22)); R.n3.forEach((g,i)=>a.op(g,s(t,.12+i*.05,.22+i*.05))); a.op(R.v3,s(t,.05,.15)); a.op(R.v3e,s(t,.82,.95)); a.op(R.ph3,s(t,.55,.75)); } },
+  { titre:"À vous : choisissez le montage", duree:6000,
+    legende:"À vous : choisissez un montage (poulie fixe, poulie mobile ou palan) et regardez la charge monter. Combien de corde faut-il tirer ? Quel effort faut-il fournir ?",
+    voix:"À vous ! Avec les boutons, choisissez un montage : poulie fixe, poulie mobile ou palan. Regardez la caisse monter. Combien de corde faut-il tirer pour la monter d'un mètre ? Et quel effort faut-il fournir ? Comparez les trois montages. Prenez votre temps.",
+    anim(t,a){ const s=a.seg; const L=[R.L1,R.L2,R.L3];
+      L.forEach((l,i)=>a.op(l,i===mode?(mode===2?1:s(t,0,.12)):(i===2?1-s(t,0,.12):0)));
+      const u=cyc(spin); a.op(R.ph3,0);
+      if(mode===0){ dFixed(u); a.op(R.ef1,1); a.op(R.eft1,1); a.op(R.dir1,1); a.op(R.v1,1); a.op(R.v1e,1); }
+      else if(mode===1){ dMobile(u); a.op(R.ef2,1); a.op(R.eft2,1); a.op(R.n2,1); a.op(R.t2s,1); a.op(R.v2,1); a.op(R.v2e,1); }
+      else { dPalan(u); a.op(R.ef3,1); a.op(R.eft3,1); R.n3.forEach(g=>a.op(g,1)); a.op(R.v3,1); a.op(R.v3e,1); } } },
+  { titre:"Le puits et la grue des cathédrales", duree:14000,
+    legende:"Au puits, une poulie fixe renvoie la corde vers le bas. Sur un chantier de cathédrale, la grue à écureuil associe une poulie et une grande roue : l'ouvrier qui marche dedans soulève des pierres très lourdes en forçant peu.",
+    voix:"Les poulies servent depuis très longtemps. Au puits, une poulie fixe permet de remonter un seau de dix kilos en tirant vers le bas. Sur les chantiers des cathédrales, au Moyen Âge, on utilisait la grue à écureuil. Un ouvrier marche à l'intérieur d'une grande roue. La roue fait tourner un petit tambour sur lequel s'enroule la corde, qui passe sur une poulie et soulève la pierre. Plus la roue est grande par rapport au tambour, moins l'ouvrier a besoin de forcer. Dans l'exemple, la roue est cinq fois plus grande que le tambour : cent cinquante kilos de pierre se soulèvent avec trente kilos d'effort.",
+    anim(t,a){ const s=a.seg; a.op(R.L4,1); [R.L1,R.L2,R.L3].forEach((l,i)=>a.op(l,i===mode?1-s(t,0,.1):0)); const u=s(t,.2,.9,true);
+      // puits : 2 m = 120 px
+      const pulled=120*u; const bt=610-pulled; const yh=340+pulled;
+      a.set(R.rope4,{d:`M264,${bt} L264,300 A36,36 0 0 1 336,300 L336,${yh}`}); setP(R.pu4,300,300,pulled/36*180/Math.PI); R.bk.setAttribute("transform",`translate(264,${bt})`); R.h4.setAttribute("transform",`translate(336,${yh})`);
+      effArrow(R.ef4,372,yh,33);
+      // grue : 1 tour de roue en sens inverse des aiguilles
+      const th=-360*u; R.wheelB.setAttribute("transform",`rotate(${th})`); R.wheel.setAttribute("transform",`translate(${R.WX},${R.WY})`); R.drum.setAttribute("transform",`translate(${R.WX},${R.WY})`); R.drumB.setAttribute("transform",`rotate(${th})`);
+      const rise=R.DR*2*Math.PI*u; const sty=635-rise; // 1 tour de tambour = 188 px = 2,5 m (75 px par mètre)
+      a.set(R.rope4b,{d:`M${R.WX},${R.WY-R.DR} L1000,214 A30,30 0 0 1 1030,244 L1030,${sty}`}); R.st.setAttribute("transform",`translate(1030,${sty})`);
+      // ouvrier qui marche dans la roue
+      const ph=u*Math.PI*14, mx=R.WX-44, my=R.WY+86, sw=Math.sin(ph)*24; R.manB.setAttribute("transform",`translate(${mx},${my})`);
+      a.set(R.manL1,{x1:mx,y1:my,x2:mx+sw,y2:my+54}); a.set(R.manL2,{x1:mx,y1:my,x2:mx-sw,y2:my+54});
+      a.op(R.ph4,s(t,.55,.75)); a.op(R.ex4,s(t,.6,.75)); R.tour.textContent=f1(u)+" tour de roue : la pierre monte de "+f1(rise/75)+" m"; a.op(R.tour,s(t,.2,.3)); a.op(R.mgr,s(t,.3,.4)); } },
+  { titre:"Comparons : la charge ne change pas", duree:15000,
+    legende:"Le poids de la charge reste 20 kg dans tous les cas. Ce qui diminue, c'est l'effort : 20, 20, 10, puis 5 kg. Mais la corde à tirer augmente : 1, 1, 2, puis 4 m (en théorie, sans frottements).",
+    voix:"Comparons. Première ligne : le poids de la charge. C'est toujours vingt kilos, avec ou sans poulie. La charge ne devient jamais plus légère ! Deuxième ligne : l'effort. Sans poulie ou avec une poulie fixe, vingt kilos. Avec une poulie mobile, dix. Avec un palan à quatre brins, cinq seulement. Troisième ligne : la corde à tirer pour monter d'un mètre. Un mètre, un mètre, deux mètres, quatre mètres. Plus on divise l'effort, plus il faut tirer de corde. Ces valeurs sont théoriques : on a oublié les frottements.",
+    anim(t,a){ const s=a.seg; a.op(R.L5,1); a.op(R.L4,1-s(t,0,.06));
+      R.bars.forEach(([k,i,v,b,tt])=>{ const g=s(t,[.04,.34,.64][k]+i*.035,[.2,.5,.8][k]+i*.035); const h=(k<2?v*5.5:v*30)*g; a.set(b,{y:b._base-h,height:Math.max(.1,h)}); a.op(b,g>0?1:0); a.set(tt,{y:b._base-h-12,text:(k<2?f0(v*g):f0(v*g))+(k<2?" kg":" m")}); a.op(tt,g>0.05?1:0); });
+      a.op(R.cmp1,s(t,.26,.34)); } },
+  { titre:"Synthèse", duree:10000,
+    legende:"Poulie fixe : on change de direction. Poulie mobile ou palan : on force moins, mais on tire plus de corde. La charge, elle, pèse toujours pareil.",
+    voix:"Pour retenir. La poulie fixe change la direction de la force. La poulie mobile et le palan divisent l'effort par le nombre de brins, mais il faut tirer plus de corde. Attention : une poulie ne rend pas la charge plus légère. La charge pèse toujours pareil, c'est l'effort qui diminue.",
+    anim(t,a){ const s=a.seg; a.op(R.L5,1-s(t,0,.08)); a.op(R.syn,s(t,0,.1)); R.pts.forEach((g,i)=>a.op(g,s(t,.08+i*.12,.18+i*.12))); a.op(R.myth,s(t,.55,.7)); } },
+  ]
+});
+})();
+</script></body></html>

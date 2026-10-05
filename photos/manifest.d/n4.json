@@ -1,0 +1,76 @@
+[
+ {
+  "id": "g-a3-greenwich",
+  "q": "Royal Observatory Greenwich Prime Meridian line brass strip",
+  "must": [
+   "Greenwich",
+   "meridian"
+  ],
+  "alt": "la ligne du méridien de Greenwich (0°) à l'Observatoire royal de Greenwich"
+ },
+ {
+  "id": "g-a3-terre-nasa",
+  "q": "The Blue Marble Apollo 17 Earth NASA",
+  "must": [
+   "Blue Marble"
+  ],
+  "alt": "la Terre vue de l'espace (NASA, domaine public)"
+ },
+ {
+  "id": "g-a4-weltzeituhr",
+  "q": "Weltzeituhr Alexanderplatz Berlin world time clock",
+  "must": [
+   "Weltzeituhr"
+  ],
+  "alt": "l'horloge universelle de l'Alexanderplatz à Berlin, qui indique l'heure dans les fuseaux horaires du monde"
+ },
+ {
+  "id": "g-a4-terre-nuit",
+  "q": "Black Marble Earth at night city lights NASA",
+  "must": [
+   "night"
+  ],
+  "alt": "la Terre la nuit vue de l'espace (lumières des villes), NASA"
+ },
+ {
+  "id": "g-a2-plan-dijon-ancien",
+  "q": "Plan de Dijon ancien carte historique",
+  "must": [
+   "Dijon",
+   "plan"
+  ],
+  "alt": "un plan ancien de la ville de Dijon"
+ },
+ {
+  "id": "g-a2-cassini",
+  "q": "Carte de Cassini Bourgogne feuille",
+  "must": [
+   "Cassini"
+  ],
+  "alt": "une feuille de la carte de Cassini (XVIIIe siècle) montrant la Bourgogne"
+ },
+ {
+  "id": "g-a5-terre-espace",
+  "q": "The Blue Marble Apollo 17 Earth NASA",
+  "must": [
+   "Blue Marble"
+  ],
+  "alt": "la Terre vue de l'espace, planète bleue (NASA, domaine public)"
+ },
+ {
+  "id": "g-a6-fuseaux-1507",
+  "q": "Waldseemüller globe gores 1507",
+  "must": [
+   "Waldseem"
+  ],
+  "alt": "les fuseaux de papier du globe de Waldseemüller (1507), à découper et coller sur une sphère"
+ },
+ {
+  "id": "g-a6-mercator-1569",
+  "q": "Mercator 1569 world map Nova et Aucta Orbis Terrae Descriptio",
+  "must": [
+   "Mercator"
+  ],
+  "alt": "la carte du monde de Gerardus Mercator (1569), à l'origine de la projection de Mercator"
+ }
+]

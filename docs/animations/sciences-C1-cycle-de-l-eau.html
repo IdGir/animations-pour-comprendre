@@ -1,0 +1,532 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le cycle de l'eau</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-C1-cycle-de-l-eau","matiere":"sciences","annee":"B","periode":1,"theme":"Matière, mélanges, eau : le cycle de l'eau et les changements d'état","resume":"Évaporation, condensation, précipitations, ruissellement : l'eau change d'état et de place entre la mer et la Côte-d'Or, mais il y en a toujours autant.","motsCles":["cycle de l'eau","évaporation","condensation","précipitations","ruissellement","infiltration","nappe","vapeur d'eau","nuage","Côte-d'Or","Ouche","Saône"]} */
+(function(){
+const C={ink:"#1E2430",or:"#E07A1F",bl:"#2563A8",gr:"#2E8B57",red:"#C0392B",water:"#4A90D9",waterL:"#BFE0F7",soil:"#A3825A",soilD:"#8B6B44",grass:"#5FA85A",rock:"#7C7F86"};
+const rnd=(i,k)=>{ const x=Math.sin(i*12.9898+k*78.233)*43758.5453; return x-Math.floor(x); };
+const SURF="M0,430 C110,310 250,285 370,340 C470,386 560,545 690,592 L1050,602";
+const LC={x:770,y:310,r:180};            // « loupe » (zoom sur les particules)
+const WP=[[1250,640],[1250,300],[400,215],[380,160],[470,400],[690,592],[1050,602],[1330,650]]; // trajet de la goutte
+let R={}, Z={}, SP=[];
+const surfY=x=>{ let lo=0,hi=SP.length-1; while(hi-lo>1){ const m=(lo+hi)>>1; if(SP[m].x<x) lo=m; else hi=m; } const p=SP[lo],q=SP[hi]; return q.x===p.x?p.y:p.y+(q.y-p.y)*(x-p.x)/(q.x-p.x); };
+const pack=(k,sp)=>({x:sp*Math.sqrt(k+.5)*Math.cos(k*2.39996),y:sp*Math.sqrt(k+.5)*Math.sin(k*2.39996)});
+function mascot(a,p){ const g=a.el("g",{},p); g.liq=a.el("g",{},g); g.gas=a.el("g",{},g); g.ice=a.el("g",{},g);
+  a.el("path",{d:"M0,-30 L26,-15 L26,15 L0,30 L-26,15 L-26,-15Z",fill:"#EAF6FF",stroke:C.bl,"stroke-width":3,"stroke-linejoin":"round"},g.ice); [0,60,120].forEach(r=>a.el("line",{x1:0,y1:-30,x2:0,y2:30,stroke:"#9CC6EA","stroke-width":2.5,transform:`rotate(${r})`},g.ice));
+  a.el("path",{d:"M0,-34 C10,-18 22,-8 22,6 C22,20 12,28 0,28 C-12,28 -22,20 -22,6 C-22,-8 -10,-18 0,-34Z",fill:C.water,stroke:"#1E5FA8","stroke-width":3},g.liq);
+  a.el("path",{d:"M0,-34 C10,-18 22,-8 22,6 C22,20 12,28 0,28 C-12,28 -22,20 -22,6 C-22,-8 -10,-18 0,-34Z",fill:"#fff","fill-opacity":.65,stroke:C.bl,"stroke-width":3,"stroke-dasharray":"6 5"},g.gas);
+  const f=a.el("g",{},g); [-8,8].forEach(x=>{ a.el("circle",{cx:x,cy:2,r:5.5,fill:"#fff",stroke:C.ink,"stroke-width":1.5},f); a.el("circle",{cx:x+1,cy:3,r:2.4,fill:C.ink},f); });
+  a.el("path",{d:"M-8,14 Q0,22 8,14",fill:"none",stroke:C.ink,"stroke-width":2.5,"stroke-linecap":"round"},f);
+  g.st=(gas,ice)=>{ a.op(g.liq,gas||ice?0:1); a.op(g.gas,gas?1:0); a.op(g.ice,ice?1:0); }; return g; }
+// manipulation : où est la goutte ? (lieu, position, état, texte)
+const PL=[
+ {b:"la mer",x:1250,y:655,etat:"liquide",col:"#2563A8",t1:"La goutte est dans la mer.",t2:"Le Soleil la réchauffe : elle va s'évaporer.",nx:1},
+ {b:"l'air",x:1180,y:335,etat:"gaz (vapeur d'eau)",col:"#7A3FA0",gas:1,t1:"La goutte est dans l'air.",t2:"En montant, elle se refroidit : elle va se condenser.",nx:2},
+ {b:"le nuage",x:372,y:150,etat:"liquide (gouttelette)",col:"#2563A8",t1:"La goutte est dans un nuage.",t2:"Elle grossit avec d'autres : elle va tomber.",nx:3},
+ {b:"la pluie",x:432,y:330,etat:"liquide",col:"#2563A8",t1:"La goutte tombe en pluie.",t2:"Elle va ruisseler vers la rivière ou s'infiltrer.",nx:5},
+ {b:"la neige",x:250,y:0,etat:"solide (glace)",col:"#1E7C8C",ice:1,t1:"La goutte tombe en neige.",t2:"Au printemps, elle fondra et rejoindra les ruisseaux.",nx:5},
+ {b:"la rivière",x:890,y:566,etat:"liquide",col:"#2563A8",t1:"La goutte est dans la rivière.",t2:"L'Ouche, la Saône puis le Rhône l'emmènent.",nx:0},
+ {b:"la nappe",x:600,y:797,etat:"liquide",col:"#2563A8",t1:"La goutte est dans la nappe.",t2:"Sous terre, elle coule très lentement vers la mer.",nx:0}];
+let place=0, lastPlace=0, manipActive=false;
+function reset0(){ Z={clk:0,vap:0,mAlpha:0,mp:0,loupe:0,ev:0,mode:1,co:0,me:0,fa:0,cloud:0,dark:0,rain:0,snowfall:0,snow:0,run:0,infil:0,nap:0,riv:0,
+  chip:{ev:0,co:0,pr:0,ru:0,inf:0,geo:0},lt1:"",lt2:"",ltitle:"",ph1:0,ph2:0,ph1b:0,restart:0,
+  mOver:null,mpanel:0,over:0,jev:0,jcon:0,jfall:0,jp:[0,0,0],jar:0,myth:0,syn:[0,0,0],synG:0}; }
+Anim.run({
+  titre:"Le cycle de l'eau",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Matière, mélanges, eau",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Où va l'eau d'une flaque qui sèche ? Suivons une particule d'eau, de la mer aux collines de Côte-d'Or.",
+  manipDes:5, manipJusqua:5,
+  init(a){
+    const {el}=a, svg=a.svg;
+    const defs=el("defs",{},svg);
+    const gr=el("linearGradient",{id:"c1sky",x1:0,y1:0,x2:0,y2:1},defs); el("stop",{offset:0,"stop-color":"#BFE0F7"},gr); el("stop",{offset:1,"stop-color":"#EEF7FD"},gr);
+    const cp=el("clipPath",{id:"c1lc"},defs); el("circle",{cx:LC.x,cy:LC.y,r:LC.r-4},cp);
+    // échantillonnage du relief
+    const sp=el("path",{d:SURF,fill:"none"},svg); const L=sp.getTotalLength(); for(let i=0;i<=400;i++){ const q=sp.getPointAtLength(L*i/400); SP.push({x:q.x,y:q.y}); } svg.removeChild(sp);
+    // ===== paysage =====
+    const land=a.layer("land"); R.land=land;
+    el("rect",{x:0,y:0,width:1600,height:610,fill:"url(#c1sky)"},land);
+    R.sun=el("g",{},land); el("circle",{cx:0,cy:0,r:44,fill:"#FFC83D",stroke:"#E8A317","stroke-width":4},R.sun);
+    R.rays=[...Array(12)].map((_,i)=>el("line",{x1:60,y1:0,x2:92,y2:0,stroke:"#F5A91F","stroke-width":6,"stroke-linecap":"round",transform:`rotate(${i*30})`},R.sun)); a.tr(R.sun,1130,92);
+    // mer
+    el("rect",{x:1050,y:600,width:550,height:300,fill:C.water},land); el("rect",{x:1050,y:600,width:550,height:300,fill:"#2F6FB5",opacity:.35},land);
+    R.waves=el("path",{fill:"none",stroke:"#fff","stroke-width":3,opacity:.7},land);
+    // sol
+    el("path",{d:SURF+" L1050,900 L0,900 Z",fill:C.soil},land);
+    el("rect",{x:0,y:735,width:1050,height:165,fill:C.rock,opacity:.9},land);
+    R.nappe=el("rect",{x:0,y:762,width:1050,height:70,fill:"#7FB8E6"},land);
+    el("rect",{x:0,y:735,width:1050,height:27,fill:C.soilD,opacity:.6},land); el("rect",{x:0,y:832,width:1050,height:68,fill:"#6B6E75"},land);
+    el("path",{d:SURF,fill:"none",stroke:C.grass,"stroke-width":14,"stroke-linecap":"butt"},land);
+    // forêt du Morvan
+    for(let i=0;i<9;i++){ const x=40+i*34+rnd(i,1)*12, y=surfY(x)-4; if(x>80&&x<400||x<=80){ el("path",{d:`M${x},${y-46} L${x-17},${y} L${x+17},${y}Z`,fill:"#2F7D3C"},land); el("rect",{x:x-3,y,width:6,height:10,fill:"#6B4A2A"},land); } }
+    // neige au sommet
+    R.snowcap=el("path",{fill:"#fff",stroke:"#C9D6E3","stroke-width":2},land);
+    // rivière (la Saône) + flot
+    el("path",{d:"M600,570 C640,590 660,596 700,598 L1055,603",fill:"none",stroke:C.water,"stroke-width":16,"stroke-linecap":"round"},land);
+    R.flow=el("path",{d:"M600,570 C640,590 660,596 700,598 L1055,603",fill:"none",stroke:"#fff","stroke-width":6,"stroke-dasharray":"16 22",opacity:.9},land);
+    // Dijon
+    const dj=el("g",{},land); [[740,40,56],[784,34,40],[826,44,64],[876,36,48]].forEach(([x,w,h],i)=>{ el("rect",{x,y:598-h,width:w,height:h,fill:["#D9C7A8","#CDB791","#E2D3B8","#D0BC98"][i],stroke:"#7A6A4E","stroke-width":2},dj); el("path",{d:`M${x-3},${598-h} L${x+w/2},${598-h-18} L${x+w+3},${598-h}Z`,fill:"#B5543A"},dj); });
+    // ruissellement
+    const rp=[]; for(let x=336;x<=692;x+=6) rp.push([x,surfY(x)+3]); R.rup="M"+rp.map(p=>p.join(",")).join(" L");
+    R.run=el("path",{d:R.rup,fill:"none",stroke:C.water,"stroke-width":9,"stroke-linecap":"round"},land);
+    // eau souterraine : étiquette et particules
+    R.inf=[...Array(22)].map((_,i)=>el("circle",{r:6,fill:"#7FB8E6",stroke:"#1E5FA8","stroke-width":2},land));
+    R.nf=[...Array(16)].map((_,i)=>el("circle",{r:6,fill:"#fff",stroke:"#1E5FA8","stroke-width":2},land));
+    // nuage
+    R.cloud=el("g",{},land); [[-70,10,52],[-20,-16,66],[40,-6,60],[88,12,48],[8,22,56],[-36,24,46],[60,26,44]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#fff"},R.cloud));
+    R.cloudD=el("g",{},land); [[-70,10,52],[-20,-16,66],[40,-6,60],[88,12,48],[8,22,56],[-36,24,46],[60,26,44]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#8C98A8"},R.cloudD));
+    // vapeur
+    R.vap=[...Array(52)].map((_,i)=>{ const c=el("circle",{r:11,fill:"#fff","fill-opacity":.55,stroke:C.bl,"stroke-width":2.5,"stroke-dasharray":"4 3"},land); c._o=rnd(i,1); c._x=i<38?1100+rnd(i,2)*450:660+rnd(i,2)*370; c._y=i<38?590:588; return c; });
+    // pluie / neige
+    R.rain=[...Array(46)].map((_,i)=>el("path",{d:"M0,0 L-3,14",stroke:"#2F6FB5","stroke-width":4,"stroke-linecap":"round"},land));
+    R.snowf=[...Array(24)].map((_,i)=>el("circle",{r:6,fill:"#fff",stroke:"#9DB2C7","stroke-width":2},land));
+    // chips
+    const chip=(k,x,y,s,c)=>{ R["ch_"+k]=a.label(land,x,y,s,{size:26,w:Math.ceil(s.length*18.5+30),stroke:c,color:c,sw:3}); };
+    chip("ev",1462,430,"ÉVAPORATION",C.or); chip("co",360,44,"CONDENSATION",C.bl); chip("pr",132,140,"PRÉCIPITATIONS",C.bl);
+    chip("ru",545,672,"RUISSELLEMENT","#1E5FA8"); chip("inf",215,672,"INFILTRATION","#1E5FA8");
+    R.geo=el("g",{},land); a.label(R.geo,150,520,"collines de Côte-d'Or",{size:24,w:290,fill:"#fff"}); a.label(R.geo,885,676,"l'Ouche, la Saône\npuis le Rhône",{size:24,w:260,fill:"#fff"}); a.label(R.geo,1325,770,"la mer (Méditerranée)",{size:26,w:340,fill:"#fff"}); a.label(R.geo,810,500,"Dijon",{size:24,w:100,fill:"#fff"}); a.label(R.geo,300,797,"nappe d'eau souterraine",{size:24,w:320,fill:"#EAF4FB"});
+    R.restart=a.label(land,800,48,"Et tout recommence : c'est un cycle !",{size:30,w:560,stroke:C.or,color:"#8A4A0E",sw:3});
+    // goutte (mascotte)
+    R.m=mascot(a,land); R.mT=el("text",{"font-size":22,"font-weight":800,fill:C.ink,stroke:"#fff","stroke-width":5,"paint-order":"stroke","text-anchor":"start",text:"Goutte"},land);
+    // ===== loupe =====
+    const lp=a.layer("loupe"); R.lp=lp;
+    el("circle",{cx:LC.x,cy:LC.y,r:LC.r,fill:"#F4FAFE",stroke:"#5A6478","stroke-width":6},lp);
+    const lg=el("g",{"clip-path":"url(#c1lc)"},lp); R.lg=lg;
+    R.surfL=el("rect",{x:LC.x-LC.r,y:LC.y+20,width:2*LC.r,height:LC.r,fill:"#CFE6F7"},lg);
+    R.cold=el("rect",{x:LC.x-LC.r,y:LC.y-LC.r,width:2*LC.r,height:2*LC.r,fill:"#C7D9F0"},lg);
+    // particules d'évaporation
+    R.lq=[]; for(let row=0;row<5;row++) for(let col=0;col<12;col++){ const x=LC.x-188+col*34+(row%2)*17, y=LC.y+44+row*31; if(Math.hypot(x-LC.x,y-LC.y)<LC.r-10) R.lq.push({x,y,row,col}); }
+    R.lq.forEach((q,i)=>{ const esc=(q.row===0&&rnd(i,3)>.42)||(q.row===1&&rnd(i,4)>.8); q.esc=esc; q.ti=.1+.6*rnd(i,5); q.sp=110+60*rnd(i,6); q.c=el("circle",{r:11,fill:"#7FB8E6",stroke:"#2F6FB5","stroke-width":2},lg); });
+    let mi=0,bd=1e9; R.lq.forEach((q,i)=>{ if(q.row===0&&Math.abs(q.x-LC.x)<bd){ bd=Math.abs(q.x-LC.x); mi=i; } }); R.mq=R.lq[mi]; R.mq.esc=true; R.mq.ti=.32; R.mq.sp=150; R.mq.c.style.display="none";
+    // particules de condensation
+    R.co=[...Array(36)].map((_,i)=>{ const d=Math.floor(i/6), j=i%6; const ang=d/6*Math.PI*2+.4, rr=d%2?95:115; const dc={x:LC.x+Math.cos(ang)*rr*(d>1?1:.8)*.9,y:LC.y+Math.sin(ang)*rr*.9}; const o=pack(j,19); const bg=pack(i,19); return {c:el("circle",{r:10.5,fill:"#7FB8E6",stroke:"#2F6FB5","stroke-width":2},lg),gx:LC.x-165+rnd(i,7)*330,gy:LC.y-150+rnd(i,8)*300,vx:(rnd(i,9)-.5)*2,vy:(rnd(i,10)-.5)*2,dx:dc.x+o.x,dy:dc.y+o.y,bx:LC.x+bg.x,by:LC.y+bg.y-10,d}; });
+    R.dr=[...Array(6)].map(()=>el("circle",{r:0,fill:"#7FB8E6","fill-opacity":.2,stroke:"#2F6FB5","stroke-width":2.5},lg)); R.big=el("circle",{r:0,fill:"#7FB8E6","fill-opacity":.2,stroke:"#2F6FB5","stroke-width":3.5},lg);
+    R.lm=mascot(a,lg); R.lm.setAttribute("data-s",1);
+    R.ltg=el("g",{},lp); el("rect",{x:LC.x-290,y:LC.y-LC.r-76,width:580,height:86,rx:12,fill:"#fff",stroke:"#5A6478","stroke-width":3},R.ltg);
+    R.ltitleT=el("text",{x:LC.x,y:LC.y-LC.r-40,"text-anchor":"middle","font-size":26,"font-weight":800,fill:C.ink},R.ltg); R.lt1=el("text",{x:LC.x,y:LC.y-LC.r-8,"text-anchor":"middle","font-size":24,"font-weight":700,fill:C.bl},R.ltg);
+    R.link=el("line",{stroke:"#9AA3B2","stroke-width":3,"stroke-dasharray":"8 6"},lp);
+    // ===== photos =====
+    const ph=a.layer("photos"); R.ph1=a.photo(ph,{id:"s-c1-nuages",x:1240,y:34,w:300,h:196,cap:"De vrais nuages",rot:2}); R.ph2=a.photo(ph,{id:"s-c1-lac-kir",x:1230,y:34,w:310,h:200,cap:"Le lac Kir, à Dijon",rot:-2});
+    // ===== manipulation : suivre la goutte =====
+    const mp=a.layer("mpan"); R.mp=mp; R.mpBox=el("rect",{x:1085,y:190,width:495,height:215,rx:16,fill:"#fff",stroke:C.or,"stroke-width":4},mp);
+    R.mpT1=el("text",{x:1105,y:236,"font-size":26,"font-weight":800,fill:C.ink},mp); R.mpEt=el("text",{x:1105,y:282,"font-size":28,"font-weight":800},mp); R.mpT2=el("text",{x:1105,y:326,"font-size":25,fill:C.ink},mp);
+    R.mpH=el("text",{x:1580,y:440,"text-anchor":"end","font-size":26,"font-weight":800,fill:C.or},mp);
+    a.manip.innerHTML=`Où est la goutte ? `+PL.map((q,i)=>`<button data-p="${i}">${q.b}</button>`).join("")+` <button data-p="next" style="border-style:dashed">et ensuite ▶</button>`;
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(!manipActive){ manipActive=true; place=lastPlace; } place=b.dataset.p==="next"?PL[place].nx:+b.dataset.p; a.redraw(); });
+    // ===== bocal fermé =====
+    const ov=a.layer("over"); R.over=ov; el("rect",{x:-12,y:-12,width:1624,height:924,fill:"#fff"},ov);
+    const J=el("g",{},ov); R.J=J; const jx=380;
+    R.jSun=el("g",{},J); el("circle",{cx:0,cy:0,r:36,fill:"#FFC83D",stroke:"#E8A317","stroke-width":4},R.jSun); [...Array(8)].forEach((_,i)=>el("line",{x1:48,y1:0,x2:72,y2:0,stroke:"#F5A91F","stroke-width":5,"stroke-linecap":"round",transform:`rotate(${i*45})`},R.jSun)); a.tr(R.jSun,jx,130);
+    R.jWater=el("rect",{x:jx-146,y:500,width:292,height:136,fill:C.water,opacity:.9},J);
+    el("path",{d:`M${jx-150},290 L${jx-150},630 Q${jx-150},640 ${jx-140},640 L${jx+140},640 Q${jx+150},640 ${jx+150},630 L${jx+150},290`,fill:"none",stroke:"#7E9BB3","stroke-width":6},J);
+    el("rect",{x:jx-160,y:258,width:320,height:34,rx:8,fill:"#8C96A6",stroke:"#5A6475","stroke-width":3},J);
+    R.jLine=el("line",{x1:jx-190,y1:500,x2:jx+150,y2:500,stroke:C.red,"stroke-width":3,"stroke-dasharray":"8 6"},J); R.jLineT=el("text",{x:jx-196,y:490,"text-anchor":"end","font-size":22,"font-weight":700,fill:C.red,text:"niveau"},J); el("text",{x:jx-196,y:516,"text-anchor":"end","font-size":22,"font-weight":700,fill:C.red,text:"de départ"},J);
+    R.jv=[...Array(10)].map((_,i)=>el("circle",{r:8,fill:"#fff","fill-opacity":.6,stroke:C.bl,"stroke-width":2.5,"stroke-dasharray":"4 3"},J));
+    R.jd=[...Array(12)].map((_,i)=>el("circle",{r:0,fill:"#BFE0F7",stroke:"#2F6FB5","stroke-width":2.5},J));
+    el("text",{x:jx,y:238,"text-anchor":"middle","font-size":24,"font-weight":800,fill:C.ink,text:"bocal fermé"},J);
+    el("rect",{x:jx-190,y:660,width:380,height:34,rx:8,fill:"#C9CFD8",stroke:"#8C96A6","stroke-width":3},J); el("rect",{x:jx-210,y:694,width:420,height:96,rx:16,fill:"#E9EDF2",stroke:"#8C96A6","stroke-width":4},J); el("rect",{x:jx-130,y:710,width:260,height:62,rx:8,fill:"#1E2A20"},J);
+    R.jBal=el("text",{x:jx+112,y:757,"text-anchor":"end","font-size":44,"font-weight":800,fill:"#7CFF8A","font-family":"Consolas,monospace",text:"450 g"},J); el("text",{x:jx,y:826,"text-anchor":"middle","font-size":24,"font-weight":700,fill:C.ink,text:"masse totale (exemple) : elle ne change pas !"},J);
+    R.jP=[["1","Évaporation : le niveau baisse.",C.or],["2","Condensation : des gouttes sur le couvercle.",C.bl],["3","Elles retombent dans l'eau : rien n'est perdu.",C.gr]].map(([n,t,c],i)=>{ const g=el("g",{},J); const y=520+i*100; el("rect",{x:740,y,width:780,height:84,rx:14,fill:"#fff",stroke:c,"stroke-width":4},g); el("circle",{cx:790,cy:y+42,r:26,fill:c},g); el("text",{x:790,y:y+53,"text-anchor":"middle","font-size":32,"font-weight":800,fill:"#fff",text:n},g); el("text",{x:834,y:y+52,"font-size":28,"font-weight":700,fill:C.ink,text:t},g); return g; });
+    R.mythL=a.layer("myth"); R.mythL.setAttribute("transform","translate(0,0)"); a.myth(R.mythL,740,170,780,"« L'eau qui s'évapore disparaît. Les nuages, c'est de la fumée. »","L'eau ne disparaît pas : elle devient de la vapeur d'eau, un gaz invisible. En refroidissant, elle forme de minuscules gouttes d'eau liquide : c'est cela, un nuage.");
+    // synthèse
+    const sy=a.layer("syn"); R.syn=sy; R.synC=[["1","L'eau change d'état","liquide, gaz (vapeur), solide (neige, glace) : toujours la même eau.",C.bl],["2","Elle circule","mer, nuage, pluie, neige, rivière, nappe : un grand cycle.",C.or],["3","Il y en a toujours autant","rien ne disparaît et rien ne se crée : l'eau change d'état et de place.",C.gr]].map(([n,t,d,c],i)=>{ const g=el("g",{},sy); const y=120+i*215; el("rect",{x:60,y,width:860,height:185,rx:18,fill:"#fff",stroke:c,"stroke-width":4},g); el("circle",{cx:125,cy:y+92,r:38,fill:c},g); el("text",{x:125,y:y+106,"text-anchor":"middle","font-size":42,"font-weight":800,fill:"#fff",text:n},g); el("text",{x:190,y:y+68,"font-size":34,"font-weight":800,fill:c,text:t},g); const tx=el("text",{x:190,y:y+112,"font-size":27,fill:C.ink},g); a.wrap(tx,d,44,1.25); return g; });
+    R.synP=a.layer("synp"); R.ph3=a.photo(R.synP,{id:"s-c1-nuages",x:1010,y:84,w:440,h:260,cap:"Nuages (gouttelettes d'eau)",rot:1.5}); R.ph4=a.photo(R.synP,{id:"s-c1-lac-kir",x:1010,y:460,w:440,h:260,cap:"Le lac Kir, à Dijon",rot:-1.5});
+    el("text",{x:800,y:58,"text-anchor":"middle","font-size":34,"font-weight":800,fill:C.ink,text:"À retenir"},sy);
+    reset0();
+  },
+  reset(a){ reset0(); },
+  after(a,k,t){ const s=a.seg, clk=k+t; Z.clk=clk;
+    const Zc=Z, lerp=a.lerp;
+    // paysage
+    a.op(R.land,1); a.tr(R.sun,1130,92); R.rays.forEach((r,i)=>r.setAttribute("transform",`rotate(${i*30+clk*40})`));
+    R.waves.setAttribute("d",[...Array(10)].map((_,i)=>{ const x=1080+i*52+Math.sin(clk*3+i)*8, y=640+(i%3)*50+((i*37)%20); return `M${x},${y} q10,-10 20,0 t20,0`; }).join(" "));
+    // vapeur
+    R.vap.forEach((c,i)=>{ const p=((clk*1.3+c._o)%1+1)%1; let x,y; const tx=380+rnd(i,3)*110; if(p<.38){ const u=p/.38; x=c._x-(c._x-lerp(c._x,tx+400,.25))*u*.3; y=lerp(c._y,260,u); } else { const u=(p-.38)/.62; const x0=c._x-(c._x-lerp(c._x,tx+400,.25))*.3; x=lerp(x0,tx,u); y=lerp(260,185+rnd(i,4)*40,u); }
+      const al=Z.vap*Math.sin(Math.PI*Math.min(1,p*1.05))*(i>=24&&false?0:1); x+=Math.sin(clk*6+i)*5; a.set(c,{cx:x,cy:y}); a.op(c,al); });
+    // nuage
+    const cs=Z.cloud; a.tr(R.cloud,360,140,.35+.65*cs); a.op(R.cloud,cs>0?Math.min(1,cs*2):0); a.tr(R.cloudD,360,140,.35+.65*cs); a.op(R.cloudD,Z.dark*Math.min(1,cs*2)*.9);
+    // pluie / neige
+    R.rain.forEach((d,i)=>{ const x=300+rnd(i,1)*260, sy=surfY(x), p=((clk*2.2+rnd(i,2))%1+1)%1, y=lerp(190,sy-6,p); a.set(d,{transform:`translate(${x},${y})`}); a.op(d,Z.rain*(p<.95?1:0)); });
+    R.snowf.forEach((d,i)=>{ const x=150+rnd(i,1)*170, sy=surfY(x), p=((clk*1.0+rnd(i,2))%1+1)%1, y=lerp(180,sy-8,p); a.set(d,{cx:x+Math.sin(clk*5+i)*10,cy:y}); a.op(d,Z.snowfall*(p<.97?1:0)); });
+    const sc=Z.snow, pts=[]; for(let x=150;x<=350;x+=10){ const w=Math.sin(Math.PI*(x-150)/200); pts.push([x,surfY(x)-9-26*w*sc]); } const back=[]; for(let x=350;x>=150;x-=10) back.push([x,surfY(x)-5]);
+    R.snowcap.setAttribute("d",sc>0.01?"M"+pts.concat(back).map(p=>p.join(",")).join(" L")+"Z":""); a.op(R.snowcap,sc>.01?1:0);
+    // ruissellement
+    a.draw(R.run,Z.run); a.op(R.run,Z.run>0?1:0);
+    R.inf.forEach((c,i)=>{ const x=400+rnd(i,1)*130, y0=surfY(x)+14, p=((clk*1.2+rnd(i,2))%1+1)%1; a.set(c,{cx:x+Math.sin(clk*4+i)*6,cy:lerp(y0,764+rnd(i,3)*40,p)}); a.op(c,Z.infil*Math.sin(Math.PI*p)); });
+    R.nf.forEach((c,i)=>{ const p=((clk*.7+i/16)%1+1)%1; a.set(c,{cx:lerp(380,1060,p),cy:785+Math.sin(i*2)*12}); a.op(c,Z.nap*.9*Math.sin(Math.PI*Math.min(1,p*1.1))); });
+    R.nappe.setAttribute("fill",Z.nap>0?"#8EC4EC":"#7FB8E6"); a.op(R.flow,Z.riv); R.flow.style.strokeDashoffset=-(clk*90)%38;
+    Object.keys(Z.chip).forEach(k=>a.op(R["ch_"+k],Z.chip[k])); a.op(R.geo,Z.chip.geo); a.op(R.restart,Z.restart);
+    // goutte (paysage)
+    { const mp=Math.max(0,Math.min(WP.length-1,Z.mp)), i=Math.min(WP.length-2,Math.floor(mp)), u=mp-i; const e=a.ease(u); let x=lerp(WP[i][0],WP[i+1][0],e), y=lerp(WP[i][1],WP[i+1][1],e);
+      if(i===1) y=lerp(WP[1][1],WP[2][1],e)-Math.sin(Math.PI*u)*40; x+=Math.sin(clk*7)*3; if(i===4){ const sx=lerp(WP[4][0],WP[5][0],u); x=sx; y=surfY(sx)-30; }
+      let gas=(mp>.12&&mp<2.9), ice=false; if(Z.mOver){ x=Z.mOver.x+Math.sin(clk*7)*3; y=Z.mOver.y||surfY(Z.mOver.x)-62; gas=!!Z.mOver.gas; ice=!!Z.mOver.ice; }
+      R.m.st(gas,ice); a.tr(R.m,x,y,1.15); a.op(R.m,Z.mAlpha); a.set(R.mT,{x:x-32,y:y-30,"text-anchor":"end"}); a.op(R.mT,Z.mAlpha); }
+    // loupe
+    a.op(R.lp,Z.loupe); R.ltitleT.textContent=Z.ltitle; R.lt1.textContent=Z.lt1;
+    const m1=Z.mode===1, ev=Z.ev;
+    a.op(R.surfL,m1?1:0); a.op(R.cold,m1?0:1); R.cold.setAttribute("fill",Z.me>0?"#B9CBE6":"#C7D9F0");
+    R.lq.forEach((q,i)=>{ const c=q.c; if(q===R.mq||!m1){ a.op(c,0); return; } let x=q.x+Math.sin(clk*9+i)*4, y=q.y+Math.cos(clk*8+i*2)*4, gas=false; if(q.esc&&ev>q.ti){ const w=ev-q.ti; y=q.y-w*q.sp; x=q.x+Math.sin(w*14+i)*18+(rnd(i,11)-.5)*130*w; gas=y<LC.y+12; }
+      a.set(c,{cx:x,cy:y,fill:gas?"#fff":"#7FB8E6",stroke:gas?C.bl:"#2F6FB5","stroke-dasharray":gas?"4 3":null,"fill-opacity":gas?.55:1}); a.op(c,1); });
+    { const q=R.mq; let x=q.x+Math.sin(clk*9)*4, y=q.y+Math.cos(clk*8)*4, gas=false; if(ev>q.ti){ const w=ev-q.ti; y=q.y-w*q.sp; x=q.x+Math.sin(w*14)*14; gas=y<LC.y+12; } R.lmPos=[x,y,gas]; }
+    R.co.forEach((p,i)=>{ const c=p.c; if(m1){ a.op(c,0); return; } a.op(c,1); const g=Z.co, me=Z.me, fa=Z.fa; const gxx=LC.x-165+(1-Math.abs(1-((((p.gx-LC.x+165)/330+p.vx*clk*.35)%2)+2)%2))*330, gyy=LC.y-150+(1-Math.abs(1-((((p.gy-LC.y+150)/300+p.vy*clk*.35)%2)+2)%2))*300;
+      let x=lerp(gxx,p.dx+Math.sin(clk*9+i)*3,a.ease(g)), y=lerp(gyy,p.dy+Math.cos(clk*8+i)*3,a.ease(g)); x=lerp(x,p.bx,a.ease(me)); y=lerp(y,p.by,a.ease(me)); y+=fa*430; a.set(c,{cx:x,cy:y,fill:g>.6?"#7FB8E6":"#fff","fill-opacity":g>.6?1:.55,stroke:g>.6?"#2F6FB5":C.bl,"stroke-dasharray":g>.6?null:"4 3"}); if(i===0) R.lmPos=[x,y,g<.6]; });
+    R.dr.forEach((c,i)=>{ const p0=R.co[i*6], o=pack(0,19), dcx=p0.dx-o.x, dcy=p0.dy-o.y, e=a.ease(Z.me); const rad=(19*Math.sqrt(6)+12)*Math.min(1,Math.max(0,(Z.co-.55)*4))*Math.max(0,1-Z.me*2);
+      a.set(c,{cx:lerp(dcx,LC.x,e),cy:lerp(dcy,LC.y-10,e),r:rad}); a.op(c,m1?0:1); });
+    a.set(R.big,{cx:LC.x,cy:LC.y-10+Z.fa*430,r:(Z.me>.5&&!m1)?(19*6+14)*Math.min(1,(Z.me-.5)*2):0}); a.op(R.big,m1?0:1);
+    const lm=R.lmPos||[LC.x,LC.y,false]; a.tr(R.lm,lm[0],lm[1],1.1); R.lm.st(lm[2]); a.op(R.lm,Z.loupe>0?1:0);
+    const lnk=Z.mode===1?[1210,610]:[450,200]; a.set(R.link,{x1:LC.x+(lnk[0]>LC.x?1:-1)*LC.r*.7,y1:LC.y+LC.r*.7*(lnk[1]>LC.y?1:-1)*(lnk[1]>400?1:.2),x2:lnk[0],y2:lnk[1]}); a.op(R.link,Z.loupe);
+    // photos
+    a.op(R.ph1,Z.ph1); a.op(R.ph2,Z.ph2);
+    // panneau de la manipulation
+    a.op(R.mp,Z.mpanel); if(Z.mOver){ const q=Z.mOver.q; R.mpT1.textContent=""; a.wrap(R.mpT1,q.t1,30,1.15); R.mpEt.textContent="État : "+q.etat; R.mpEt.setAttribute("fill",q.col); R.mpT2.textContent=""; a.wrap(R.mpT2,q.t2,36,1.2); R.mpH.textContent=Z.mHint?"À vous : choisissez un lieu":""; }
+    // bocal fermé
+    a.op(R.over,Z.over); a.op(R.J,Z.jar); const jev=Z.jev; const lv=jev*34*(1-.85*Z.jfall); a.set(R.jWater,{y:500+lv,height:136-lv}); R.jP.forEach((g,i)=>a.op(g,Z.jp[i])); a.set(R.jLine,{}); R.jBal.textContent="450 g";
+    R.jv.forEach((c,i)=>{ a.set(c,{cx:250+rnd(i,1)*260+Math.sin(clk*5+i)*10,cy:300+rnd(i,2)*180+Math.cos(clk*4+i)*8}); a.op(c,jev>.15?Math.min(1,jev*1.5)*(1-Z.jcon*.45):0); });
+    R.jd.forEach((c,i)=>{ const x=240+rnd(i,3)*280, top=292+rnd(i,4)*18; const f=Z.jfall; const y=top+f*(560-top-rnd(i,5)*50); a.set(c,{cx:x,cy:y,r:Z.jcon*(7+rnd(i,6)*5)}); a.op(c,Z.jcon>0?(1-Math.max(0,(f-.8)/.2)):0); });
+    a.op(R.mythL,Z.myth); a.op(R.syn,Z.synG); R.synC.forEach((g,i)=>a.op(g,Z.syn[i])); a.op(R.synP,Z.synG); a.op(R.ph3,Z.synG*Z.ph1b); a.op(R.ph4,Z.synG*Z.ph1b);
+  },
+  etapes:[
+  { titre:"Évaporation", duree:9500,
+    legende:"Le Soleil réchauffe la mer, les rivières et les lacs. En surface, des particules d'eau s'échappent dans l'air : c'est l'évaporation. La vapeur d'eau est un gaz invisible.",
+    voix:"Le Soleil réchauffe la mer, les rivières et les lacs. Zoomons sur la surface de l'eau avec notre loupe. Suivons une particule d'eau que nous appelons Goutte. Chauffée par le Soleil, elle s'échappe dans l'air : c'est l'évaporation. L'eau est devenue un gaz, la vapeur d'eau. On ne la voit pas, mais elle est bien là.",
+    anim(t,a){ const s=a.seg; Z.vap=s(t,0,.3); Z.mAlpha=s(t,0,.12); Z.mp=1*s(t,.15,1); Z.loupe=s(t,0,.12); Z.mode=1; Z.ev=s(t,.08,1,true); Z.chip.ev=s(t,.2,.3);
+      Z.ltitle="Zoom sur la surface de la mer"; Z.lt1=t<.4?"eau liquide : particules serrées":"vapeur d'eau : gaz invisible (en pointillés)"; } },
+  { titre:"Condensation", duree:9500,
+    legende:"En altitude, l'air est froid. La vapeur d'eau se refroidit : ses particules se rassemblent en minuscules gouttes d'eau liquide. Des milliards de gouttelettes forment un nuage.",
+    voix:"La vapeur monte, emportée par le vent, jusqu'au-dessus des collines de Côte-d'Or. En altitude, l'air est froid. La vapeur se refroidit : ses particules se rapprochent et se regroupent en minuscules gouttes d'eau liquide. C'est la condensation. Des milliards de gouttelettes forment un nuage. Un nuage n'est pas de la fumée : c'est de l'eau.",
+    anim(t,a){ const s=a.seg; Z.vap=1-.7*s(t,.5,1); Z.mAlpha=1; Z.mp=1+2*s(t,.1,.9); Z.loupe=1; Z.mode=t<.04?1:2; Z.ev=1; Z.co=s(t,.15,.85); Z.cloud=s(t,.25,1); Z.chip.ev=1; Z.chip.co=s(t,.3,.4);
+      Z.ltitle="Zoom dans l'air froid, en altitude"; Z.lt1=t<.5?"l'air froid ralentit les particules":"elles forment des gouttelettes liquides"; } },
+  { titre:"Précipitations", duree:9500,
+    legende:"Les gouttelettes se rassemblent et grossissent. Devenues trop lourdes, elles tombent : pluie, ou neige quand il fait très froid, comme sur les hauteurs de Côte-d'Or en hiver.",
+    voix:"Les gouttelettes se rassemblent et grossissent. Quand elles sont trop lourdes, elles tombent : ce sont les précipitations. Il pleut sur les collines de Côte-d'Or. Quand il fait très froid, l'eau gèle en cristaux de glace et il neige sur les hauteurs.",
+    anim(t,a){ const s=a.seg; Z.vap=.3*(1-s(t,0,.4)); Z.mAlpha=1; Z.mp=3+s(t,.45,1); Z.mode=2; Z.ev=1; Z.co=1; Z.me=s(t,.05,.45); Z.fa=s(t,.5,.95); Z.loupe=1-s(t,.9,1); Z.cloud=1; Z.dark=s(t,0,.4); Z.rain=s(t,.45,.6); Z.snowfall=s(t,.45,.6); Z.snow=s(t,.55,1);
+      Z.chip.ev=1; Z.chip.co=1; Z.chip.pr=s(t,.4,.5); Z.ph1=s(t,.1,.3); Z.ltitle="Zoom dans le nuage"; Z.lt1=t<.4?"les gouttelettes se rassemblent":"la goutte, trop lourde, tombe"; } },
+  { titre:"Ruissellement et infiltration", duree:10000,
+    legende:"L'eau de pluie ruisselle sur le sol vers les rivières. Une partie s'infiltre dans la terre jusqu'à la nappe d'eau souterraine. La neige, en fondant, alimente aussi les ruisseaux.",
+    voix:"L'eau de pluie ruisselle sur la pente, vers les ruisseaux et les rivières. Une autre partie s'infiltre dans le sol, entre les grains de terre, jusqu'à la nappe d'eau souterraine. Au printemps, la neige fond et alimente aussi les ruisseaux.",
+    anim(t,a){ const s=a.seg; Z.vap=0; Z.cloud=1; Z.dark=1; Z.mAlpha=1; Z.mp=4+s(t,.1,.8); Z.loupe=1-s(t,0,.12); Z.mode=2; Z.ev=1; Z.co=1; Z.me=1; Z.fa=1; Z.rain=1-s(t,.55,.9); Z.snowfall=1-s(t,.1,.4); Z.snow=1-.7*s(t,.3,1); Z.run=s(t,.1,.7); Z.infil=s(t,.3,.5); Z.chip.ev=1; Z.chip.co=1; Z.chip.pr=1; Z.chip.ru=s(t,.15,.25); Z.chip.inf=s(t,.35,.45); Z.chip.geo=s(t,0,.2);
+      Z.cloud=1-.6*s(t,.6,1); Z.ph1=1-s(t,0,.15); Z.ph2=s(t,.2,.4); } },
+  { titre:"Retour à la mer", duree:9000,
+    legende:"Les ruisseaux, l'Ouche, la Saône puis le Rhône ramènent l'eau à la mer. La nappe coule aussi, très lentement, vers la mer. Le cycle peut recommencer : c'est toujours la même eau.",
+    voix:"Les ruisseaux se jettent dans l'Ouche, la rivière de Dijon. L'Ouche rejoint la Saône, qui rejoint le Rhône, et le Rhône se jette dans la mer Méditerranée. L'eau de la nappe coule aussi, très lentement, vers la mer. Et le Soleil réchauffe de nouveau la mer : le cycle recommence. C'est toujours la même eau qui voyage.",
+    anim(t,a){ const s=a.seg; Z.vap=s(t,.55,.9); Z.mAlpha=1; Z.mp=5+2*s(t,.1,.85); Z.loupe=0; Z.mode=2; Z.ev=1; Z.co=1; Z.me=1; Z.fa=1; Z.rain=0; Z.snowfall=0; Z.snow=.3; Z.cloud=.4*(1-s(t,.3,.8)); Z.dark=1; Z.run=1; Z.infil=1-s(t,.2,.5); Z.nap=s(t,0,.3); Z.riv=s(t,0,.2); Z.chip.ev=s(t,.7,.8); Z.chip.co=0; Z.chip.pr=0; Z.chip.ru=1; Z.chip.inf=1; Z.chip.geo=1; Z.restart=s(t,.7,.85); Z.ph2=0; } },
+  { titre:"À vous : suivez la goutte", duree:11000,
+    legende:"Voici le cycle complet. À vous : cliquez sur un lieu (mer, air, nuage, pluie, neige, rivière, nappe) pour y placer la goutte, ou sur « et ensuite » : regardez son état et ce qui va lui arriver.",
+    voix:"Voici le cycle complet. Regardez notre goutte voyager : la mer, l'air, le nuage, la pluie, la neige, la rivière et la nappe souterraine. À chaque endroit, elle est liquide, gazeuse ou solide. À vous maintenant : cliquez sur un lieu pour y placer la goutte, ou sur le bouton et ensuite. Regardez son état et ce qui va lui arriver. Prenez votre temps.",
+    anim(t,a){ const s=a.seg; if(t<.02){ manipActive=false; place=0; }
+      let p; if(manipActive) p=place; else p=t>=.9?0:Math.min(PL.length-1,Math.floor(Math.max(0,t-.03)/.87*PL.length)); lastPlace=p; const q=PL[p];
+      Z.mAlpha=1; Z.loupe=0; Z.mode=2; Z.ev=1; Z.co=1; Z.me=1; Z.fa=1; Z.run=1; Z.nap=1; Z.riv=1; Z.infil=p===3?1:0; Z.chip.ev=0; Z.chip.co=0; Z.chip.pr=0; Z.chip.ru=1; Z.chip.inf=1; Z.chip.geo=1;
+      Z.cloud=(p===2||p===3||p===4)?1:.35; Z.dark=(p===3||p===4)?1:.3; Z.rain=p===3?1:0; Z.snowfall=p===4?1:0; Z.snow=(p===4||p===5)?1:.5; Z.vap=(p===0||p===1)?.8:.15; Z.ph1=Z.ph2=0; Z.restart=0;
+      Z.mOver={x:q.x,y:q.y,gas:q.gas,ice:q.ice,q}; Z.mpanel=s(t,0,.06); Z.mHint=(!manipActive&&t>.9)?1:0;
+      if(a.manip) a.manip.querySelectorAll("button").forEach(b=>b.classList.toggle("sel",manipActive&&+b.dataset.p===place)); } },
+  { titre:"L'eau ne disparaît pas", duree:11000,
+    legende:"Dans un bocal fermé, l'eau s'évapore puis se condense sur les parois et retombe : la balance indique toujours la même masse. L'eau a changé d'état, elle n'a pas disparu.",
+    voix:"Vérifions avec un bocal fermé posé sur une balance. Au soleil, l'eau s'évapore : le niveau baisse. Mais la vapeur se condense sur le couvercle, et les gouttes retombent. La balance indique toujours la même masse. L'eau n'a pas disparu : elle a seulement changé d'état. Attention, c'est une idée fausse de croire que l'eau qui s'évapore disparaît, et que les nuages sont de la fumée.",
+    anim(t,a){ const s=a.seg; Z.mOver=null; Z.mpanel=0; Z.snow=.3; Z.rain=0; Z.snowfall=0; Z.over=s(t,0,.12); Z.jar=s(t,.05,.2); Z.jev=s(t,.15,.55); Z.jcon=s(t,.35,.65); Z.jfall=s(t,.6,.95); Z.jp=[s(t,.2,.3),s(t,.4,.5),s(t,.65,.75)]; Z.myth=s(t,.8,.92); Z.restart=0; Z.mAlpha=0; Z.loupe=0; Z.vap=0; Z.chip.ev=Z.chip.ru=Z.chip.inf=Z.chip.geo=1; } },
+  { titre:"À retenir", duree:9000,
+    legende:"L'eau change d'état (liquide, gaz, solide), elle circule, et il y en a toujours autant : rien ne disparaît.",
+    voix:"À retenir. Un : l'eau change d'état, elle peut être liquide, gazeuse ou solide. Deux : elle circule, de la mer aux nuages, puis à la pluie, aux rivières et aux nappes. Trois : il y en a toujours autant. Rien ne disparaît, l'eau change seulement d'état et de place.",
+    anim(t,a){ const s=a.seg; Z.over=1; Z.jar=1-s(t,0,.2); Z.jev=1; Z.jcon=1; Z.jfall=1; Z.jp=[1,1,1]; Z.myth=1-s(t,0,.2); Z.synG=s(t,.05,.2); Z.syn=[s(t,.15,.35),s(t,.4,.6),s(t,.65,.85)]; Z.ph1b=s(t,.3,.5); Z.mAlpha=0; Z.loupe=0; Z.vap=0; } }
+  ]
+});
+})();
+</script></body></html>

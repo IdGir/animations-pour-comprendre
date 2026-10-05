@@ -1,0 +1,198 @@
+/* META {"id":"sciences-D6-vitesse-distance-temps","matiere":"sciences","annee":"connexe","periode":1,"theme":"Mouvement : vitesse, distance et temps","resume":"La vitesse est la distance parcourue divisée par le temps (v = d ÷ t) ; graphique distance-temps ; conversion m/s et km/h (× 3,6) ; on compare des mobiles (escargot, vélo, voiture, TGV).","motsCles":["vitesse","distance","temps","graphique","km/h","m/s","TGV","mouvement"]} */
+(function(){
+let R={}, E=null, a=null;
+let mob=2, spin=0, ran=false, road=0; // manipulation : mobile choisi (0 escargot, 1 vélo, 2 voiture, 3 TGV) ; temps écoulé (ms) ; défilement de la route
+const KM=5; // indice de l'étape de manipulation
+const C={A:"#2563A8",B:"#E07A1F",gr:"#2E8B57",ink:"#1E2430",gris:"#5A6478",red:"#C0392B",brown:"#8A5A2B"};
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const f1=v=>(Math.round(v*10)/10).toString().replace(".",",");
+const f2=v=>(Math.round(v*100)/100).toString().replace(".",",");
+const NB=" "; // espace fine insécable
+const panel=(parent,x,y,w,h,col)=>E("rect",{x,y,width:w,height:h,rx:16,fill:"#fff",stroke:col||"#D6DBE4","stroke-width":3},parent);
+const txt=(parent,x,y,s,o)=>{ o=o||{}; return E("text",{x,y,"font-size":o.size||24,"font-weight":o.w||700,fill:o.color||C.ink,"text-anchor":o.anchor||"start",text:s,stroke:o.halo?"#fff":null,"stroke-width":o.halo?5:null,"paint-order":o.halo?"stroke":null},parent); };
+// ---- mobiles (dessinés avec leur base posée en y = 0, tournés vers la droite)
+function mkWalker(parent,col){ const g=E("g",{},parent); const b=E("g",{},g); const leg1=E("line",{x1:0,y1:-44,x2:0,y2:0,stroke:col,"stroke-width":10,"stroke-linecap":"round"},b), leg2=E("line",{x1:0,y1:-44,x2:0,y2:0,stroke:"#3B4252","stroke-width":10,"stroke-linecap":"round"},b);
+  E("line",{x1:0,y1:-84,x2:0,y2:-44,stroke:col,"stroke-width":16,"stroke-linecap":"round"},b); E("circle",{cx:2,cy:-104,r:15,fill:"#F2C79C",stroke:C.ink,"stroke-width":3},b);
+  const arm=E("line",{x1:0,y1:-78,x2:0,y2:-50,stroke:col,"stroke-width":8,"stroke-linecap":"round"},b);
+  g.step=ph=>{ const s=Math.sin(ph)*26; leg1.setAttribute("x2",s); leg2.setAttribute("x2",-s); arm.setAttribute("x2",-s*.7); }; g.step(0); return g; }
+function mkBike(parent,col){ const g=E("g",{},parent);
+  [-40,42].forEach(x=>{ E("circle",{cx:x,cy:-26,r:26,fill:"none",stroke:C.ink,"stroke-width":6},g); E("circle",{cx:x,cy:-26,r:4,fill:C.ink},g); });
+  E("path",{d:"M-40,-26 L-6,-26 L-16,-70 L32,-70 L42,-26 M-6,-26 L32,-70 M32,-70 L28,-86 L40,-88",fill:"none",stroke:col,"stroke-width":7,"stroke-linejoin":"round","stroke-linecap":"round"},g);
+  E("line",{x1:-24,y1:-74,x2:-8,y2:-74,stroke:C.ink,"stroke-width":7,"stroke-linecap":"round"},g);
+  E("path",{d:"M-14,-76 L-4,-100 L22,-90 M-4,-100 L-4,-100",fill:"none",stroke:"#3B4252","stroke-width":9,"stroke-linecap":"round","stroke-linejoin":"round"},g); E("circle",{cx:-2,cy:-118,r:14,fill:"#F2C79C",stroke:C.ink,"stroke-width":3},g); return g; }
+function mkCar(parent,col){ const g=E("g",{},parent);
+  E("path",{d:"M-72,-24 L-72,-48 Q-72,-58 -58,-60 L-36,-62 L-16,-90 L32,-90 L54,-62 L68,-58 Q78,-54 78,-42 L78,-24 Z",fill:col,stroke:C.ink,"stroke-width":4,"stroke-linejoin":"round"},g);
+  E("path",{d:"M-24,-64 L-10,-84 L8,-84 L8,-64 Z M16,-64 L16,-84 L30,-84 L46,-64 Z",fill:"#DCEBFA",stroke:C.ink,"stroke-width":3},g);
+  [-42,44].forEach(x=>{ E("circle",{cx:x,cy:-18,r:19,fill:"#3B4252",stroke:C.ink,"stroke-width":3},g); E("circle",{cx:x,cy:-18,r:8,fill:"#C9CED8"},g); }); return g; }
+function mkTGV(parent,col){ const g=E("g",{},parent);
+  E("path",{d:"M-190,-26 L-190,-92 L70,-92 Q128,-90 168,-44 L178,-26 Z",fill:"#EEF1F6",stroke:C.ink,"stroke-width":4,"stroke-linejoin":"round"},g);
+  E("path",{d:"M-190,-54 L172,-54 L178,-26 L-190,-26 Z",fill:col},g);
+  for(let i=0;i<9;i++) E("rect",{x:-176+i*34,y:-80,width:24,height:18,rx:4,fill:"#BFD6EE",stroke:C.ink,"stroke-width":2},g);
+  E("path",{d:"M92,-84 Q130,-82 150,-56 L92,-56 Z",fill:"#BFD6EE",stroke:C.ink,"stroke-width":3},g);
+  [-150,-60,40,120].forEach(x=>E("circle",{cx:x,cy:-14,r:13,fill:"#3B4252",stroke:C.ink,"stroke-width":3},g)); return g; }
+function mkSnail(parent,col){ const g=E("g",{},parent);
+  E("ellipse",{cx:-8,cy:-10,rx:66,ry:11,fill:"#D9B98E",stroke:C.ink,"stroke-width":3},g);
+  E("line",{x1:34,y1:-14,x2:60,y2:-46,stroke:"#D9B98E","stroke-width":18,"stroke-linecap":"round"},g); E("circle",{cx:62,cy:-52,r:12,fill:"#D9B98E",stroke:C.ink,"stroke-width":3},g);
+  E("line",{x1:58,y1:-60,x2:52,y2:-84,stroke:C.ink,"stroke-width":3,"stroke-linecap":"round"},g); E("line",{x1:68,y1:-60,x2:78,y2:-82,stroke:C.ink,"stroke-width":3,"stroke-linecap":"round"},g); E("circle",{cx:52,cy:-86,r:5,fill:C.ink},g); E("circle",{cx:79,cy:-84,r:5,fill:C.ink},g);
+  E("circle",{cx:-18,cy:-44,r:34,fill:col,stroke:C.ink,"stroke-width":4},g); E("path",{d:"M-18,-44 m0,0 a8,8 0 1 1 9,9 a16,16 0 1 1 -25,-14 a24,24 0 1 1 33,32",fill:"none",stroke:"#fff","stroke-width":4,opacity:.8},g); return g; }
+const MB=[
+  {nom:"l'escargot",bt:"Escargot",col:"#8A5A2B",kmh:0.0036},
+  {nom:"le vélo",bt:"Vélo",col:"#2E8B57",kmh:18},
+  {nom:"la voiture",bt:"Voiture",col:"#2563A8",kmh:90},
+  {nom:"le TGV",bt:"TGV",col:"#C0392B",kmh:300}];
+const distTxt=km=>km<0.5?f1(km*1000)+" m":f1(km)+" km";
+const GX0=150, GX1=880, GY0=790, GY1=170; // graphique de l'étape de manipulation
+const gx=h=>GX0+(GX1-GX0)*h, gy=km=>GY0-(GY0-GY1)*km/300;
+const cyc=ms=>{ const x=(ms/6500)%1; return clamp(x/.75,0,1); };
+
+Anim.run({
+  titre:"La vitesse : distance, temps et graphique",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Mouvement",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Comment savoir qui est le plus rapide ? Et que veut dire « 90 km/h » ?",
+  manipDes:KM, manipJusqua:KM,
+  init(api){
+    a=api; E=a.el;
+    // =============== 1. même durée : le plus rapide va le plus loin
+    const L1=a.layer("d1"); R.L1=L1; const X1=m=>160+24*m;
+    E("rect",{x:60,y:215,width:1480,height:305,rx:14,fill:"#F6F8FB"},L1);
+    [330,500].forEach(y=>E("line",{x1:130,y1:y+8,x2:1470,y2:y+8,stroke:"#C9CED8","stroke-width":8,"stroke-linecap":"round"},L1));
+    txt(L1,50,300,"marcheur",{size:28,w:800,color:"#3B4252"}); txt(L1,50,470,"cycliste",{size:28,w:800,color:C.gr});
+    for(let m=0;m<=50;m+=10){ E("line",{x1:X1(m),y1:560,x2:X1(m),y2:578,stroke:C.ink,"stroke-width":4},L1); txt(L1,X1(m),616,m+" m",{size:26,anchor:"middle"}); } E("line",{x1:X1(0),y1:569,x2:X1(50),y2:569,stroke:C.ink,"stroke-width":4},L1);
+    R.wk=mkWalker(L1,C.A); R.bk=mkBike(L1,C.gr);
+    R.dw=txt(L1,0,0,"",{size:30,w:800,color:C.A,halo:1,anchor:"middle"}); R.db=txt(L1,0,0,"",{size:30,w:800,color:C.gr,halo:1,anchor:"middle"});
+    R.cr1=txt(L1,800,110,"",{size:56,w:800,anchor:"middle"}); R.cs1=txt(L1,800,160,"Les deux partent en même temps et roulent pendant 10 secondes",{size:28,anchor:"middle",color:C.gris});
+    R.fin1=E("g",{},L1); [[15,C.A],[50,C.gr]].forEach(([m,c])=>E("line",{x1:X1(m),y1:215,x2:X1(m),y2:560,stroke:c,"stroke-width":4,"stroke-dasharray":"12 8"},R.fin1));
+    L1.appendChild(R.dw); L1.appendChild(R.db); R.cc1=E("g",{},L1); a.label(R.cc1,800,730,"Même durée : celui qui va le plus loin est le plus rapide",{size:32,stroke:C.gr,color:C.ink,w:1060,h:76});
+    txt(R.cc1,800,796,"(vitesses données en exemple)",{size:22,w:600,anchor:"middle",color:C.gris});
+    // =============== 2. pas la même durée : on compare par heure
+    const L2=a.layer("d2"); R.L2=L2; const X2=km=>160+10*km;
+    E("rect",{x:60,y:150,width:1480,height:470,rx:14,fill:"#F6F8FB"},L2);
+    [290,520].forEach(y=>E("line",{x1:130,y1:y+8,x2:1400,y2:y+8,stroke:"#C9CED8","stroke-width":8,"stroke-linecap":"round"},L2));
+    txt(L2,160,190,"Voiture A : 120 km en 3 heures",{size:30,w:800,color:C.A}); txt(L2,160,420,"Voiture B : 60 km en 1 heure",{size:30,w:800,color:C.B});
+    R.cA=mkCar(L2,C.A); R.cB=mkCar(L2,C.B);
+    R.seg2=E("g",{},L2);
+    [0,1,2].forEach(i=>{ const x0=X2(40*i)+6, x1=X2(40*i+40)-6; E("path",{d:`M${x0},${318} L${x0},${332} L${x1},${332} L${x1},${318}`,fill:"none",stroke:C.A,"stroke-width":4},R.seg2); txt(R.seg2,(x0+x1)/2,364,"1 h : 40 km",{size:24,w:800,anchor:"middle",color:C.A}); });
+    E("path",{d:`M${X2(0)+6},${548} L${X2(0)+6},${562} L${X2(60)-6},${562} L${X2(60)-6},${548}`,fill:"none",stroke:C.B,"stroke-width":4},R.seg2); txt(R.seg2,(X2(0)+X2(60))/2,596,"1 h : 60 km",{size:24,w:800,anchor:"middle",color:C.B});
+    R.cr2=txt(L2,800,90,"",{size:50,w:800,anchor:"middle"});
+    R.m1=E("g",{},L2); E("line",{x1:X2(40),y1:150,x2:X2(40),y2:620,stroke:C.ink,"stroke-width":3,"stroke-dasharray":"10 8"},R.m1); a.label(R.m1,X2(40),128,"après 1 heure",{size:24,stroke:C.ink,w:200,h:42});
+    R.r2=E("g",{},L2); panel(R.r2,100,650,1400,150,C.gr);
+    txt(R.r2,130,702,"A : 120 km, mais en 3 heures",{size:30,color:C.A}); txt(R.r2,130,750,"A fait 40 km chaque heure",{size:34,w:800,color:C.A});
+    txt(R.r2,800,702,"B : 60 km, en 1 heure seulement",{size:30,color:C.B}); txt(R.r2,800,750,"B fait 60 km chaque heure",{size:34,w:800,color:C.B});
+    txt(R.r2,800,785,"B est plus rapide, même s'il a parcouru moins de kilomètres !",{size:24,w:800,anchor:"middle",color:C.gr});
+    // =============== 3. vitesse = distance ÷ temps
+    const L3=a.layer("d3"); R.L3=L3; const X3=km=>160+14*km;
+    txt(L3,800,66,"vitesse = distance ÷ temps",{size:42,w:800,anchor:"middle",color:C.ink});
+    R.tl=[["distance d","40 km",C.A,120,"parcourue"],["temps t","0,5 h",C.B,600,"(30 minutes)"],["vitesse v","80 km/h",C.gr,1080,"(en 1 heure : 80 km)"]].map(([t,v,c,x,sub])=>{ const g=E("g",{},L3); panel(g,x,100,400,150,c); txt(g,x+200,142,t,{size:28,w:800,anchor:"middle",color:c}); txt(g,x+200,205,v,{size:58,w:800,anchor:"middle",color:c}); txt(g,x+200,238,sub,{size:22,anchor:"middle",color:C.gris}); return g; });
+    R.op3=E("g",{},L3); txt(R.op3,560,198,"÷",{size:64,w:800,anchor:"middle"}); txt(R.op3,1040,198,"=",{size:64,w:800,anchor:"middle"});
+    E("line",{x1:130,y1:560,x2:X3(80)+60,y2:560,stroke:"#C9CED8","stroke-width":10,"stroke-linecap":"round"},L3);
+    R.rk=E("g",{},L3); [0,20,40,60,80].forEach(k=>{ E("line",{x1:X3(k),y1:590,x2:X3(k),y2:608,stroke:C.ink,"stroke-width":4},R.rk); txt(R.rk,X3(k),646,k+" km",{size:26,anchor:"middle"}); });
+    R.tk=E("g",{},L3); [[0,"départ"],[40,"30 min"],[80,"1 h"]].forEach(([k,s])=>{ E("line",{x1:X3(k),y1:430,x2:X3(k),y2:588,stroke:C.B,"stroke-width":3,"stroke-dasharray":"8 8"},R.tk); txt(R.tk,X3(k),418,s,{size:28,w:800,anchor:"middle",color:C.B}); });
+    R.car3=mkCar(L3,C.A); R.rd3=txt(L3,800,340,"",{size:30,w:700,anchor:"middle",color:C.gris});
+    R.br3=E("g",{},L3); E("path",{d:`M${X3(0)},${686} L${X3(0)},${700} L${X3(40)},${700} L${X3(40)},${686}`,fill:"none",stroke:C.A,"stroke-width":4},R.br3); txt(R.br3,(X3(0)+X3(40))/2,740,"40 km en 30 min",{size:26,w:800,anchor:"middle",color:C.A});
+    E("path",{d:`M${X3(40)},${686} L${X3(40)},${700} L${X3(80)},${700} L${X3(80)},${686}`,fill:"none",stroke:C.gr,"stroke-width":4},R.br3); txt(R.br3,(X3(40)+X3(80))/2,740,"encore 40 km en 30 min",{size:26,w:800,anchor:"middle",color:C.gr});
+    R.cc3=E("g",{},L3); a.label(R.cc3,800,815,"40 ÷ 0,5 = 80 : en 1 heure, la voiture parcourt 80 km",{size:30,stroke:C.gr,color:C.ink,w:1020,h:64}); txt(L3,800,876,"exemple : un trajet d'environ 40 km, à peu près la distance Dijon – Beaune",{size:22,w:600,anchor:"middle",color:C.gris});
+    // =============== 4. le graphique distance-temps
+    const L4=a.layer("d4"); R.L4=L4; const AX0=200, AX1=880, AY0=760, AY1=180, px=min=>AX0+(AX1-AX0)*min/60, py=km=>AY0-(AY0-AY1)*km/100; R.px=px; R.py=py;
+    for(let km=0;km<=100;km+=20){ E("line",{x1:AX0,y1:py(km),x2:AX1,y2:py(km),stroke:"#E3E7EE","stroke-width":2},L4); txt(L4,AX0-14,py(km)+8,String(km),{size:24,anchor:"end"}); }
+    for(let m=0;m<=60;m+=15){ E("line",{x1:px(m),y1:AY0,x2:px(m),y2:AY1,stroke:"#E3E7EE","stroke-width":2},L4); txt(L4,px(m),AY0+36,m===60?"1 h":m+" min",{size:24,anchor:"middle"}); }
+    a.arrow(L4,`M${AX0},${AY0} L${AX1+30},${AY0}`,{color:C.ink,w:5,head:3}); a.arrow(L4,`M${AX0},${AY0} L${AX0},${AY1-30}`,{color:C.ink,w:5,head:3});
+    txt(L4,AX0,AY1-50,"distance (km)",{size:28,w:800,anchor:"middle"}); txt(L4,AX1-120,AY0+78,"temps",{size:28,w:800,anchor:"middle"});
+    R.lc=E("path",{d:`M${px(0)},${py(0)} L${px(60)},${py(80)}`,fill:"none",stroke:C.A,"stroke-width":8,"stroke-linecap":"round"},L4); R.lb=E("path",{d:`M${px(0)},${py(0)} L${px(60)},${py(20)}`,fill:"none",stroke:C.gr,"stroke-width":8,"stroke-linecap":"round"},L4);
+    R.dc=E("circle",{r:13,fill:C.A,stroke:"#fff","stroke-width":3},L4); R.db4=E("circle",{r:13,fill:C.gr,stroke:"#fff","stroke-width":3},L4);
+    R.nc=txt(L4,px(60)+24,py(80)+8,"voiture : 80 km/h",{size:26,w:800,color:C.A}); R.nb=txt(L4,px(60)+24,py(20)+8,"vélo : 20 km/h",{size:26,w:800,color:C.gr});
+    R.gd=E("g",{},L4); E("line",{x1:px(30),y1:AY0,x2:px(30),y2:py(40),stroke:C.ink,"stroke-width":3,"stroke-dasharray":"10 8"},R.gd); E("line",{x1:AX0,y1:py(40),x2:px(30),y2:py(40),stroke:C.A,"stroke-width":3,"stroke-dasharray":"10 8"},R.gd); E("line",{x1:AX0,y1:py(10),x2:px(30),y2:py(10),stroke:C.gr,"stroke-width":3,"stroke-dasharray":"10 8"},R.gd);
+    E("circle",{cx:px(30),cy:py(40),r:10,fill:"none",stroke:C.A,"stroke-width":5},R.gd); E("circle",{cx:px(30),cy:py(10),r:10,fill:"none",stroke:C.gr,"stroke-width":5},R.gd);
+    txt(R.gd,px(30)-14,py(40)-14,"40 km",{size:26,w:800,anchor:"end",color:C.A,halo:1}); txt(R.gd,px(30)+16,py(10)-14,"10 km",{size:26,w:800,color:C.gr,halo:1});
+    R.p4=E("g",{},L4); panel(R.p4,1150,170,410,230,C.B); txt(R.p4,1175,218,"Plus la droite",{size:32,w:800,color:C.B}); txt(R.p4,1175,260,"est penchée,",{size:32,w:800,color:C.B}); txt(R.p4,1175,302,"plus la vitesse",{size:32,w:800,color:C.B}); txt(R.p4,1175,344,"est grande.",{size:32,w:800,color:C.B});
+    R.p4b=E("g",{},L4); panel(R.p4b,1150,440,410,200,C.ink); txt(R.p4b,1175,486,"À 30 minutes :",{size:28,w:800}); txt(R.p4b,1175,538,"voiture : 40 km",{size:30,w:800,color:C.A}); txt(R.p4b,1175,590,"vélo : 10 km",{size:30,w:800,color:C.gr});
+    R.hh4=txt(L4,AX0+30,AY1+10,"",{size:30,w:800,color:C.ink});
+    // =============== 5. m/s et km/h
+    const L5=a.layer("d5"); R.L5=L5; const X5=m=>200+100*m;
+    txt(L5,800,64,"Un mobile qui avance de 1 m chaque seconde",{size:36,w:800,anchor:"middle"});
+    E("line",{x1:X5(0),y1:250,x2:X5(8)+20,y2:250,stroke:"#C9CED8","stroke-width":10,"stroke-linecap":"round"},L5); for(let m=0;m<=8;m++){ E("line",{x1:X5(m),y1:262,x2:X5(m),y2:282,stroke:C.ink,"stroke-width":4},L5); txt(L5,X5(m),322,m+" m",{size:24,anchor:"middle"}); }
+    R.ball=E("circle",{r:20,cy:226,fill:C.B,stroke:C.ink,"stroke-width":4},L5);
+    R.rd5=E("g",{},L5); panel(R.rd5,1130,150,420,170,C.B); R.s5a=txt(R.rd5,1160,212,"",{size:44,w:800,color:C.B}); R.s5b=txt(R.rd5,1160,276,"",{size:44,w:800,color:C.A});
+    R.h5=E("g",{},L5); txt(R.h5,800,402,"En 1 heure (3 600 secondes) : 3 600 m, soit 3,6 km",{size:34,w:800,anchor:"middle",color:C.ink}); a.label(R.h5,800,490,"1 m/s = 3,6 km/h",{size:64,stroke:C.gr,color:C.gr,w:640,h:110,sw:5});
+    R.cv=[["m/s  →  km/h","× 3,6","10 m/s × 3,6 = 36 km/h",C.B,100],["km/h  →  m/s","÷ 3,6","90 km/h ÷ 3,6 = 25 m/s",C.A,840]].map(([t,op,ex,c,x])=>{ const g=E("g",{},L5); panel(g,x,590,660,230,c); txt(g,x+330,642,t,{size:34,w:800,anchor:"middle",color:c}); txt(g,x+330,720,op,{size:64,w:800,anchor:"middle",color:c}); txt(g,x+330,786,ex,{size:32,w:800,anchor:"middle"}); return g; });
+    txt(L5,780,626,"",{});
+    // =============== 6. MANIPULATION : choisir le mobile
+    const L6=a.layer("d6"); R.L6=L6;
+    for(let km=0;km<=300;km+=100){ E("line",{x1:GX0,y1:gy(km),x2:GX1,y2:gy(km),stroke:"#E3E7EE","stroke-width":2},L6); txt(L6,GX0-14,gy(km)+8,String(km),{size:24,anchor:"end"}); }
+    [[0,"0"],[.25,"15 min"],[.5,"30 min"],[.75,"45 min"],[1,"1 h"]].forEach(([h,s])=>{ E("line",{x1:gx(h),y1:GY0,x2:gx(h),y2:GY1,stroke:"#E3E7EE","stroke-width":2},L6); txt(L6,gx(h),GY0+34,s,{size:24,anchor:"middle"}); });
+    a.arrow(L6,`M${GX0},${GY0} L${GX1+30},${GY0}`,{color:C.ink,w:5,head:3}); a.arrow(L6,`M${GX0},${GY0} L${GX0},${GY1-30}`,{color:C.ink,w:5,head:3});
+    txt(L6,GX0,GY1-50,"distance (km)",{size:28,w:800,anchor:"middle"});
+    R.gl=MB.map((m,i)=>{ const g=E("g",{},L6); g.ln=E("path",{d:`M${gx(0)},${gy(0)} L${gx(1)},${gy(m.kmh)}`,fill:"none","stroke-linecap":"round"},g); g.nm=txt(g,GX1+(i===0?44:12),(i===0?GY0+6:gy(m.kmh)+8),["escargot","vélo","voiture","TGV"][i],{size:24}); return g; });
+    R.pt6=E("circle",{r:14,stroke:"#fff","stroke-width":3},L6); R.dyn6=txt(L6,GX0+24,GY1+8,"",{size:28,w:800,halo:1});
+    R.rdA=E("g",{},L6); R.sky6=E("rect",{x:1010,y:130,width:550,height:200,rx:14,fill:"#EAF4FB"},R.rdA); R.road6=E("rect",{x:1010,y:300,width:550,height:56,fill:"#8C96A6"},R.rdA);
+    R.dash6=[...Array(8)].map(()=>E("rect",{y:324,width:44,height:8,fill:"#fff"},R.rdA));
+    R.mv=MB.map((m,i)=>{ const g=[mkSnail,mkBike,mkCar,mkTGV][i](R.rdA,m.col); g.setAttribute("transform",`translate(1285,305) scale(${[1.2,1,1.15,.78][i]})`); return g; });
+    R.nm6=txt(R.rdA,1285,176,"",{size:38,w:800,anchor:"middle"});
+    R.rd6=E("g",{},L6); panel(R.rd6,1010,380,550,270,C.B); R.r6a=txt(R.rd6,1038,432,"",{size:28,w:800}); R.r6b=txt(R.rd6,1038,494,"",{size:34,w:800}); R.r6c=txt(R.rd6,1038,552,"",{size:30,w:800,color:C.gris}); R.r6d=txt(R.rd6,1038,612,"",{size:24,w:600,color:C.gris});
+    R.ph6=a.photo(L6,{id:"s-d6-tgv",x:1180,y:690,w:200,h:128,cap:"Un TGV",size:21,rot:-2});
+    // =============== synthèse
+    const sy=a.layer("syn"); R.syn=sy; E("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy); txt(sy,800,70,"À retenir",{size:38,w:800,anchor:"middle"});
+    R.pts=[["1","La vitesse, c'est la distance parcourue divisée par le temps : v = d ÷ t.",C.B],["2","1 m/s = 3,6 km/h. On passe de m/s à km/h en multipliant par 3,6 (et on divise pour revenir).",C.A],["3","Sur un graphique distance-temps, plus la droite est penchée, plus le mobile est rapide.",C.gr]].map(([n,t,c],i)=>{
+      const g=E("g",{},sy); E("rect",{x:110,y:110+i*105,width:1380,height:88,rx:16,fill:"#fff",stroke:c,"stroke-width":4},g); E("circle",{cx:165,cy:154+i*105,r:28,fill:c},g); E("text",{x:165,y:166+i*105,"text-anchor":"middle","font-size":34,"font-weight":800,fill:"#fff",text:n},g);
+      const tt=E("text",{x:215,y:152+i*105,"font-size":25,"font-weight":700,fill:C.ink},g); a.wrap(tt,t,76,1.25); return g; });
+    R.myth=a.layer("myth"); a.myth(R.myth,110,450,1380,"Celui qui parcourt la plus grande distance est le plus rapide.","Pas forcément : il faut aussi regarder le temps. 120 km en 3 h, c'est 40 km/h ; 60 km en 1 h, c'est 60 km/h. On compare les vitesses (distance ÷ temps).");
+    // manipulation : choix du mobile
+    a.manip.innerHTML='Mobile : '+MB.map((m,i)=>`<button data-i="${i}" class="${i===mob?"sel":""}">${m.bt}</button>`).join(" ");
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ mob=+b.dataset.i; spin=0; a.manip.querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x===b)); a.redraw(); });
+    let last=performance.now(); setInterval(()=>{ const now=performance.now(), dt=Math.min(now-last,100); last=now; if(a.step()===KM){ ran=true; spin+=dt; const k=MB[mob].kmh; road+=dt/1000*160*k/(k+30); a.redraw(); } },40);
+  },
+  reset(a){ [R.L1,R.L2,R.L3,R.L4,R.L5,R.L6,R.syn,R.myth,R.fin1,R.cc1,R.seg2,R.m1,R.r2,...R.tl,R.op3,R.rk,R.tk,R.br3,R.cc3,R.gd,R.p4,R.p4b,R.h5,...R.cv,R.rd5,R.rdA,R.rd6,R.ph6,R.pt6,R.dyn6].forEach(e=>a.op(e,0)); R.pts.forEach(g=>a.op(g,0)); },
+  etapes:[
+  { titre:"Même durée : qui va le plus loin ?", duree:10000,
+    legende:"Le marcheur et le cycliste partent ensemble et avancent pendant 10 secondes. Le cycliste va beaucoup plus loin : à durée égale, celui qui va le plus loin est le plus rapide.",
+    voix:"Un marcheur et un cycliste partent en même temps et avancent pendant dix secondes. Regardez : le cycliste va beaucoup plus loin ! Quand la durée est la même, celui qui parcourt la plus grande distance est le plus rapide. Ici, en dix secondes, le marcheur fait quinze mètres, et le cycliste cinquante mètres. Ces valeurs sont des exemples.",
+    anim(t,a){ const s=a.seg, u=s(t,.12,.78,true), sec=10*u; a.op(R.L1,1);
+      const dw=1.5*sec, db=5*sec; a.set(R.wk,{transform:`translate(${160+24*dw},330)`}); R.wk.step(dw*3.2); a.set(R.bk,{transform:`translate(${160+24*db},500)`});
+      a.set(R.dw,{x:160+24*dw,y:380}); a.set(R.db,{x:160+24*db,y:550}); R.dw.textContent=f1(dw)+" m"; R.db.textContent=f1(db)+" m"; a.op(R.dw,s(t,.1,.18)); a.op(R.db,s(t,.1,.18));
+      R.cr1.textContent="Temps : "+f1(sec)+" s"; a.op(R.fin1,s(t,.8,.88)); a.op(R.cc1,s(t,.86,.96)); } },
+  { titre:"Pas la même durée : on compare par heure", duree:14000,
+    legende:"Voiture A : 120 km en 3 heures. Voiture B : 60 km en 1 heure. A va plus loin mais met plus de temps. Par heure, A fait 40 km et B fait 60 km : B est plus rapide !",
+    voix:"Mais que faire si les durées sont différentes ? La voiture A parcourt cent vingt kilomètres en trois heures. La voiture B parcourt soixante kilomètres en une heure. A a fait plus de chemin, mais elle a mis plus de temps. Pour comparer, on regarde la distance parcourue en une heure : quarante kilomètres pour A, soixante kilomètres pour B. B est plus rapide, même si elle a parcouru moins de kilomètres !",
+    anim(t,a){ const s=a.seg, h=3*s(t,.1,.8,true); a.op(R.L1,1-s(t,0,.08)); a.op(R.L2,1);
+      const dA=40*h, dB=Math.min(60*h,60); R.cA.setAttribute("transform",`translate(${160+10*dA},298) scale(.9)`); R.cB.setAttribute("transform",`translate(${160+10*dB},528) scale(.9)`);
+      R.cr2.textContent="Temps : "+f1(h)+" h"; a.op(R.seg2,s(t,.8,.9)); a.op(R.m1,s(t,.36,.42)*(1-s(t,.82,.88))); a.op(R.r2,s(t,.86,.96)); } },
+  { titre:"Vitesse = distance ÷ temps", duree:13000,
+    legende:"Pour calculer une vitesse, on divise la distance par le temps. Exemple : 40 km en 0,5 h (30 minutes), ça fait 40 ÷ 0,5 = 80 km/h.",
+    voix:"Pour calculer une vitesse, on divise la distance par le temps. Exemple : une voiture parcourt quarante kilomètres en une demi-heure, c'est-à-dire en trente minutes. Quarante divisé par zéro virgule cinq égale quatre-vingts. En une heure, elle ira deux fois plus loin : quatre-vingts kilomètres. Sa vitesse est de quatre-vingts kilomètres par heure. Retenez : vitesse égale distance divisée par temps.",
+    anim(t,a){ const s=a.seg; a.op(R.L2,1-s(t,0,.08)); a.op(R.L3,1); a.op(R.tl[0],s(t,.05,.14)); a.op(R.op3,s(t,.16,.24)); a.op(R.tl[1],s(t,.16,.25)); a.op(R.tl[2],s(t,.58,.68)); a.op(R.rk,s(t,.05,.12)); a.op(R.tk,s(t,.12,.2)); a.op(R.br3,s(t,.3,.4)); a.op(R.cc3,s(t,.78,.9));
+      const u=t<.5?.5*s(t,.12,.45,true):.5+.5*s(t,.55,.85,true); R.car3.setAttribute("transform",`translate(${160+14*80*u},560) scale(.9)`); R.rd3.textContent="temps : "+f0(60*u)+" min · distance : "+f0(80*u)+" km"; } },
+  { titre:"Le graphique distance-temps", duree:14000,
+    legende:"Le graphique montre la distance parcourue au fil du temps. La droite de la voiture est plus penchée que celle du vélo : plus la droite est penchée, plus la vitesse est grande.",
+    voix:"Un graphique distance-temps montre la distance parcourue au fil du temps. Voici une voiture et un vélo qui partent en même temps. La ligne de la voiture monte plus vite : elle est plus penchée. Plus la ligne est penchée, plus la vitesse est grande. On peut aussi lire des valeurs : au bout de trente minutes, la voiture a parcouru quarante kilomètres, et le vélo, dix kilomètres.",
+    anim(t,a){ const s=a.seg, u=s(t,.08,.62,true); a.op(R.L3,1-s(t,0,.08)); a.op(R.L4,1); const m=60*u;
+      a.set(R.lc,{d:`M${R.px(0)},${R.py(0)} L${R.px(m)},${R.py(80*u)}`}); a.set(R.lb,{d:`M${R.px(0)},${R.py(0)} L${R.px(m)},${R.py(20*u)}`});
+      a.set(R.dc,{cx:R.px(m),cy:R.py(80*u)}); a.set(R.db4,{cx:R.px(m),cy:R.py(20*u)}); a.op(R.nc,s(t,.55,.65)); a.op(R.nb,s(t,.55,.65)); a.op(R.p4,s(t,.62,.74)); a.op(R.gd,s(t,.76,.86)); a.op(R.p4b,s(t,.8,.9));
+      R.hh4.textContent=u<1?"temps : "+f0(m)+" min":""; } },
+  { titre:"Mètres par seconde et kilomètres par heure", duree:15000,
+    legende:"Un mobile qui avance de 1 m chaque seconde fait, en 1 heure, 3 600 m, soit 3,6 km : 1 m/s = 3,6 km/h. De m/s à km/h on multiplie par 3,6 ; de km/h à m/s on divise par 3,6.",
+    voix:"On exprime aussi la vitesse en mètres par seconde. Un mobile qui avance d'un mètre chaque seconde parcourt, en une heure, c'est-à-dire en trois mille six cents secondes, trois mille six cents mètres, soit trois virgule six kilomètres. Donc un mètre par seconde, c'est trois virgule six kilomètres par heure. Pour passer des mètres par seconde aux kilomètres par heure, on multiplie par trois virgule six. Pour faire l'inverse, on divise par trois virgule six. Dix mètres par seconde, c'est trente-six kilomètres par heure. Quatre-vingt-dix kilomètres par heure, c'est vingt-cinq mètres par seconde.",
+    anim(t,a){ const s=a.seg, sec=8*s(t,.05,.34,true); a.op(R.L4,1-s(t,0,.08)); a.op(R.L5,1);
+      a.set(R.ball,{cx:200+100*sec}); a.op(R.rd5,s(t,.04,.1)); R.s5a.textContent="temps : "+f0(sec)+" s"; R.s5b.textContent="distance : "+f0(sec)+" m";
+      a.op(R.h5,s(t,.42,.56)); a.op(R.cv[0],s(t,.64,.76)); a.op(R.cv[1],s(t,.8,.92)); } },
+  { titre:"À vous : choisissez le mobile", duree:8000,
+    legende:"À vous : choisissez un mobile (escargot, vélo, voiture ou TGV) et regardez sa droite sur le graphique. Quelle distance parcourt-il en 1 heure ? Calculez sa vitesse : distance ÷ temps.",
+    voix:"À vous ! Choisissez un mobile avec les boutons : l'escargot, le vélo, la voiture ou le TGV. Regardez sa ligne sur le graphique, et lisez la distance qu'il parcourt en une heure. Plus la ligne est penchée, plus il est rapide. Calculez sa vitesse : la distance divisée par le temps. Comparez avec les autres mobiles. Prenez votre temps.",
+    anim(t,a){ const s=a.seg; a.op(R.L5,1-s(t,0,.1)); a.op(R.L6,1); a.op(R.rdA,s(t,.05,.2)); a.op(R.rd6,s(t,.1,.25));
+      const m=MB[mob], p=ran?cyc(spin):1, h=p, km=m.kmh*h;
+      R.gl.forEach((g,i)=>{ const sel=i===mob; g.ln.setAttribute("stroke",sel?MB[i].col:"#C9CED8"); g.ln.setAttribute("stroke-width",sel?10:4); g.nm.setAttribute("fill",sel?MB[i].col:C.gris); g.nm.setAttribute("font-weight",sel?800:600); });
+      a.set(R.pt6,{cx:gx(h),cy:gy(km),fill:m.col}); a.op(R.pt6,1); R.dyn6.textContent="après "+f2(h)+" h : "+distTxt(km); R.dyn6.setAttribute("fill",m.col); a.op(R.dyn6,1);
+      R.mv.forEach((g,i)=>a.op(g,i===mob?1:0)); R.nm6.textContent=m.nom; R.nm6.setAttribute("fill",m.col);
+      R.dash6.forEach((d,i)=>{ const x=1010+(((i*80+road)%640)+640)%640-60; a.set(d,{x}); a.op(d,x>1010&&x<1516?1:0); });
+      const d1=distTxt(m.kmh), unit=m.kmh<0.5?"m":"km";
+      R.r6a.textContent="Distance parcourue en 1 h : "+d1; R.r6a.setAttribute("fill",m.col);
+      R.r6b.textContent=d1+" ÷ 1 h = "+(m.kmh<0.5?f1(m.kmh*1000)+" m/h":f1(m.kmh)+" km/h");
+      R.r6c.textContent=["≈ 1 mm/s","= 5 m/s","= 25 m/s","≈ 83 m/s"][mob]; R.r6d.textContent=["(exemple : un escargot de jardin)","(exemple : un cycliste tranquille)","(exemple : sur route de campagne)","(exemple : ligne à grande vitesse)"][mob];
+      a.op(R.ph6,mob===3?s(t,.1,.3):0); } },
+  { titre:"Synthèse", duree:11000,
+    legende:"Vitesse = distance ÷ temps. 1 m/s = 3,6 km/h. Sur un graphique distance-temps, plus la droite est penchée, plus le mobile est rapide.",
+    voix:"Pour retenir. La vitesse, c'est la distance parcourue divisée par le temps. Un mètre par seconde, c'est trois virgule six kilomètres par heure. Sur un graphique distance-temps, plus la ligne est penchée, plus le mobile est rapide. Attention : ce n'est pas forcément celui qui va le plus loin qui est le plus rapide. Il faut regarder le temps aussi !",
+    anim(t,a){ const s=a.seg; a.op(R.L6,1-s(t,0,.1)); a.op(R.syn,s(t,0,.1)); R.pts.forEach((g,i)=>a.op(g,s(t,.08+i*.12,.18+i*.12))); a.op(R.myth,s(t,.55,.7)); a.cls(R.myth.faux,"pulse",t>.8&&t<1); } },
+  ]
+});
+function f0(v){ return Math.round(v).toString(); }
+})();

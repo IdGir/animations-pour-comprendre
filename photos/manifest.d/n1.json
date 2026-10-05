@@ -1,0 +1,91 @@
+[
+ {
+  "id": "h-a2-fontenay-cloitre",
+  "q": "Abbaye de Fontenay cloître",
+  "must": [
+   "Fontenay"
+  ],
+  "alt": "le cloître roman de l'abbaye cistercienne de Fontenay (Côte-d'Or)"
+ },
+ {
+  "id": "h-a2-fontenay-forge",
+  "q": "Abbaye de Fontenay forge",
+  "must": [
+   "Fontenay",
+   "forge"
+  ],
+  "alt": "la forge de l'abbaye de Fontenay (fin XIIe siècle)"
+ },
+ {
+  "id": "h-a3-aix-chapelle",
+  "q": "Chapelle palatine Aix-la-Chapelle Charlemagne",
+  "must": [
+   "Aachen"
+  ],
+  "alt": "la chapelle palatine de Charlemagne (cathédrale d'Aix-la-Chapelle)"
+ },
+ {
+  "id": "h-a3-manuscrit-caroline",
+  "q": "Carolingian minuscule manuscript page",
+  "must": [
+   "Carolingian"
+  ],
+  "alt": "une page de manuscrit écrite en minuscule caroline"
+ },
+ {
+  "id": "h-a4-vezelay-basilique",
+  "q": "Basilique Sainte-Marie-Madeleine de Vézelay",
+  "must": [
+   "Vézelay"
+  ],
+  "alt": "la basilique Sainte-Marie-Madeleine de Vézelay (Yonne), nef ou façade"
+ },
+ {
+  "id": "h-a4-compostelle-cathedrale",
+  "q": "Cathédrale de Saint-Jacques-de-Compostelle façade Obradoiro",
+  "must": [
+   "Santiago"
+  ],
+  "alt": "la cathédrale de Saint-Jacques-de-Compostelle (Espagne)"
+ },
+ {
+  "id": "h-a4-coquille-saint-jacques",
+  "q": "coquille Saint-Jacques pèlerin Camino de Santiago",
+  "must": [
+   "Santiago"
+  ],
+  "alt": "une coquille Saint-Jacques, symbole des pèlerins de Compostelle"
+ },
+ {
+  "id": "h-a5-krak-chevaliers",
+  "q": "Krak des Chevaliers forteresse croisés Syrie",
+  "must": [
+   "Krak"
+  ],
+  "alt": "le Krak des Chevaliers, château des croisés en Syrie"
+ },
+ {
+  "id": "h-a6-palais-ducs-dijon",
+  "q": "Palais des ducs et des États de Bourgogne Dijon tour Philippe le Bon",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "le palais des ducs de Bourgogne à Dijon"
+ },
+ {
+  "id": "h-a6-puits-de-moise",
+  "q": "Puits de Moïse Champmol Dijon Claus Sluter",
+  "must": [
+   "Moïse"
+  ],
+  "alt": "le Puits de Moïse, sculpture de la chartreuse de Champmol (Dijon)"
+ },
+ {
+  "id": "h-a6-hospices-beaune",
+  "q": "Hospices de Beaune toit tuiles vernissées cour",
+  "must": [
+   "Beaune"
+  ],
+  "alt": "le toit de tuiles vernissées des Hospices de Beaune"
+ }
+]

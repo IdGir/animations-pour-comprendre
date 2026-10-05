@@ -1,0 +1,884 @@
+[
+ {
+  "id": "h-a2-fontenay-cloitre",
+  "q": "Abbaye de Fontenay cloître",
+  "must": [
+   "Fontenay"
+  ],
+  "alt": "le cloître roman de l'abbaye cistercienne de Fontenay (Côte-d'Or)"
+ },
+ {
+  "id": "h-a2-fontenay-forge",
+  "q": "Abbaye de Fontenay forge",
+  "must": [
+   "Fontenay",
+   "forge"
+  ],
+  "alt": "la forge de l'abbaye de Fontenay (fin XIIe siècle)"
+ },
+ {
+  "id": "h-a3-aix-chapelle",
+  "q": "Chapelle palatine Aix-la-Chapelle Charlemagne",
+  "must": [
+   "Aachen"
+  ],
+  "alt": "la chapelle palatine de Charlemagne (cathédrale d'Aix-la-Chapelle)"
+ },
+ {
+  "id": "h-a3-manuscrit-caroline",
+  "q": "Carolingian minuscule manuscript page",
+  "must": [
+   "Carolingian"
+  ],
+  "alt": "une page de manuscrit écrite en minuscule caroline"
+ },
+ {
+  "id": "h-a4-vezelay-basilique",
+  "q": "Basilique Sainte-Marie-Madeleine de Vézelay",
+  "must": [
+   "Vézelay"
+  ],
+  "alt": "la basilique Sainte-Marie-Madeleine de Vézelay (Yonne), nef ou façade"
+ },
+ {
+  "id": "h-a4-compostelle-cathedrale",
+  "q": "Cathédrale de Saint-Jacques-de-Compostelle façade Obradoiro",
+  "must": [
+   "Santiago"
+  ],
+  "alt": "la cathédrale de Saint-Jacques-de-Compostelle (Espagne)"
+ },
+ {
+  "id": "h-a4-coquille-saint-jacques",
+  "q": "coquille Saint-Jacques pèlerin Camino de Santiago",
+  "must": [
+   "Santiago"
+  ],
+  "alt": "une coquille Saint-Jacques, symbole des pèlerins de Compostelle"
+ },
+ {
+  "id": "h-a5-krak-chevaliers",
+  "q": "Krak des Chevaliers forteresse croisés Syrie",
+  "must": [
+   "Krak"
+  ],
+  "alt": "le Krak des Chevaliers, château des croisés en Syrie"
+ },
+ {
+  "id": "h-a6-palais-ducs-dijon",
+  "q": "Palais des ducs et des États de Bourgogne Dijon tour Philippe le Bon",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "le palais des ducs de Bourgogne à Dijon"
+ },
+ {
+  "id": "h-a6-puits-de-moise",
+  "q": "Puits de Moïse Champmol Dijon Claus Sluter",
+  "must": [
+   "Moïse"
+  ],
+  "alt": "le Puits de Moïse, sculpture de la chartreuse de Champmol (Dijon)"
+ },
+ {
+  "id": "h-a6-hospices-beaune",
+  "q": "Hospices de Beaune toit tuiles vernissées cour",
+  "must": [
+   "Beaune"
+  ],
+  "alt": "le toit de tuiles vernissées des Hospices de Beaune"
+ },
+ {
+  "id": "h-b2-hommage",
+  "q": "hommage féodal vassal mains jointes enluminure",
+  "must": [
+   "hommage"
+  ],
+  "alt": "enluminure médiévale montrant un vassal rendant hommage à son seigneur, mains jointes"
+ },
+ {
+  "id": "h-b3-armure",
+  "q": "armure gothique complète Metropolitan Museum of Art",
+  "must": [
+   "armor"
+  ],
+  "alt": "armure de plates complète d'un chevalier exposée dans un musée"
+ },
+ {
+  "id": "h-b3-bayeux",
+  "q": "Tapisserie de Bayeux chevaliers normands cavaliers",
+  "must": [
+   "bayeux"
+  ],
+  "alt": "scène de la tapisserie de Bayeux montrant des chevaliers à cheval"
+ },
+ {
+  "id": "h-b4-provins-remparts",
+  "q": "Remparts de Provins",
+  "must": [
+   "Provins"
+  ],
+  "alt": "les remparts médiévaux de Provins (Seine-et-Marne)"
+ },
+ {
+  "id": "h-b4-provins-tour",
+  "q": "Tour César Provins",
+  "must": [
+   "Provins"
+  ],
+  "alt": "la tour César de Provins, ancienne ville de foires de Champagne"
+ },
+ {
+  "id": "h-b5-moulin-eau",
+  "q": "moulin à eau roue à aubes",
+  "must": [
+   "moulin"
+  ],
+  "alt": "un moulin à eau avec sa roue à aubes"
+ },
+ {
+  "id": "h-b5-four-pain",
+  "q": "four à pain banal village",
+  "must": [
+   "four"
+  ],
+  "alt": "un four à pain banal ancien dans un village"
+ },
+ {
+  "id": "h-c1-peste-enterrement-tournai",
+  "q": "Gilles li Muisis Tournai peste enterrement miniature 1349",
+  "must": [
+   "Tournai",
+   "peste"
+  ],
+  "alt": "miniature des Annales de Gilles li Muisis : des habitants de Tournai enterrent des morts de la peste (1349)"
+ },
+ {
+  "id": "h-c1-puce-xenopsylla",
+  "q": "Xenopsylla cheopis flea rat flea",
+  "must": [
+   "Xenopsylla"
+  ],
+  "alt": "puce du rat (Xenopsylla cheopis) vue de près"
+ },
+ {
+  "id": "h-c2-chantier-fouquet-temple",
+  "q": "Fouquet Construction du Temple de Jérusalem miniature chantier grue",
+  "must": [
+   "Fouquet",
+   "Temple"
+  ],
+  "alt": "miniature de Jean Fouquet (vers 1470) montrant un chantier médiéval : tailleurs de pierre, maçons, grue à roue"
+ },
+ {
+  "id": "h-c2-grue-ecureuil-guedelon",
+  "q": "Guédelon grue à écureuil roue treadwheel crane",
+  "must": [
+   "Guédelon",
+   "grue"
+  ],
+  "alt": "grue à roue (cage à écureuil) reconstituée sur le chantier de Guédelon"
+ },
+ {
+  "id": "h-c2-notre-dame-paris-facade",
+  "q": "Cathédrale Notre-Dame de Paris façade ouest",
+  "must": [
+   "Notre-Dame",
+   "Paris"
+  ],
+  "alt": "façade occidentale de Notre-Dame de Paris avec ses deux tours"
+ },
+ {
+  "id": "h-c3-presse-gutenberg",
+  "q": "Gutenberg press replica Gutenberg-Museum Mainz Druckerpresse",
+  "must": [
+   "Gutenberg",
+   "press"
+  ],
+  "alt": "reconstitution d'une presse à imprimer de type Gutenberg (musée Gutenberg, Mayence)"
+ },
+ {
+  "id": "h-c3-bible-gutenberg",
+  "q": "Gutenberg Bible page 42 lines Genesis",
+  "must": [
+   "Gutenberg",
+   "Bible"
+  ],
+  "alt": "page d'une Bible de Gutenberg (Bible à 42 lignes) : texte en deux colonnes, initiales enluminées à la main"
+ },
+ {
+  "id": "h-c3-caracteres-mobiles",
+  "q": "caractères mobiles plomb typographie casse imprimerie movable type",
+  "must": [
+   "type"
+  ],
+  "alt": "caractères mobiles en plomb (lettres en relief, à l'envers) dans une casse d'imprimeur"
+ },
+ {
+  "id": "h-c4-jeanne-darc-fauquembergue",
+  "q": "Jeanne d'Arc Clément de Fauquembergue dessin 1429 registre Parlement",
+  "must": [
+   "Jeanne",
+   "Arc"
+  ],
+  "alt": "seul portrait de Jeanne d'Arc de son vivant : dessin dans la marge d'un registre du Parlement de Paris (1429)"
+ },
+ {
+  "id": "h-c4-reims-cathedrale",
+  "q": "Cathédrale Notre-Dame de Reims façade occidentale",
+  "must": [
+   "Reims"
+  ],
+  "alt": "façade de la cathédrale Notre-Dame de Reims, où Charles VII est sacré en 1429"
+ },
+ {
+  "id": "g-a3-greenwich",
+  "q": "Royal Observatory Greenwich Prime Meridian line brass strip",
+  "must": [
+   "Greenwich",
+   "meridian"
+  ],
+  "alt": "la ligne du méridien de Greenwich (0°) à l'Observatoire royal de Greenwich"
+ },
+ {
+  "id": "g-a3-terre-nasa",
+  "q": "The Blue Marble Apollo 17 Earth NASA",
+  "must": [
+   "Blue Marble"
+  ],
+  "alt": "la Terre vue de l'espace (NASA, domaine public)"
+ },
+ {
+  "id": "g-a4-weltzeituhr",
+  "q": "Weltzeituhr Alexanderplatz Berlin world time clock",
+  "must": [
+   "Weltzeituhr"
+  ],
+  "alt": "l'horloge universelle de l'Alexanderplatz à Berlin, qui indique l'heure dans les fuseaux horaires du monde"
+ },
+ {
+  "id": "g-a4-terre-nuit",
+  "q": "Black Marble Earth at night city lights NASA",
+  "must": [
+   "night"
+  ],
+  "alt": "la Terre la nuit vue de l'espace (lumières des villes), NASA"
+ },
+ {
+  "id": "g-a2-plan-dijon-ancien",
+  "q": "Plan de Dijon ancien carte historique",
+  "must": [
+   "Dijon",
+   "plan"
+  ],
+  "alt": "un plan ancien de la ville de Dijon"
+ },
+ {
+  "id": "g-a2-cassini",
+  "q": "Carte de Cassini Bourgogne feuille",
+  "must": [
+   "Cassini"
+  ],
+  "alt": "une feuille de la carte de Cassini (XVIIIe siècle) montrant la Bourgogne"
+ },
+ {
+  "id": "g-a5-terre-espace",
+  "q": "The Blue Marble Apollo 17 Earth NASA",
+  "must": [
+   "Blue Marble"
+  ],
+  "alt": "la Terre vue de l'espace, planète bleue (NASA, domaine public)"
+ },
+ {
+  "id": "g-a6-fuseaux-1507",
+  "q": "Waldseemüller globe gores 1507",
+  "must": [
+   "Waldseem"
+  ],
+  "alt": "les fuseaux de papier du globe de Waldseemüller (1507), à découper et coller sur une sphère"
+ },
+ {
+  "id": "g-a6-mercator-1569",
+  "q": "Mercator 1569 world map Nova et Aucta Orbis Terrae Descriptio",
+  "must": [
+   "Mercator"
+  ],
+  "alt": "la carte du monde de Gerardus Mercator (1569), à l'origine de la projection de Mercator"
+ },
+ {
+  "id": "g-b2-mairie",
+  "q": "Palais des ducs et des États de Bourgogne Dijon hôtel de ville",
+  "must": [
+   "Dijon",
+   "palais"
+  ],
+  "alt": "façade du palais des ducs de Bourgogne à Dijon, qui abrite la mairie"
+ },
+ {
+  "id": "g-b2-ter",
+  "q": "TER Bourgogne-Franche-Comté gare de Dijon-Ville",
+  "must": [
+   "TER",
+   "Dijon"
+  ],
+  "alt": "un train régional TER en gare de Dijon-Ville"
+ },
+ {
+  "id": "g-b3-paris-aerienne",
+  "q": "Paris aerial view rooftops dense buildings",
+  "must": [
+   "Paris"
+  ],
+  "alt": "vue aérienne de Paris : immeubles serrés, densité très forte"
+ },
+ {
+  "id": "g-b3-campagne-cote-d-or",
+  "q": "Auxois paysage village champs prairies Côte-d'Or",
+  "must": [
+   "Côte-d'Or"
+  ],
+  "alt": "campagne de Côte-d'Or : village isolé entre champs et prairies, faible densité"
+ },
+ {
+  "id": "g-b4-tgv-dijon",
+  "q": "TGV gare de Dijon-Ville",
+  "must": [
+   "TGV",
+   "Dijon"
+  ],
+  "alt": "un TGV à quai en gare de Dijon-Ville"
+ },
+ {
+  "id": "g-b4-tram-dijon",
+  "q": "Tramway de Dijon Citadis",
+  "must": [
+   "tramway",
+   "Dijon"
+  ],
+  "alt": "une rame du tramway de Dijon"
+ },
+ {
+  "id": "g-b5-dijon-aerienne",
+  "q": "Dijon vue aérienne centre ville",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "vue aérienne de Dijon : centre ancien dense"
+ },
+ {
+  "id": "g-b5-lotissement",
+  "q": "lotissement pavillonnaire vue aérienne France périurbain",
+  "must": [
+   "lotissement"
+  ],
+  "alt": "lotissement de maisons individuelles en périphérie d'une ville, vu du ciel"
+ },
+ {
+  "id": "g-b6-source-seine",
+  "q": "Source de la Seine Source-Seine Côte-d'Or",
+  "must": [
+   "Source",
+   "Seine"
+  ],
+  "alt": "la source de la Seine à Source-Seine (Côte-d'Or)"
+ },
+ {
+  "id": "g-b6-canal-bourgogne",
+  "q": "Canal de Bourgogne Pouilly-en-Auxois",
+  "must": [
+   "Canal",
+   "Bourgogne"
+  ],
+  "alt": "le canal de Bourgogne près de Pouilly-en-Auxois"
+ },
+ {
+  "id": "g-b6-morvan",
+  "q": "Lac des Settons Morvan",
+  "must": [
+   "Settons"
+  ],
+  "alt": "le lac des Settons, dans le Morvan"
+ },
+ {
+  "id": "s-c1-nuages",
+  "q": "Cumulus clouds blue sky",
+  "must": [
+   "cloud"
+  ],
+  "alt": "nuages (cumulus) dans le ciel"
+ },
+ {
+  "id": "s-c1-lac-kir",
+  "q": "Lac Kir Dijon",
+  "must": [
+   "Kir"
+  ],
+  "alt": "le lac Kir à Dijon (plan d'eau)"
+ },
+ {
+  "id": "s-c2-glacon",
+  "q": "ice cubes in a glass of water",
+  "must": [
+   "ice"
+  ],
+  "alt": "des glaçons dans un verre d'eau"
+ },
+ {
+  "id": "s-c2-ebullition",
+  "q": "boiling water in a pot bubbles",
+  "must": [
+   "boiling"
+  ],
+  "alt": "de l'eau qui bout dans une casserole : bulles de vapeur d'eau"
+ },
+ {
+  "id": "s-c3-marais-guerande",
+  "q": "Marais salants de Guérande vue aérienne",
+  "must": [
+   "Guérande"
+  ],
+  "alt": "les marais salants de Guérande vus du ciel : bassins et œillets"
+ },
+ {
+  "id": "s-c3-paludier",
+  "q": "paludier récolte sel Guérande",
+  "must": [
+   "paludier"
+  ],
+  "alt": "un paludier récoltant le sel dans les marais de Guérande (vue de loin)"
+ },
+ {
+  "id": "s-c3-fleur-de-sel",
+  "q": "fleur de sel Guérande",
+  "must": [
+   "fleur"
+  ],
+  "alt": "la fleur de sel, fine couche de cristaux blancs en surface d'un œillet"
+ },
+ {
+  "id": "s-c4-station",
+  "q": "water treatment plant sedimentation tanks",
+  "must": [
+   "water"
+  ],
+  "alt": "une usine de production d'eau potable (bassins de décantation)"
+ },
+ {
+  "id": "s-c5-iceberg",
+  "q": "iceberg floating",
+  "must": [
+   "iceberg"
+  ],
+  "alt": "un iceberg : la glace flotte, seule une petite partie dépasse de l'eau"
+ },
+ {
+  "id": "s-c5-cargo",
+  "q": "container ship at sea",
+  "must": [
+   "container"
+  ],
+  "alt": "un grand porte-conteneurs en acier qui flotte"
+ },
+ {
+  "id": "s-d1-horloge",
+  "q": "clock movement brass gears wheels mechanism",
+  "must": [
+   "clock"
+  ],
+  "alt": "roues dentées en laiton d'un mécanisme d'horloge"
+ },
+ {
+  "id": "s-d1-montre",
+  "q": "mechanical watch movement gears",
+  "must": [
+   "watch"
+  ],
+  "alt": "mouvement d'une montre mécanique avec ses petits engrenages"
+ },
+ {
+  "id": "s-d2-brouette",
+  "q": "wheelbarrow garden",
+  "must": [
+   "wheelbarrow"
+  ],
+  "alt": "une brouette de jardin chargée"
+ },
+ {
+  "id": "s-d2-romaine",
+  "q": "steelyard balance roman scale",
+  "must": [
+   "steelyard"
+  ],
+  "alt": "balance romaine avec son curseur coulissant sur le bras gradué"
+ },
+ {
+  "id": "s-d3-moufle",
+  "q": "block and tackle pulleys rope",
+  "must": [
+   "pulley"
+  ],
+  "alt": "moufle ou palan : plusieurs poulies et une corde"
+ },
+ {
+  "id": "s-d3-grue-ecureuil",
+  "q": "treadwheel crane Guédelon grue à écureuil",
+  "must": [
+   "treadwheel"
+  ],
+  "alt": "grue à écureuil (grande roue à marcher) sur un chantier médiéval"
+ },
+ {
+  "id": "s-d4-thermometre",
+  "q": "liquid-in-glass thermometer red alcohol",
+  "must": [
+   "thermometer"
+  ],
+  "alt": "thermomètre à liquide coloré dans un tube de verre gradué"
+ },
+ {
+  "id": "s-d4-abri-meteo",
+  "q": "Stevenson screen weather station",
+  "must": [
+   "stevenson"
+  ],
+  "alt": "abri météorologique (abri Stevenson) contenant les thermomètres"
+ },
+ {
+  "id": "s-d5-girouette",
+  "q": "weather vane rooster roof",
+  "must": [
+   "vane"
+  ],
+  "alt": "girouette sur un toit"
+ },
+ {
+  "id": "s-d5-anemometre",
+  "q": "cup anemometer wind speed",
+  "must": [
+   "anemometer"
+  ],
+  "alt": "anémomètre à coupelles"
+ },
+ {
+  "id": "s-d6-tgv",
+  "q": "TGV Duplex train en gare",
+  "must": [
+   "TGV"
+  ],
+  "alt": "rame de TGV à quai ou en ligne"
+ },
+ {
+  "id": "s-e1-globe-lampe",
+  "q": "globe terrestre éclairé par une lampe jour et nuit",
+  "must": [
+   "globe"
+  ],
+  "alt": "un globe terrestre éclairé d'un seul côté par une lampe (jour/nuit)"
+ },
+ {
+  "id": "s-e1-cadran-solaire",
+  "q": "cadran solaire",
+  "must": [
+   "cadran"
+  ],
+  "alt": "un cadran solaire avec son style (gnomon) et l'ombre sur les lignes horaires"
+ },
+ {
+  "id": "s-e2-dijon-ete",
+  "q": "Dijon place de la Libération été",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "Dijon en été : lumière haute, terrasses, ciel dégagé"
+ },
+ {
+  "id": "s-e2-dijon-hiver",
+  "q": "Dijon neige hiver",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "Dijon en hiver : ciel bas, neige ou arbres nus"
+ },
+ {
+  "id": "s-e3-phases-lune",
+  "q": "Lunar phases composite photograph all phases of the Moon",
+  "must": [
+   "phase"
+  ],
+  "alt": "une série de photographies de la Lune montrant ses phases successives (croissant, quartier, pleine Lune)"
+ },
+ {
+  "id": "s-e3-eclipse-lune",
+  "q": "total lunar eclipse red Moon",
+  "must": [
+   "eclipse"
+  ],
+  "alt": "une éclipse totale de Lune : disque rougeâtre dans l'ombre de la Terre"
+ },
+ {
+  "id": "s-e4-balance-cuisine",
+  "q": "balance de cuisine électronique",
+  "must": [
+   "balance"
+  ],
+  "alt": "une balance de cuisine électronique avec affichage numérique"
+ },
+ {
+  "id": "s-e4-sucre-dissolution",
+  "q": "sugar cube dissolving in water",
+  "must": [
+   "sugar"
+  ],
+  "alt": "un morceau de sucre qui se dissout dans un verre d'eau"
+ },
+ {
+  "id": "s-e5-aimant",
+  "q": "magnet attracting steel nails paper clips",
+  "must": [
+   "magnet"
+  ],
+  "alt": "un aimant qui attire des objets en acier (trombones, clous)"
+ },
+ {
+  "id": "s-e5-centre-de-tri",
+  "q": "centre de tri des déchets recyclables convoyeur",
+  "must": [
+   "tri"
+  ],
+  "alt": "l'intérieur d'un centre de tri : tapis roulants et déchets recyclables"
+ },
+ {
+  "id": "s-e6-bouteille-petillante",
+  "q": "bouteille eau gazeuse bulles carbonated water bubbles",
+  "must": [
+   "bubble"
+  ],
+  "alt": "une bouteille ou un verre d'eau gazeuse avec des bulles de gaz carbonique"
+ },
+ {
+  "id": "h-a1-chapelle-palatine",
+  "q": "Aachen Cathedral Palatine Chapel interior octagon Charlemagne",
+  "must": [
+   "Aachen"
+  ],
+  "alt": "la chapelle palatine de Charlemagne à Aix-la-Chapelle (intérieur ou extérieur)"
+ },
+ {
+  "id": "h-a1-denier-charlemagne",
+  "q": "Denier Charlemagne silver coin Carolus monogram",
+  "must": [
+   "Charlemagne"
+  ],
+  "alt": "une pièce d'argent (denier) de Charlemagne, avec son monogramme"
+ },
+ {
+  "id": "h-a1-baptistere-poitiers",
+  "q": "Baptistère Saint-Jean Poitiers intérieur",
+  "must": [
+   "Poitiers"
+  ],
+  "alt": "le baptistère Saint-Jean de Poitiers, très ancien édifice chrétien de Gaule"
+ },
+ {
+  "id": "h-a1b-hospices-beaune",
+  "q": "Hospices de Beaune Hôtel-Dieu cour toit tuiles vernissées",
+  "must": [
+   "Beaune"
+  ],
+  "alt": "l'Hôtel-Dieu de Beaune et son toit de tuiles vernissées"
+ },
+ {
+  "id": "h-a1b-manuscrit-enlumine",
+  "q": "Illuminated manuscript medieval monk scribe scriptorium",
+  "must": [
+   "manuscript"
+  ],
+  "alt": "un manuscrit médiéval enluminé ou un moine copiste dans un scriptorium"
+ },
+ {
+  "id": "h-a1c-vezelay-nef",
+  "q": "Basilique Sainte-Marie-Madeleine Vézelay nef intérieur",
+  "must": [
+   "Vézelay"
+  ],
+  "alt": "la nef romane de la basilique de Vézelay : arcs en plein cintre, murs épais"
+ },
+ {
+  "id": "h-a1c-sens-voute",
+  "q": "Cathédrale Saint-Étienne de Sens nef voûte croisée d'ogives",
+  "must": [
+   "Sens"
+  ],
+  "alt": "la nef gothique de la cathédrale de Sens avec ses voûtes sur croisée d'ogives"
+ },
+ {
+  "id": "h-b1-guedelon",
+  "q": "Château de Guédelon chantier",
+  "must": [
+   "Guédelon"
+  ],
+  "alt": "le chantier du château de Guédelon (Yonne), construit avec les techniques du XIIIe siècle"
+ },
+ {
+  "id": "h-b1-pontlevis",
+  "q": "pont-levis relevé château fort",
+  "must": [
+   "pont-levis"
+  ],
+  "alt": "un pont-levis de château fort (relevé ou abaissé), avec ses chaînes"
+ },
+ {
+  "id": "h-b1-chateauneuf",
+  "q": "Château de Châteauneuf-en-Auxois",
+  "must": [
+   "Châteauneuf"
+  ],
+  "alt": "le château fort de Châteauneuf-en-Auxois (Côte-d'Or) dominant le village"
+ },
+ {
+  "id": "h-b1b-berry-octobre",
+  "q": "Très Riches Heures du duc de Berry octobre semailles",
+  "must": [
+   "Très Riches Heures"
+  ],
+  "alt": "enluminure du mois d'octobre des Très Riches Heures du duc de Berry : un paysan sème le blé"
+ },
+ {
+  "id": "h-b1b-grange-dimiere",
+  "q": "Grange dîmière de Meslay",
+  "must": [
+   "Meslay"
+  ],
+  "alt": "la grange dîmière de Meslay (Parçay-Meslay, près de Tours), grande grange médiévale où l'on stockait la dîme"
+ },
+ {
+  "id": "g-a1-tram-dijon",
+  "q": "Tramway de Dijon rame station",
+  "must": [
+   "Dijon",
+   "tram"
+  ],
+  "alt": "une rame de tramway circulant dans une rue de Dijon"
+ },
+ {
+  "id": "g-a1-village-rural",
+  "q": "Flavigny-sur-Ozerain village vue",
+  "must": [
+   "Flavigny"
+  ],
+  "alt": "un village de Côte-d'Or entouré de champs et de prés : habitat dispersé, peu de transports en commun"
+ },
+ {
+  "id": "g-b1-prefecture-dijon",
+  "q": "Préfecture de la Côte-d'Or Dijon",
+  "must": [
+   "préfecture"
+  ],
+  "alt": "la préfecture de la Côte-d'Or à Dijon, siège du préfet du département"
+ },
+ {
+  "id": "g-b1-hotel-ville-dijon",
+  "q": "Hôtel de ville de Dijon",
+  "must": [
+   "Dijon",
+   "hôtel de ville"
+  ],
+  "alt": "l'hôtel de ville (mairie) de Dijon"
+ },
+ {
+  "id": "s-a1-plateau",
+  "q": "bicycle chainring crankset chain",
+  "must": [
+   "chainring"
+  ],
+  "alt": "plateau (pignon avant) et chaîne d'un vélo"
+ },
+ {
+  "id": "s-a1-cassette",
+  "q": "bicycle cassette sprockets rear derailleur",
+  "must": [
+   "cassette"
+  ],
+  "alt": "cassette de pignons de roue arrière avec dérailleur"
+ },
+ {
+  "id": "s-a1b-abri-meteo",
+  "q": "Stevenson screen weather station",
+  "must": [
+   "stevenson"
+  ],
+  "alt": "abri météorologique (abri Stevenson) contenant les thermomètres"
+ },
+ {
+  "id": "s-a1b-anemometre",
+  "q": "cup anemometer wind speed",
+  "must": [
+   "anemometer"
+  ],
+  "alt": "anémomètre à coupelles"
+ },
+ {
+  "id": "s-a1b-pluviometre",
+  "q": "rain gauge pluviomètre",
+  "must": [
+   "gauge"
+  ],
+  "alt": "pluviomètre"
+ },
+ {
+  "id": "s-b1-roberval",
+  "q": "balance de Roberval plateaux",
+  "must": [
+   "roberval"
+  ],
+  "alt": "balance de Roberval à deux plateaux"
+ },
+ {
+  "id": "s-b1-masses",
+  "q": "calibration weights set brass masses",
+  "must": [
+   "weights"
+  ],
+  "alt": "jeu de masses marquées"
+ },
+ {
+  "id": "s-b1b-sucre-eau",
+  "q": "sugar cube dissolving in water glass",
+  "must": [
+   "sugar"
+  ],
+  "alt": "morceau de sucre qui se dissout dans l'eau"
+ },
+ {
+  "id": "s-b1b-sel-mer",
+  "q": "sea salt crystals coarse salt",
+  "must": [
+   "salt"
+  ],
+  "alt": "sel de mer (gros sel)"
+ },
+ {
+  "id": "s-b1c-tamis",
+  "q": "sieve sifting sand gravel",
+  "must": [
+   "sieve"
+  ],
+  "alt": "tamis utilisé pour séparer sable et graviers"
+ },
+ {
+  "id": "s-b1c-filtre-cafe",
+  "q": "coffee filter paper pouring water",
+  "must": [
+   "filter"
+  ],
+  "alt": "filtre à café et papier filtre"
+ },
+ {
+  "id": "s-b1c-marais-salants",
+  "q": "Marais salants de Guérande",
+  "must": [
+   "Guérande"
+  ],
+  "alt": "marais salants de Guérande où l'eau de mer s'évapore"
+ }
+]

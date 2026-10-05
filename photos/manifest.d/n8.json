@@ -1,0 +1,90 @@
+[
+ {
+  "id": "s-e1-globe-lampe",
+  "q": "globe terrestre éclairé par une lampe jour et nuit",
+  "must": [
+   "globe"
+  ],
+  "alt": "un globe terrestre éclairé d'un seul côté par une lampe (jour/nuit)"
+ },
+ {
+  "id": "s-e1-cadran-solaire",
+  "q": "cadran solaire",
+  "must": [
+   "cadran"
+  ],
+  "alt": "un cadran solaire avec son style (gnomon) et l'ombre sur les lignes horaires"
+ },
+ {
+  "id": "s-e2-dijon-ete",
+  "q": "Dijon place de la Libération été",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "Dijon en été : lumière haute, terrasses, ciel dégagé"
+ },
+ {
+  "id": "s-e2-dijon-hiver",
+  "q": "Dijon neige hiver",
+  "must": [
+   "Dijon"
+  ],
+  "alt": "Dijon en hiver : ciel bas, neige ou arbres nus"
+ },
+ {
+  "id": "s-e3-phases-lune",
+  "q": "Lunar phases composite photograph all phases of the Moon",
+  "must": [
+   "phase"
+  ],
+  "alt": "une série de photographies de la Lune montrant ses phases successives (croissant, quartier, pleine Lune)"
+ },
+ {
+  "id": "s-e3-eclipse-lune",
+  "q": "total lunar eclipse red Moon",
+  "must": [
+   "eclipse"
+  ],
+  "alt": "une éclipse totale de Lune : disque rougeâtre dans l'ombre de la Terre"
+ },
+ {
+  "id": "s-e4-balance-cuisine",
+  "q": "balance de cuisine électronique",
+  "must": [
+   "balance"
+  ],
+  "alt": "une balance de cuisine électronique avec affichage numérique"
+ },
+ {
+  "id": "s-e4-sucre-dissolution",
+  "q": "sugar cube dissolving in water",
+  "must": [
+   "sugar"
+  ],
+  "alt": "un morceau de sucre qui se dissout dans un verre d'eau"
+ },
+ {
+  "id": "s-e5-aimant",
+  "q": "magnet attracting steel nails paper clips",
+  "must": [
+   "magnet"
+  ],
+  "alt": "un aimant qui attire des objets en acier (trombones, clous)"
+ },
+ {
+  "id": "s-e5-centre-de-tri",
+  "q": "centre de tri des déchets recyclables convoyeur",
+  "must": [
+   "tri"
+  ],
+  "alt": "l'intérieur d'un centre de tri : tapis roulants et déchets recyclables"
+ },
+ {
+  "id": "s-e6-bouteille-petillante",
+  "q": "bouteille eau gazeuse bulles carbonated water bubbles",
+  "must": [
+   "bubble"
+  ],
+  "alt": "une bouteille ou un verre d'eau gazeuse avec des bulles de gaz carbonique"
+ }
+]

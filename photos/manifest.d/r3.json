@@ -1,0 +1,14 @@
+[
+ {"id":"s-a1-plateau","q":"bicycle chainring crankset chain","must":["chainring"],"alt":"plateau (pignon avant) et chaîne d'un vélo"},
+ {"id":"s-a1-cassette","q":"bicycle cassette sprockets rear derailleur","must":["cassette"],"alt":"cassette de pignons de roue arrière avec dérailleur"},
+ {"id":"s-a1b-abri-meteo","q":"Stevenson screen weather station","must":["stevenson"],"alt":"abri météorologique (abri Stevenson) contenant les thermomètres"},
+ {"id":"s-a1b-anemometre","q":"cup anemometer wind speed","must":["anemometer"],"alt":"anémomètre à coupelles"},
+ {"id":"s-a1b-pluviometre","q":"rain gauge pluviomètre","must":["gauge"],"alt":"pluviomètre"},
+ {"id":"s-b1-roberval","q":"balance de Roberval plateaux","must":["roberval"],"alt":"balance de Roberval à deux plateaux"},
+ {"id":"s-b1-masses","q":"calibration weights set brass masses","must":["weights"],"alt":"jeu de masses marquées"},
+ {"id":"s-b1b-sucre-eau","q":"sugar cube dissolving in water glass","must":["sugar"],"alt":"morceau de sucre qui se dissout dans l'eau"},
+ {"id":"s-b1b-sel-mer","q":"sea salt crystals coarse salt","must":["salt"],"alt":"sel de mer (gros sel)"},
+ {"id":"s-b1c-tamis","q":"sieve sifting sand gravel","must":["sieve"],"alt":"tamis utilisé pour séparer sable et graviers"},
+ {"id":"s-b1c-filtre-cafe","q":"coffee filter paper pouring water","must":["filter"],"alt":"filtre à café et papier filtre"},
+ {"id":"s-b1c-marais-salants","q":"Marais salants de Guérande","must":["Guérande"],"alt":"marais salants de Guérande où l'eau de mer s'évapore"}
+]

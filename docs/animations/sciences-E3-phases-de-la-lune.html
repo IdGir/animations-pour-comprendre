@@ -1,0 +1,451 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les phases de la Lune</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-E3-phases-de-la-lune","matiere":"sciences","annee":"B","periode":1,"theme":"La Terre dans l'espace : la Lune et ses phases","resume":"La Lune tourne autour de la Terre en environ un mois : le Soleil en éclaire toujours la moitié, et selon sa position on en voit plus ou moins (nouvelle Lune, quartiers, pleine Lune). Les phases ne sont pas l'ombre de la Terre.","motsCles":["Lune","phases","lunaison","orbite","Soleil","éclipse","quartier","croissante","décroissante"]} */
+(function(){
+const R={}; let manActive=false, manDay=7.4;
+const C={sun:"#F5B82E",ink:"#1E2430",or:"#E07A1F",gr:"#2E8B57",bl:"#2563A8",red:"#C0392B",moonL:"#F6F0D6",moonD:"#2B3045"};
+const EX=520, EY=255, ER=46, OR=175, MR=28, SX=125, SY=255, SR=58;   // Terre, orbite, Moon (rayon), Soleil
+const CYC=29.5;                                                       // durée d'un cycle de phases (jours)
+const rad=d=>d*Math.PI/180;
+const NOMS=["Nouvelle Lune","Premier croissant","Premier quartier","Gibbeuse croissante","Pleine Lune","Gibbeuse décroissante","Dernier quartier","Dernier croissant"];
+const phaseIdx=e=>Math.round((((e%360)+360)%360)/45)%8;
+const moonPos=e=>{ const th=rad(180+e); return [EX+OR*Math.cos(th),EY-OR*Math.sin(th)]; };
+const dayOf=e=>e/360*CYC;
+const fj=d=>(Math.round(d*10)/10).toString().replace(".",",");
+/* Lune vue de la Terre : e = angle Soleil-Terre-Lune compté dans le sens du mouvement (0 nouvelle, 90 premier quartier, 180 pleine) */
+function mkMoon(a,parent,r){ const {el}=a; const g=el("g",{},parent);
+  el("circle",{r,fill:C.moonD,stroke:"#6B7388","stroke-width":Math.max(2,r*.03)},g);
+  const lit=el("path",{fill:C.moonL},g);
+  [[-.35,-.3,.28],[.3,-.45,.2],[.05,.25,.3],[-.5,.35,.17],[.5,.3,.18]].forEach(([x,y,k])=>el("circle",{cx:x*r,cy:y*r,r:k*r,fill:"#8A8F9E","fill-opacity":.2},g));
+  g.upd=e=>{ e=((e%360)+360)%360; const w=e<=180, ee=w?e:360-e; const rx=r*Math.abs(Math.cos(rad(ee)));
+    const d=ee<=90?`M0,${-r} A${r},${r} 0 0 1 0,${r} A${rx},${r} 0 0 0 0,${-r} Z`:`M0,${-r} A${r},${r} 0 0 1 0,${r} A${rx},${r} 0 0 1 0,${-r} Z`;
+    lit.setAttribute("d",ee<.5?"M0,0":d); lit.setAttribute("transform",w?"":"scale(-1,1)"); };
+  return g; }
+
+Anim.run({
+  titre:"Les phases de la Lune",
+  sousTitre:"Sciences et technologie · CM1-CM2 · La Terre dans l'espace",
+  matiere:"sciences", badge:"Sciences", manipDes:4, manipJusqua:4,
+  accroche:"Pourquoi la Lune change-t-elle de forme au fil des jours ?",
+  init(a){
+    const {el}=a;
+    /* ---------- orbite vue de dessus (en haut) ---------- */
+    const T=a.layer("T"); R.T=T;
+    el("text",{x:EX,y:44,"text-anchor":"middle","font-size":24,"font-weight":600,fill:"#4A5468",text:"Vue de dessus, au-dessus du pôle Nord"},T);
+    R.rays=[-150,-100,-50,0,50,100,150].map(dy=>el("line",{x1:SX+SR+16,y1:EY+dy,x2:dy===0?EX-ER-8:EX+OR+60,y2:EY+dy,stroke:C.sun,"stroke-width":4,"stroke-linecap":"round","stroke-dasharray":"16 12","stroke-opacity":.85},T));
+    el("circle",{cx:EX,cy:EY,r:OR,fill:"none",stroke:"#9AA3B2","stroke-width":3,"stroke-dasharray":"12 10"},T);
+    R.shadow=el("rect",{x:EX,y:EY-ER,width:OR+135,height:2*ER,fill:"#1B2447","fill-opacity":.85},T);
+    R.shT=el("text",{x:EX+ER+114,y:EY+8,"text-anchor":"middle","font-size":22,"font-weight":700,fill:"#fff",text:"ombre de la Terre"},T);
+    el("circle",{cx:SX,cy:SY,r:SR+24,fill:C.sun,opacity:.28},T); el("circle",{cx:SX,cy:SY,r:SR,fill:C.sun,stroke:"#E39A0B","stroke-width":4},T);
+    el("text",{x:SX,y:SY+SR+44,"text-anchor":"middle","font-size":28,"font-weight":800,fill:"#8A5A00",text:"Soleil"},T);
+    el("circle",{cx:EX,cy:EY,r:ER,fill:"#4A90D9",stroke:"#1E4F8A","stroke-width":3},T);
+    el("path",{d:`M${EX-10},${EY-34} q22,2 30,18 q-4,20 -22,18 q-14,-14 -8,-36z`,fill:"#5DAA5B"},T);
+    el("path",{d:`M${EX-30},${EY+4} q10,-2 14,10 q-6,14 -16,8z`,fill:"#5DAA5B"},T);
+    el("text",{x:EX,y:EY+ER+30,"text-anchor":"middle","font-size":26,"font-weight":800,fill:"#1E4F8A",text:"Terre"},T);
+    R.sight=el("line",{stroke:"#7E8AA0","stroke-width":3,"stroke-dasharray":"6 6"},T);
+    R.mt=el("g",{},T); el("circle",{r:MR,fill:C.moonD,stroke:"#6B7388","stroke-width":3},R.mt); el("path",{d:`M0,${-MR} A${MR},${MR} 0 0 0 0,${MR} Z`,fill:C.moonL},R.mt);   // vue de dessus : moitié éclairée toujours côté Soleil (gauche)
+    R.face=el("path",{fill:"none",stroke:C.red,"stroke-width":6,"stroke-linecap":"round"},R.mt);
+    R.orbA=a.arrow(T,`M${EX+(OR+40)*Math.cos(rad(195))},${EY-(OR+40)*Math.sin(rad(195))} A${OR+40},${OR+40} 0 0 0 ${EX+(OR+40)*Math.cos(rad(240))},${EY-(OR+40)*Math.sin(rad(240))}`,{color:C.or,w:7,head:3.2});
+    R.orbT=a.label(T,150,432,"La Lune tourne\nautour de la Terre",{size:24,stroke:C.or,color:"#8A4A0E",fill:"#FFF3E3"});
+    R.lbL=a.label(T,EX-190,EY+OR+50,"moitié éclairée",{size:24,stroke:"#E39A0B",color:"#8A5A00",fill:"#FFF6D8"});
+    R.lbN=a.label(T,EX+190,EY+OR+50,"moitié dans la nuit",{size:24,stroke:"#2B3045",color:"#fff",fill:"#2B3045"});
+    // tour des informations (haut droite)
+    R.gau=el("g",{},T); const GX0=860, GW=660, GY=118;
+    el("text",{x:GX0,y:80,"font-size":26,"font-weight":700,fill:C.ink,text:"Jours depuis la nouvelle Lune (exemple moyen)"},R.gau);
+    el("rect",{x:GX0,y:GY-14,width:GW,height:28,rx:8,fill:"#E7EAF0",stroke:"#9AA3B2","stroke-width":2},R.gau);
+    R.gFill=el("rect",{x:GX0,y:GY-14,width:0,height:28,rx:8,fill:"#F5D56A"},R.gau);
+    [[0,"0"],[7.4,"7"],[14.8,"15"],[22.1,"22"],[29.5,"29,5"]].forEach(([d,tx])=>{ const x=GX0+GW*d/CYC; el("line",{x1:x,y1:GY+14,x2:x,y2:GY+24,stroke:C.ink,"stroke-width":2},R.gau); el("text",{x,y:GY+50,"text-anchor":"middle","font-size":22,fill:C.ink,text:tx},R.gau); });
+    R.gMk=el("g",{},R.gau); el("path",{d:"M0,-16 L-11,-34 L11,-34Z",fill:C.red},R.gMk); el("line",{x1:0,y1:-16,x2:0,y2:16,stroke:C.red,"stroke-width":4},R.gMk);
+    R.name=el("text",{x:GX0,y:218,"font-size":34,"font-weight":800,fill:C.ink},T);
+    R.sub=el("text",{x:GX0,y:258,"font-size":28,"font-weight":700},T);
+    R.cbox=el("g",{},T); el("rect",{x:GX0-14,y:286,width:GW+28,height:150,rx:14,fill:"#FFF8EC",stroke:C.or,"stroke-width":3},R.cbox); R.cTx=el("text",{x:GX0+10,y:332,"font-size":28,"font-weight":600,fill:C.ink},R.cbox);
+    R.leg=el("g",{},T); el("path",{d:"M860,462 h50",stroke:C.red,"stroke-width":6,"stroke-linecap":"round"},R.leg); el("text",{x:926,y:470,"font-size":22,fill:C.ink,text:"face de la Lune tournée vers la Terre : celle qu'on voit"},R.leg);
+    el("text",{x:1530,y:44,"text-anchor":"end","font-size":22,fill:"#5A6478",text:"Tailles et distances pas à l'échelle"},T);
+    /* ---------- vue depuis la Terre (en bas) ---------- */
+    const B=a.layer("B"); R.B=B;
+    el("text",{x:250,y:540,"text-anchor":"middle","font-size":28,"font-weight":800,fill:C.ink,text:"Vue depuis la Terre"},B);
+    el("text",{x:250,y:572,"text-anchor":"middle","font-size":22,fill:"#4A5468",text:"(dans l'hémisphère nord)"},B);
+    R.big=el("g",{transform:"translate(250,696)"},B); R.bigM=mkMoon(a,R.big,118);
+    R.bigN=el("text",{x:250,y:860,"text-anchor":"middle","font-size":32,"font-weight":800,fill:C.ink},B);
+    R.strip=el("g",{},B); el("text",{x:1070,y:540,"text-anchor":"middle","font-size":26,"font-weight":800,fill:C.ink,text:"Les 8 phases d'un cycle (environ 29,5 jours)"},R.strip);
+    R.thumbs=NOMS.map((n,i)=>{ const g=el("g",{},R.strip); const cx=[700,945,1190,1435][i%4], cy=i<4?628:790; const ring=el("circle",{cx,cy,r:54,fill:"none",stroke:C.or,"stroke-width":6},g);
+      const m=el("g",{transform:`translate(${cx},${cy})`},g); const mm=mkMoon(a,m,42); mm.upd(i*45);
+      el("text",{x:cx,y:cy+82,"text-anchor":"middle","font-size":22,"font-weight":700,fill:C.ink,text:n},g); g.ring=ring; return g; });
+    /* ---------- manipulation ---------- */
+    a.manip.innerHTML=`Jour du cycle : <input type="range" id="mD" min="0" max="29.5" step="0.1" value="7.4" aria-label="Position de la Lune sur son orbite (jour du cycle)"> <b id="mDt" style="min-width:70px">jour 7</b> <button data-d="0">Nouvelle Lune</button> <button data-d="7.4">1er quartier</button> <button data-d="14.8">Pleine Lune</button> <button data-d="22.1">Dernier quartier</button>`;
+    const sl=a.manip.querySelector("#mD"); sl.oninput=()=>{ manActive=true; manDay=+sl.value; a.redraw(); };
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ manActive=true; manDay=+b.dataset.d; a.redraw(); });
+    /* ---------- idée fausse ---------- */
+    R.myth=a.layer("myth"); R.mc=a.myth(R.myth,840,60,700,"Les phases de la Lune, c'est l'ombre de la Terre sur la Lune.","Non : l'ombre de la Terre ne tombe sur la Lune que pendant une éclipse de Lune, un événement rare. Les phases viennent de la moitié de la Lune éclairée par le Soleil, qu'on voit sous un angle différent chaque jour.");
+    R.ph2=a.photo(R.myth,{id:"s-e3-eclipse-lune",x:1000,y:560,w:440,h:240,cap:"Une éclipse totale de Lune",rot:2});
+    /* ---------- synthèse ---------- */
+    R.syn=a.layer("syn"); el("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},R.syn);
+    el("text",{x:800,y:78,"text-anchor":"middle","font-size":38,"font-weight":800,fill:C.ink,text:"À retenir"},R.syn);
+    R.pts=[["La Lune tourne autour de la Terre. Le cycle des phases dure environ 29,5 jours.",C.bl],["Le Soleil éclaire toujours la moitié de la Lune. Selon sa position, on voit plus ou moins de cette moitié éclairée.",C.or],["Les phases ne sont pas l'ombre de la Terre (sauf pendant une éclipse). Et la Lune nous montre toujours la même face.",C.gr]].map(([tx,c],i)=>{
+      const g=el("g",{},R.syn); const y=140+i*210; el("rect",{x:60,y,width:930,height:170,rx:18,fill:"#fff",stroke:c,"stroke-width":4},g); el("circle",{cx:120,cy:y+85,r:34,fill:c},g); el("text",{x:120,y:y+98,"text-anchor":"middle","font-size":38,"font-weight":800,fill:"#fff",text:i+1},g);
+      const t=el("text",{x:180,y:y+62,"font-size":28,"font-weight":600,fill:C.ink},g); a.wrap(t,tx,50,1.2); return g; });
+    R.ph1=a.photo(R.syn,{id:"s-e3-phases-lune",x:1050,y:230,w:440,h:300,cap:"Les phases de la Lune",rot:-2});
+  },
+  reset(a){ [R.T,R.B,R.myth,R.syn,R.ph2,R.ph1].forEach(e=>a.op(e,0)); },
+  etapes:[
+  { titre:"Le Soleil éclaire la moitié de la Lune", duree:8000,
+    legende:"La Lune tourne autour de la Terre. Le Soleil en éclaire toujours une moitié, celle qui est tournée vers lui : l'autre moitié est dans la nuit.",
+    voix:"La Lune tourne autour de la Terre. Elle ne produit pas de lumière : elle est éclairée par le Soleil. Comme pour la Terre, le Soleil éclaire toujours une moitié de la Lune, celle qui est tournée vers lui. L'autre moitié est dans la nuit.",
+    anim(t,a){ const s=a.seg; pose(a,{e:90,top:s(t,0,.15),rays:s(t,.1,.3),lbl:s(t,.5,.7),orbA:s(t,.75,.9)}); } },
+  { titre:"Un tour de la Lune : environ un mois", duree:15000,
+    legende:"La Lune fait le tour de la Terre. Au fil des jours, la forme de la partie éclairée qu'on voit change : c'est le cycle des phases, environ 29 jours et demi.",
+    voix:"Regardons la Lune faire un tour autour de la Terre. En bas, voici ce que voit un observateur sur la Terre. La moitié éclairée de la Lune est toujours tournée vers le Soleil, mais l'observateur ne la voit pas toujours de la même façon. La forme change jour après jour. Après environ vingt-neuf jours et demi, on retrouve la même phase : c'est le cycle de la Lune.",
+    anim(t,a){ const s=a.seg; const e=360*s(t,.12,.95,true); pose(a,{e,top:1,rays:1,orbA:1,big:s(t,0,.1),gauge:s(t,0,.1),face:s(t,.05,.12),strip:e,sight:1}); } },
+  { titre:"Quatre positions importantes", duree:15000,
+    legende:"Nouvelle Lune : on ne voit rien. Premier quartier : une moitié. Pleine Lune : tout le disque. Dernier quartier : l'autre moitié.",
+    voix:"Arrêtons la Lune à quatre endroits. À la nouvelle Lune, elle est du même côté que le Soleil : sa face éclairée est tournée à l'opposé de nous, et on ne voit rien. Au premier quartier, on voit la moitié de la face éclairée, à droite. À la pleine Lune, elle est à l'opposé du Soleil : on voit toute la face éclairée. Au dernier quartier, on voit de nouveau une moitié, mais à gauche.",
+    anim(t,a){ const s=a.seg; const E=[0,90,180,270]; const i=Math.min(3,Math.floor(t*4)); const f=a.seg(t*4-i,0,.35); const e=i?a.lerp(E[i-1],E[i],f):0;
+      const TX=["La Lune est du même côté que le Soleil : la face éclairée est de l'autre côté. Vu de la Terre, on ne voit rien.","On voit la moitié de la face éclairée : un demi-disque, à droite.","La Lune est à l'opposé du Soleil : on voit toute la face éclairée.","On voit de nouveau un demi-disque, mais à gauche."];
+      pose(a,{e,top:1,rays:1,orbA:1,big:1,gauge:1,face:1,all:1,sight:1,call:TX[i],callA:s(t*4-i,.3,.5)}); } },
+  { titre:"Lune croissante, lune décroissante", duree:15000,
+    legende:"De la nouvelle à la pleine Lune, la partie éclairée grandit, à droite : la Lune est croissante. Ensuite elle diminue, à gauche : la Lune est décroissante.",
+    voix:"Suivons de nouveau la Lune. De la nouvelle Lune jusqu'à la pleine Lune, la partie éclairée qu'on voit grandit, du côté droit : on dit que la Lune est croissante. Après la pleine Lune, elle diminue, du côté gauche : la Lune est décroissante. Entre les deux, on passe par le croissant, le quartier et la gibbeuse.",
+    anim(t,a){ const s=a.seg; const e=360*s(t,.05,.95,true); pose(a,{e,top:1,rays:1,orbA:1,big:1,gauge:1,face:1,all:1,sight:1,call:e<180?"Lune CROISSANTE : la partie éclairée grandit. Elle est à droite (dans l'hémisphère nord).":"Lune DÉCROISSANTE : la partie éclairée diminue. Elle est à gauche (dans l'hémisphère nord).",callA:s(t,.02,.1),hl:1}); } },
+  { titre:"À vous : placez la Lune", duree:16000,
+    legende:"Déplacez la Lune sur son orbite avec le curseur ou les boutons : regardez la forme qu'on voit depuis la Terre. À vous de trouver la position de la pleine Lune !",
+    voix:"À vous de jouer ! Avec le curseur, placez la Lune où vous voulez sur son orbite. Regardez en bas la forme qu'on voit depuis la Terre. Où faut-il placer la Lune pour voir une pleine Lune ? Et pour ne rien voir du tout ? Prenez votre temps.",
+    anim(t,a){ const s=a.seg; if(t<.02) manActive=false; const d=manActive?manDay:7.4*s(t,.15,.9,true); const e=d/CYC*360; pose(a,{e,top:1,rays:1,orbA:1,big:1,gauge:1,face:1,all:1,sight:1,hl:1,man:1}); const sl=document.getElementById("mD"), tx=document.getElementById("mDt"); if(sl&&!manActive) sl.value=d.toFixed(1); if(tx) tx.textContent="jour "+Math.round(d); } },
+  { titre:"Idée fausse : l'ombre de la Terre ?", duree:12000,
+    legende:"Beaucoup pensent que les phases viennent de l'ombre de la Terre. Mais ici la Lune est loin de l'ombre et on la voit déjà à moitié éclairée : l'ombre de la Terre est une autre histoire (éclipse).",
+    voix:"On entend souvent que les phases de la Lune sont l'ombre de la Terre sur la Lune. C'est faux. Regardez : au premier quartier, la Lune est très loin de l'ombre de la Terre, et pourtant on ne la voit qu'à moitié. L'ombre de la Terre ne touche la Lune que lors d'une éclipse de Lune, un événement rare. Les phases, c'est la moitié éclairée par le Soleil, vue sous des angles différents.",
+    anim(t,a){ const s=a.seg; pose(a,{e:90,top:1,rays:1,orbA:0,big:s(t,0,.1),face:1,shade:s(t,.1,.35),myth:s(t,.4,.6),hl:1,big2:1}); a.cls(R.mc.faux,"pulse",t>.7); } },
+  { titre:"À retenir", duree:9000,
+    legende:"La Lune tourne autour de la Terre en un mois environ ; le Soleil en éclaire toujours la moitié ; selon sa position, on voit plus ou moins cette moitié. Ce n'est pas l'ombre de la Terre.",
+    voix:"À retenir. Un : la Lune tourne autour de la Terre, et le cycle des phases dure environ vingt-neuf jours et demi. Deux : le Soleil éclaire toujours la moitié de la Lune, et selon sa position, on voit plus ou moins de cette moitié éclairée. Trois : les phases ne sont pas l'ombre de la Terre, sauf pendant une éclipse. Et la Lune nous montre toujours la même face.",
+    anim(t,a){ const s=a.seg; pose(a,{syn:1}); R.pts.forEach((g,i)=>a.op(g,s(t,.1+i*.22,.3+i*.22))); a.op(R.ph1,s(t,.75,.95)); } },
+  ]
+});
+function pose(a,o){ const d=k=>o[k]||0, op=a.op;
+  op(R.syn,o.syn?1:0); if(o.syn){ [R.T,R.B,R.myth].forEach(e=>op(e,0)); return; } op(R.ph1,0);
+  op(R.T,1); op(R.B,d("big")>0?1:0);
+  const e=((o.e%360)+360)%360, [mx,my]=moonPos(e);
+  R.rays.forEach((r,i)=>{ op(r,d("rays"));  });
+  op(R.mt,d("top")); a.tr(R.mt,mx,my);
+  op(R.orbA,d("orbA")); op(R.orbT,d("orbA")); op(R.lbL,d("lbl")); op(R.lbN,d("lbl"));
+  // face tournée vers la Terre : arc rouge
+  const dx=EX-mx, dy=EY-my, al=Math.atan2(dy,dx), rr=MR+9, p1=[rr*Math.cos(al-Math.PI/2),rr*Math.sin(al-Math.PI/2)], p2=[rr*Math.cos(al+Math.PI/2),rr*Math.sin(al+Math.PI/2)];
+  R.face.setAttribute("d",`M${p1[0]},${p1[1]} A${rr},${rr} 0 0 1 ${p2[0]},${p2[1]}`); op(R.face,d("face")); op(R.leg,d("face"));
+  const L=Math.hypot(dx,dy); a.set(R.sight,{x1:EX-dx/L*(ER+4),y1:EY-dy/L*(ER+4),x2:mx+dx/L*(MR+12),y2:my+dy/L*(MR+12)}); op(R.sight,d("sight")*.9);
+  // ombre de la Terre (idée fausse)
+  op(R.shadow,d("shade")); op(R.shT,d("shade"));
+  // vue en bas
+  R.bigM.upd(e); const idx=phaseIdx(e), day=dayOf(e);
+  R.bigN.textContent=NOMS[idx]; op(R.bigN,1);
+  op(R.strip,(o.all||o.strip!==undefined)?1:0);
+  R.thumbs.forEach((g,i)=>{ const seen=o.all||o.strip>=359||o.strip>=i*45-1; g.setAttribute("opacity",seen?1:.2); op(g.ring,o.hl&&i===idx?1:0); });
+  // jauge et titre
+  op(R.gau,d("gauge")); const GX0=860, GW=660; R.gFill.setAttribute("width",GW*Math.min(1,day/CYC)); a.tr(R.gMk,GX0+GW*Math.min(1,day/CYC),118);
+  const hasInfo=d("gauge")>0&&!o.myth; op(R.name,hasInfo?1:0); op(R.sub,hasInfo?1:0);
+  R.name.textContent="Jour "+(o.man?Math.round(day):fj(day))+" : "+NOMS[idx];
+  const w=e<180; R.sub.textContent=e<4||e>356||Math.abs(e-180)<4?(Math.abs(e-180)<4?"la Lune est à son maximum":"début du cycle"):w?"Lune croissante : la partie éclairée grandit":"Lune décroissante : la partie éclairée diminue"; R.sub.setAttribute("fill",w?C.gr:C.or);
+  // bulle d'explication
+  op(R.cbox,o.call&&hasInfo?o.callA:0); if(o.call){ a.wrap(R.cTx,o.call,46,1.25); }
+  // idée fausse
+  op(R.myth,d("myth")); op(R.ph2,d("myth")); if(d("myth")>0){ op(R.gau,0); op(R.name,0); op(R.sub,0); op(R.cbox,0); op(R.leg,0); op(R.strip,0); R.orbA&&op(R.orbA,0); }
+}
+})();
+</script></body></html>

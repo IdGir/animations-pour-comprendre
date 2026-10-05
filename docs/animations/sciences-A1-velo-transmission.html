@@ -1,0 +1,420 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le vélo : comment le mouvement est-il transmis ?</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-A1-velo-transmission","matiere":"sciences","annee":"A","periode":1,"theme":"Les objets techniques : la transmission du mouvement","resume":"Un tour de pédale, combien de tours de roue ? Le plateau, la chaîne et le pignon expliquent la distance parcourue.","motsCles":["vélo","transmission","plateau","pignon","chaîne","objet technique"]} */
+(function(){
+let R={}, NP=11, NPsel=null, manT=1, spinId=0; const NPL=44; const PIG=[11,22,44]; // dents du pignon / du plateau (NPsel : choix de l'élève, null = démonstration automatique)
+const C={frame:"#2563A8",tr:"#E07A1F",wheel:"#1E2430",brake:"#C0392B",dir:"#7B3F98",ink:"#1E2430",gr:"#2E8B57"};
+const RW=[430,600], FW=[1130,600], BB=[720,620], RR=165, RPL=72, CIRC=2.1; // circonférence (m)
+const rP=()=>RPL*NP/NPL;
+function gear(n,r){ let d=""; const th=Math.min(7,r*0.22); for(let i=0;i<n;i++){ const a0=i/n*2*Math.PI, a1=(i+.25)/n*2*Math.PI, a2=(i+.5)/n*2*Math.PI, a3=(i+.75)/n*2*Math.PI;
+  const p=(a,rr)=>`${(rr*Math.cos(a)).toFixed(1)},${(rr*Math.sin(a)).toFixed(1)}`; d+=(i?"L":"M")+p(a0,r-th)+" L"+p(a1,r+th*.6)+" L"+p(a2,r+th*.6)+" L"+p(a3,r-th)+" "; } return d+"Z"; }
+function chainPath(){ // courroie entre plateau (BB,RPL) et pignon (RW,rP)
+  const [x1,y1]=BB,[x2,y2]=RW, r1=RPL, r2=rP(); const dx=x2-x1, dy=y2-y1, D=Math.hypot(dx,dy); const base=Math.atan2(dy,dx); const g=Math.acos((r1-r2)/D);
+  const t1=base+g, t2=base-g; // angles des points de tangence
+  const P=(c,r,a)=>[c[0]+r*Math.cos(a),c[1]+r*Math.sin(a)];
+  const a1=P(BB,r1,t1), b1=P(RW,r2,t1), a2=P(BB,r1,t2), b2=P(RW,r2,t2);
+  return `M${a1} L${b1} A${r2},${r2} 0 0 1 ${b2} L${a2} A${r1},${r1} 0 1 1 ${a1}Z`; }
+function pose(a,theta,shift){ // theta : angle du pédalier (rad)
+    const tp=theta*NPL/NP; a.set(R.pignon,{d:gear(NP,rP()),transform:`translate(${RW}) rotate(${tp*180/Math.PI})`}); a.set(R.pignonDot,{cx:RW[0]+rP()*.6*Math.cos(tp),cy:RW[1]+rP()*.6*Math.sin(tp)});
+    a.set(R.plateau,{transform:`translate(${BB}) rotate(${theta*180/Math.PI})`}); a.set(R.platDot,{cx:BB[0]+RPL*.7*Math.cos(theta),cy:BB[1]+RPL*.7*Math.sin(theta)});
+    a.set(R.mani,{transform:`translate(${BB}) rotate(${theta*180/Math.PI})`});
+    a.set(R.chain,{d:chainPath(),"stroke-dashoffset":-theta*RPL});
+    R.wR.sp.setAttribute("transform",`rotate(${tp*180/Math.PI})`); R.wF.sp.setAttribute("transform",`rotate(${tp*180/Math.PI})`);
+    a.set(R.marks,{"stroke-dashoffset":(shift?tp*RR:0)});
+    return tp;
+  }
+Anim.run({
+  titre:"Le vélo : comment le mouvement est-il transmis ?",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Les objets techniques",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Quand je pédale une fois, combien de fois la roue tourne-t-elle ?",
+  manipDes:4, manipJusqua:4,
+  init(a){
+    const {el}=a; const L=a.layer("velo"); R.L=L;
+    R.road=el("g",{},L); el("rect",{x:0,y:RW[1]+RR,width:1600,height:900,fill:"#E3E7EC"},R.road); R.marks=el("path",{stroke:"#fff","stroke-width":8,"stroke-dasharray":"60 60",d:`M-200,${RW[1]+RR+40} L1800,${RW[1]+RR+40}`},R.road);
+    const wheel=(c)=>{ const g=el("g",{},L); el("circle",{cx:0,cy:0,r:RR,fill:"none",stroke:C.wheel,"stroke-width":16},g); el("circle",{cx:0,cy:0,r:RR-14,fill:"none",stroke:"#9AA3B2","stroke-width":4},g); const sp=el("g",{},g); for(let i=0;i<16;i++){ const a=i/16*Math.PI*2; el("line",{x1:0,y1:0,x2:(RR-14)*Math.cos(a),y2:(RR-14)*Math.sin(a),stroke:"#9AA3B2","stroke-width":2},sp);} el("circle",{cx:RR-14,cy:0,r:9,fill:C.brake},sp); el("circle",{r:12,fill:"#555"},g); g.sp=sp; a.tr(g,c[0],c[1]); return g; };
+    R.wR=wheel(RW); R.wF=wheel(FW);
+    // cadre
+    R.cadre=el("path",{d:`M${RW} L${BB} L660,340 L${RW} M660,340 L1030,360 L${BB} M1030,360 L${FW} M1030,360 L1010,300`,fill:"none",stroke:C.frame,"stroke-width":16,"stroke-linejoin":"round","stroke-linecap":"round"},L);
+    R.selle=el("path",{d:"M610,320 Q660,300 715,322 L700,334 L620,332Z",fill:"#333"},L); el("line",{x1:660,y1:340,x2:660,y2:325,stroke:"#333","stroke-width":8},L);
+    R.guidon=el("path",{d:"M1010,300 Q1040,280 1090,300 L1100,320",fill:"none",stroke:"#333","stroke-width":10,"stroke-linecap":"round"},L);
+    R.frein=el("g",{},L); el("path",{d:`M1080,305 Q1070,330 1060,340`,fill:"none",stroke:C.brake,"stroke-width":5},R.frein); el("rect",{x:1112,y:425,width:30,height:14,rx:4,fill:C.brake},R.frein); el("path",{d:"M1062,340 Q1100,380 1125,425",fill:"none",stroke:"#555","stroke-width":2.5},R.frein);
+    // transmission
+    R.chain=el("path",{fill:"none",stroke:"#3A3A3A","stroke-width":9,"stroke-dasharray":"7 5"},L);
+    R.pignon=el("path",{fill:"#B8BEC8",stroke:"#555","stroke-width":2},L); R.pignonDot=el("circle",{r:4,fill:C.tr},L);
+    R.plateau=el("path",{d:gear(NPL,RPL),fill:"#C8CED6",stroke:"#555","stroke-width":2},L); R.platDot=el("circle",{r:6,fill:C.tr},L);
+    R.mani=el("g",{},L); el("line",{x1:0,y1:0,x2:0,y2:95,stroke:"#444","stroke-width":12,"stroke-linecap":"round"},R.mani); el("rect",{x:-26,y:88,width:52,height:16,rx:4,fill:"#222"},R.mani); el("circle",{r:14,fill:"#666"},R.mani);
+    // étiquettes de constitution
+    const lab=a.layer("lab"); R.lab=lab; R.labs={};
+    const LB=(id,x,y,txt,col,tx,ty)=>{ const g=el("g",{},lab); a.label(g,x,y,txt,{size:22,stroke:col,color:col}); a.arrow(g,`M${x},${y+(ty>y?18:-18)} L${tx},${ty}`,{color:col,w:3}); R.labs[id]=g; };
+    LB("cadre",860,200,"cadre",C.frame,840,355); LB("selle",520,230,"selle",C.frame,610,315); LB("guidon",1250,230,"guidon (diriger)",C.dir,1090,300); LB("frein",1330,400,"freins (s'arrêter)",C.brake,1145,430);
+    LB("roue",180,330,"roues",C.wheel,330,470); LB("plateau",860,800,"pédalier + plateau",C.tr,735,700); LB("chaine",560,830,"chaîne",C.tr,580,640); LB("pignon",230,830,"pignon",C.tr,420,620);
+    R.leg=el("g",{},lab); [["structure",C.frame],["transmettre le mouvement",C.tr],["diriger",C.dir],["freiner",C.brake]].forEach(([t,c],i)=>{ el("rect",{x:40+i*330,y:40,width:26,height:26,rx:6,fill:c},R.leg); el("text",{x:76+i*330,y:62,"font-size":22,"font-weight":700,fill:C.ink,text:t},R.leg); });
+    // compteurs
+    const cpt=a.layer("cpt"); R.cpt=cpt; R.cptB=el("rect",{x:1180,y:30,width:390,height:250,rx:16,fill:"#fff",stroke:"#D6DBE4","stroke-width":3},cpt);
+    R.c1=el("text",{x:1205,y:85,"font-size":26,"font-weight":800,fill:C.tr},cpt); R.c2=el("text",{x:1205,y:135,"font-size":26,"font-weight":800,fill:C.ink},cpt); R.c3=el("text",{x:1205,y:185,"font-size":26,"font-weight":800,fill:C.gr},cpt); R.c4=el("text",{x:1205,y:240,"font-size":22,fill:"#4A5468"},cpt);
+    R.dents=el("g",{},a.svg); const pill=(x,y,col)=>{ const g=a.label(R.dents,x,y,"plateau : 44 dents",{size:24,stroke:col,color:col,w:310,h:54}); return g.querySelector("text"); };
+    R.dT1=pill(930,805,C.tr); R.dT2=pill(300,805,C.tr); R.dA1=a.arrow(R.dents,"M850,780 L765,688",{color:C.tr,w:4}); R.dA2=a.arrow(R.dents,"M330,778 L418,640",{color:C.tr,w:4});
+    // tableau des pignons (étape 5)
+    R.tab=el("g",{},a.svg); el("text",{x:40,y:60,"font-size":26,"font-weight":800,fill:C.ink,text:"Un tour de pédale · plateau de 44 dents · trois pignons (exemples)"},R.tab);
+    R.rows=PIG.map((n,i)=>{ const g=el("g",{},R.tab), y=82+i*64, r=44/n; R.rows; const bg=el("rect",{x:40,y,width:1110,height:54,rx:12,fill:"#FBEFE2",stroke:C.tr,"stroke-width":3},g);
+      el("text",{x:62,y:y+37,"font-size":26,"font-weight":800,fill:C.ink,text:`pignon ${n} dents`},g);
+      el("text",{x:330,y:y+37,"font-size":26,"font-weight":700,fill:C.ink,text:`→ ${r} tour${r>1?"s":""} de roue`},g);
+      el("text",{x:620,y:y+37,"font-size":26,"font-weight":800,fill:C.gr,text:`→ ${(r*CIRC).toFixed(1).replace(".",",")} m`},g);
+      el("rect",{x:790,y:y+14,width:130,height:26,rx:13,fill:"#fff",stroke:C.ink,"stroke-width":2},g); el("rect",{x:792,y:y+16,width:Math.max(8,126*r/4),height:22,rx:11,fill:C.brake},g);
+      el("text",{x:935,y:y+37,"font-size":24,"font-weight":700,fill:C.ink,text:["effort fort","effort moyen","effort faible"][i]},g); g.bg=bg; return g; });
+    // photos « dans la réalité »
+    R.phP=a.photo(a.svg,{id:"s-a1-plateau",x:60,y:50,w:340,h:160,cap:"En vrai : plateau et chaîne",size:20,rot:-1.5});
+    R.phC=a.photo(a.svg,{id:"s-a1-cassette",x:470,y:50,w:340,h:160,cap:"En vrai : pignons de roue arrière",size:20,rot:1.5});
+    // manipulation : choix du pignon (barre #manip), la roue refait un tour de pédale à chaque choix
+    a.manip.innerHTML=`Pignon arrière : `+PIG.map(n=>`<button data-n="${n}">${n} dents</button>`).join("");
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ NPsel=+b.dataset.n; const id=++spinId, t0=performance.now(); const f=now=>{ if(id!==spinId) return; manT=Math.min(1,(now-t0)/2600); a.redraw(); if(manT<1) requestAnimationFrame(f); }; manT=0; requestAnimationFrame(f); a.redraw(); });
+    // synthèse
+    const sy=a.layer("syn"); R.syn=sy; el("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy);
+    el("text",{x:800,y:80,"text-anchor":"middle","font-size":34,"font-weight":800,fill:C.ink,text:"La chaîne de transmission du mouvement"},sy);
+    R.ch=["mes jambes","pédales","plateau","chaîne","pignon","roue arrière","le vélo avance"].map((t,i)=>{ const g=el("g",{},sy); const x=120+i*228; a.label(g,x,220,t,{size:23,stroke:i===6?C.gr:C.tr,color:i===6?C.gr:"#8A4A0E",w:200,h:80}); if(i<6) a.arrow(g,`M${x+102},220 L${x+124},220`,{color:"#9AA3B2",w:5,head:3}); return g; });
+    R.syT=el("text",{x:800,y:350,"text-anchor":"middle","font-size":26,fill:C.ink,text:"Le pignon et la roue arrière sont fixés ensemble : ils font le même nombre de tours."},sy);
+    R.myth=a.layer("myth"); a.myth(R.myth,200,430,1200,"Un grand pignon à l'arrière fait aller plus vite.","C'est l'inverse ! Un petit pignon fait tourner la roue plus de fois à chaque tour de pédale : on va plus vite, mais c'est plus dur. Un grand pignon rend la montée plus facile.");
+  },
+  reset(a){ [R.lab,R.cpt,R.dents,R.tab,R.phP,R.phC,R.syn,R.myth,R.leg,...Object.values(R.labs)].forEach(e=>a.op(e,0)); a.op(R.L,1); NP=11; a.set(R.cptB,{height:250}); pose(a,0,false); },
+  etapes:[
+  { titre:"De quoi est fait un vélo ?", duree:9000,
+    legende:"Un vélo est un objet technique. Chaque partie a une fonction : le cadre porte, les roues roulent, le guidon dirige, les freins arrêtent, et la transmission fait avancer.",
+    voix:"Un vélo est un objet technique. Chaque partie a une fonction. Le cadre et la selle forment la structure. Les roues roulent. Le guidon permet de diriger, les freins de s'arrêter. Et les pédales, le plateau, la chaîne et le pignon forment la transmission : ce sont eux qui font avancer le vélo.",
+    anim(t,a){ const s=a.seg; a.op(R.lab,1); a.op(R.leg,s(t,0,.1)); ["cadre","selle","roue","guidon","frein","plateau","chaine","pignon"].forEach((k,i)=>a.op(R.labs[k],s(t,.08+i*.1,.16+i*.1))); } },
+  { titre:"Je pédale : le plateau tourne", duree:7000,
+    legende:"Quand j'appuie sur les pédales, le pédalier fait tourner le plateau. Pédales et plateau sont fixés ensemble : ils font exactement le même nombre de tours.",
+    voix:"Quand j'appuie sur les pédales, je fais tourner le pédalier. Le plateau est fixé aux pédales : il fait exactement le même nombre de tours qu'elles. Mais comment ce mouvement arrive-t-il jusqu'à la roue arrière, qui est loin ?",
+    anim(t,a){ const s=a.seg; a.op(R.lab,1); Object.values(R.labs).forEach(l=>a.op(l,1-s(t,0,.1))); a.op(R.leg,1-s(t,0,.1)); const th=2*Math.PI*s(t,.15,.9); pose(a,th,false); a.op(R.cpt,s(t,.1,.2)); a.set(R.cptB,{height:90});
+      R.c1.textContent=`Tours de pédale : ${(th/2/Math.PI).toFixed(1).replace(".",",")}`; R.c2.textContent=""; R.c3.textContent=""; R.c4.textContent="";
+      a.cls(R.plateau,"glow",t>.15&&t<.9); a.op(R.phP,s(t,.3,.5)); } },
+  { titre:"La chaîne transmet le mouvement", duree:12000,
+    legende:"La chaîne relie le plateau (44 dents) au pignon (11 dents). Quand 44 maillons passent, le petit pignon fait 4 tours ! 1 tour de pédale = 4 tours de pignon.",
+    voix:"La chaîne relie le plateau au pignon de la roue arrière. Comptons les dents : le plateau en a quarante-quatre, le pignon seulement onze. Quand je fais un tour de pédale, quarante-quatre maillons de chaîne avancent. Pour les laisser passer, le petit pignon doit faire quatre tours ! Un tour de pédale donne donc quatre tours de pignon.",
+    anim(t,a){ const s=a.seg; a.op(R.cpt,1); a.set(R.cptB,{height:200}); a.op(R.dents,s(t,0,.1)); R.dT1.textContent=`plateau : ${NPL} dents`; R.dT2.textContent=`pignon : ${NP} dents`; a.cls(R.chain,"glow",t>.1&&t<.9); a.op(R.phP,1); a.op(R.phC,s(t,.2,.4));
+      const th=2*Math.PI*s(t,.12,.92,true); const tp=pose(a,th,false); R.c1.textContent=`Tours de pédale : ${(th/2/Math.PI).toFixed(2).replace(".",",")}`; R.c2.textContent=`Tours de pignon : ${(tp/2/Math.PI).toFixed(2).replace(".",",")}`; R.c3.textContent=""; R.c4.textContent=`maillons passés : ${Math.round(th/2/Math.PI*NPL)}`; } },
+  { titre:"La roue avance", duree:12000,
+    legende:"Le pignon est fixé à la roue arrière : elle fait aussi 4 tours. Une roue fait environ 2,1 m par tour : 1 tour de pédale fait avancer le vélo d'environ 8,4 m !",
+    voix:"Le pignon est fixé à la roue arrière : la roue fait donc, elle aussi, quatre tours. À chaque tour, une roue de vélo avance d'environ deux mètres dix. Résultat : un seul tour de pédale fait avancer le vélo d'environ huit mètres quarante !",
+    anim(t,a){ const s=a.seg; a.op(R.cpt,1); a.set(R.cptB,{height:250}); a.op(R.dents,1); a.op(R.phP,1); a.op(R.phC,1); R.dT1.textContent=`plateau : ${NPL} dents`; R.dT2.textContent=`pignon : ${NP} dents`;
+      const th=2*Math.PI*s(t,.08,.9,true); const tp=pose(a,th,true); const tw=tp/2/Math.PI;
+      R.c1.textContent=`Tours de pédale : ${(th/2/Math.PI).toFixed(2).replace(".",",")}`; R.c2.textContent=`Tours de roue : ${tw.toFixed(2).replace(".",",")}`; R.c3.textContent=`Distance : ${(tw*CIRC).toFixed(1).replace(".",",")} m`; R.c4.textContent="1 tour de roue ≈ 2,1 m (exemple)";
+      a.cls(R.wR,"glow",t>.08&&t<.9); } },
+  { titre:"À vous : choisissez le pignon", duree:14000,
+    legende:"Petit pignon : plus de tours de roue, on va vite mais c'est dur. Grand pignon : facile en côte. À vous : choisissez un pignon avec les boutons, regardez ce qui change.",
+    voix:"Changeons de pignon, sans toucher au plateau. Avec onze dents, un tour de pédale donne quatre tours de roue : on avance loin, mais il faut beaucoup forcer. Avec vingt-deux dents, deux tours de roue seulement : c'est plus facile. Avec quarante-quatre dents, un seul tour de roue : on avance peu, mais pédaler est très doux. À vous maintenant : choisissez un pignon avec les boutons, et regardez ce qui change. Prenez votre temps.",
+    anim(t,a){ const s=a.seg; if(t<.02){ NPsel=null; manT=1; }
+      a.op(R.cpt,1); a.set(R.cptB,{height:250}); a.op(R.dents,1); a.op(R.phP,1-s(t,0,.08)); a.op(R.phC,1-s(t,0,.08)); a.op(R.tab,s(t,0,.08));
+      const auto=NPsel===null; const ph=Math.min(2,Math.max(0,Math.floor((t-.08)/.29))); const loc=s(t,.08+ph*.29,.08+(ph+1)*.29,true);
+      NP=auto?PIG[ph]:NPsel; const th=2*Math.PI*(auto?loc:manT); const tp=pose(a,th,true); const ratio=NPL/NP;
+      R.dT1.textContent=`plateau : ${NPL} dents`; R.dT2.textContent=`pignon : ${NP} dents`;
+      R.rows.forEach((g,i)=>{ const here=PIG[i]===NP; a.op(g,!auto||t>.08+i*.29-.02?1:0); a.set(g.bg,{fill:here?"#FFD9AE":"#FBEFE2","stroke-width":here?5:3}); });
+      if(a.manip) a.manip.querySelectorAll("button").forEach(b=>b.classList.toggle("sel",+b.dataset.n===NP));
+      R.c1.textContent=`Pédale : ${(th/2/Math.PI).toFixed(2).replace(".",",")} tour`; R.c2.textContent=`Roue : ${(tp/2/Math.PI).toFixed(2).replace(".",",")} tour${ratio>1?"s":""}`; R.c3.textContent=`Distance : ${(tp/2/Math.PI*CIRC).toFixed(1).replace(".",",")} m`; R.c4.textContent=`${NPL} ÷ ${NP} = ${ratio.toFixed(0)}`; } },
+  { titre:"Synthèse", duree:9000,
+    legende:"Le mouvement passe des jambes aux pédales, au plateau, à la chaîne, au pignon puis à la roue. Le rapport des dents fixe la distance parcourue à chaque tour de pédale.",
+    voix:"Récapitulons. Le mouvement de mes jambes passe aux pédales, puis au plateau, à la chaîne, au pignon, et enfin à la roue arrière : le vélo avance. Le nombre de dents du plateau et du pignon décide du nombre de tours que fait la roue à chaque coup de pédale.",
+    anim(t,a){ const s=a.seg; a.op(R.syn,s(t,0,.1)); R.ch.forEach((g,i)=>a.op(g,s(t,.08+i*.07,.15+i*.07))); a.op(R.syT,s(t,.55,.65)); a.op(R.myth,s(t,.7,.82)); a.cls(R.myth.faux,"pulse",t>.82&&t<1); } },
+  ]
+});
+})();
+</script></body></html>

@@ -1,0 +1,13 @@
+[
+ {"id":"s-d1-horloge","q":"clock movement brass gears wheels mechanism","must":["clock"],"alt":"roues dentées en laiton d'un mécanisme d'horloge"},
+ {"id":"s-d1-montre","q":"mechanical watch movement gears","must":["watch"],"alt":"mouvement d'une montre mécanique avec ses petits engrenages"},
+ {"id":"s-d2-brouette","q":"wheelbarrow garden","must":["wheelbarrow"],"alt":"une brouette de jardin chargée"},
+ {"id":"s-d2-romaine","q":"steelyard balance roman scale","must":["steelyard"],"alt":"balance romaine avec son curseur coulissant sur le bras gradué"},
+ {"id":"s-d3-moufle","q":"block and tackle pulleys rope","must":["pulley"],"alt":"moufle ou palan : plusieurs poulies et une corde"},
+ {"id":"s-d3-grue-ecureuil","q":"treadwheel crane Guédelon grue à écureuil","must":["treadwheel"],"alt":"grue à écureuil (grande roue à marcher) sur un chantier médiéval"},
+ {"id":"s-d4-thermometre","q":"liquid-in-glass thermometer red alcohol","must":["thermometer"],"alt":"thermomètre à liquide coloré dans un tube de verre gradué"},
+ {"id":"s-d4-abri-meteo","q":"Stevenson screen weather station","must":["stevenson"],"alt":"abri météorologique (abri Stevenson) contenant les thermomètres"},
+ {"id":"s-d5-girouette","q":"weather vane rooster roof","must":["vane"],"alt":"girouette sur un toit"},
+ {"id":"s-d5-anemometre","q":"cup anemometer wind speed","must":["anemometer"],"alt":"anémomètre à coupelles"},
+ {"id":"s-d6-tgv","q":"TGV Duplex train en gare","must":["TGV"],"alt":"rame de TGV à quai ou en ligne"}
+]

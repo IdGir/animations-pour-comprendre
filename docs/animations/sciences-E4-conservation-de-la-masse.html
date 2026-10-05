@@ -1,0 +1,442 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La masse se conserve : eau et sucre</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-E4-conservation-de-la-masse","matiere":"sciences","annee":"B","periode":1,"theme":"Les mélanges : conservation de la masse lors d'une dissolution","resume":"On pèse 200 g d'eau puis on ajoute 20 g de sucre : la balance indique 220 g avant comme après la dissolution. Le sucre dissous n'a pas disparu, et la masse du mélange est la somme des masses.","motsCles":["masse","conservation de la masse","balance","dissolution","mélange","sucre","eau"]} */
+(function(){
+const R={}; let manActive=false, manN=4, manStir=true, curN=4, curStir=true;
+const C={water:"#BFE0F7",waterD:"#4A90D9",ink:"#1E2430",or:"#E07A1F",gr:"#2E8B57",bl:"#2563A8",red:"#C0392B"};
+const EAU=200, MORC=5;                       // exemple : 200 g d'eau ; 1 morceau de sucre = 5 g
+const nb=s=>s.replace(/(\d) g\b/g,"$1\u00a0g");
+const rnd=(i,k)=>{ const x=Math.sin(i*12.9898+k*78.233)*43758.5453; return x-Math.floor(x); };
+/* balance + verre d'eau + morceaux de sucre (origine = centre du plateau) */
+function mkRig(a,parent,tx,ty,sc){ const {el}=a; const g=el("g",{transform:`translate(${tx},${ty}) scale(${sc})`},parent);
+  el("rect",{x:-260,y:22,width:520,height:128,rx:20,fill:"#E9EDF2",stroke:"#8C96A6","stroke-width":4},g);
+  el("rect",{x:-220,y:0,width:440,height:24,rx:8,fill:"#C9CFD8",stroke:"#8C96A6","stroke-width":3},g);
+  el("rect",{x:-170,y:46,width:300,height:78,rx:8,fill:"#1E2A20"},g);
+  g.disp=el("text",{x:110,y:106,"text-anchor":"end","font-size":58,"font-weight":800,fill:"#7CFF8A","font-family":"Consolas,monospace"},g);
+  g.water=el("rect",{x:-79,y:0,width:158,height:0,fill:C.water},g);
+  g.dots=[...Array(60)].map((_,i)=>el("circle",{r:5,fill:"#fff",stroke:C.or,"stroke-width":2},g));
+  g.cubes=[...Array(10)].map(()=>el("rect",{x:-19,y:-19,width:38,height:38,rx:4,fill:"#fff",stroke:"#9AA3B2","stroke-width":3},g));
+  el("path",{d:"M-90,-240 L-80,0 L80,0 L90,-240",fill:"none",stroke:"#7E9BB3","stroke-width":5,"stroke-linejoin":"round"},g);
+  g.stream=el("rect",{x:-6,y:-440,width:12,height:0,fill:C.waterD},g);
+  g.spoon=el("g",{},g); el("path",{d:"M0,-330 L0,-62",stroke:"#8C96A6","stroke-width":9,"stroke-linecap":"round"},g.spoon); el("ellipse",{cx:0,cy:-52,rx:16,ry:11,fill:"#8C96A6"},g.spoon);
+  g.upd=o=>{ const w=o.w===undefined?1:o.w, dis=o.dis||0, n=o.n||0;
+    g.water.setAttribute("y",-190*w); g.water.setAttribute("height",190*w+.01); g.water.setAttribute("fill",dis>.5?"#D7ECFA":C.water);
+    const st=o.stream||0; a.op(g.stream,st); g.stream.setAttribute("height",Math.max(0,440-190*w));
+    g.cubes.forEach((c,i)=>{ const f=o.fall?o.fall(i):1; const vis=i<n&&f>0&&dis<.98; a.op(c,vis?1:0); const row=Math.floor(i/3), col=i%3; const yr=-19-row*38, xr=(col-1)*40; const fe=a.ease(f);
+      const s=1-dis*.96; a.tr(c,xr,a.lerp(-330,yr,fe),s); });
+    const cnt=Math.min(60,n*6); g.dots.forEach((d,i)=>{ a.op(d,i<cnt&&dis>0?dis:0); a.set(d,{cx:-68+rnd(i,1)*136+Math.sin((o.ph||0)*30+i)*2,cy:-175+rnd(i,2)*155+Math.cos((o.ph||0)*27+i)*2}); });
+    a.op(g.spoon,o.spoon||0); a.tr(g.spoon,Math.sin((o.ph||0)*50)*34,0);
+    g.disp.textContent=Math.round(o.read||0)+" g"; a.cls(g.disp,"glow",!!o.glow); };
+  return g; }
+
+Anim.run({
+  titre:"La masse se conserve : eau et sucre",
+  sousTitre:"Sciences et technologie · CM1-CM2 · La matière",
+  matiere:"sciences", badge:"Sciences", manipDes:5, manipJusqua:5,
+  accroche:"On dissout du sucre dans l'eau : la balance indique-t-elle plus, moins, ou pareil ?",
+  init(a){
+    const {el}=a;
+    /* ---------- scène principale : balance, verre, panneau des masses ---------- */
+    const L=a.layer("L"); R.L=L; R.rig=mkRig(a,L,560,690,1);
+    R.tare=el("text",{x:560,y:880,"text-anchor":"middle","font-size":22,fill:"#4A5468",text:"Tare faite : la balance ne compte pas le verre vide"},L);
+    R.pnl=el("g",{},L); el("rect",{x:900,y:80,width:660,height:400,rx:18,fill:"#fff",stroke:"#D6DBE4","stroke-width":3},R.pnl);
+    el("text",{x:930,y:126,"font-size":24,fill:"#4A5468",text:"Masses (valeurs d'exemple)"},R.pnl);
+    R.l1=el("text",{x:930,y:228,"font-size":42,"font-weight":800,fill:C.bl},R.pnl);
+    R.l2=el("text",{x:930,y:306,"font-size":38,"font-weight":800,fill:C.or},R.pnl);
+    R.ln=el("line",{x1:930,y1:336,x2:1530,y2:336,stroke:C.ink,"stroke-width":3},R.pnl);
+    R.l3=el("text",{x:930,y:396,"font-size":42,"font-weight":800,fill:C.gr},R.pnl);
+    R.nt=el("text",{x:930,y:452,"font-size":26,"font-weight":600,fill:C.ink},R.pnl);
+    R.st=el("text",{x:930,y:176,"font-size":26,"font-weight":700,fill:"#4A5468"},R.pnl);
+    R.ph1=a.photo(L,{id:"s-e4-balance-cuisine",x:1060,y:565,w:400,h:200,cap:"Une balance de cuisine",rot:-2});
+    /* ---------- zoom sur les particules (étape 4) ---------- */
+    const Z=a.layer("Z"); R.Z=Z; const zx=1230, zy=290, zr=200;
+    el("line",{x1:640,y1:540,x2:zx-zr*.8,y2:zy+zr*.55,stroke:"#9AA3B2","stroke-width":2,"stroke-dasharray":"8 6"},Z);
+    el("circle",{cx:zx,cy:zy,r:zr,fill:"#EAF4FB",stroke:"#7E9BB3","stroke-width":5},Z);
+    el("clipPath",{id:"zc4"},Z).appendChild(el("circle",{cx:zx,cy:zy,r:zr-4}));
+    const zg=el("g",{"clip-path":"url(#zc4)"},Z);
+    R.wp=[...Array(70)].map((_,i)=>{ const c=el("circle",{r:10,fill:"#7FB8E6"},zg); c._x=zx-zr+rnd(i,3)*2*zr; c._y=zy-zr+rnd(i,4)*2*zr; return c; });
+    R.sp=[...Array(20)].map((_,i)=>{ const c=el("circle",{r:11,fill:"#fff",stroke:C.or,"stroke-width":3},zg); c._cx=zx-50+(i%5)*22; c._cy=zy-40+Math.floor(i/5)*22; c._x=zx-zr*.85+rnd(i,7)*zr*1.7; c._y=zy-zr*.85+rnd(i,8)*zr*1.7; return c; });
+    el("circle",{cx:960,cy:545,r:10,fill:"#7FB8E6"},Z); el("text",{x:978,y:553,"font-size":22,fill:C.ink,text:"particule d'eau"},Z);
+    el("circle",{cx:1230,cy:545,r:11,fill:"#fff",stroke:C.or,"stroke-width":3},Z); el("text",{x:1248,y:553,"font-size":22,fill:C.ink,text:"particule de sucre"},Z);
+    R.bar=el("g",{},Z); const BX=940, BW=600, bw1=BW*EAU/(EAU+20), bw2=BW-bw1;
+    R.b1=el("rect",{x:BX,y:610,width:bw1,height:50,rx:6,fill:C.waterD},R.bar); R.b2=el("rect",{x:BX+bw1,y:610,width:bw2,height:50,rx:6,fill:C.or},R.bar);
+    el("text",{x:BX+bw1/2,y:644,"text-anchor":"middle","font-size":28,"font-weight":800,fill:"#fff",text:"eau : 200 g"},R.bar);
+    el("text",{x:BX+BW,y:600,"text-anchor":"end","font-size":24,"font-weight":800,fill:C.or,text:"sucre : 20 g"},R.bar);
+    el("text",{x:BX+BW/2,y:716,"text-anchor":"middle","font-size":34,"font-weight":800,fill:C.gr,text:"200 g + 20 g = 220 g"},R.bar);
+    /* ---------- avant / après (étape 5) ---------- */
+    const K=a.layer("K"); R.K=K;
+    R.rA=mkRig(a,K,400,560,.85); R.rB=mkRig(a,K,1200,560,.85);
+    [[400,"AVANT de remuer","le sucre est au fond",C.or],[1200,"APRÈS avoir remué","le sucre est dissous",C.bl]].forEach(([x,t1,t2,c])=>{ el("text",{x,y:170,"text-anchor":"middle","font-size":38,"font-weight":800,fill:c,text:t1},K); el("text",{x,y:216,"text-anchor":"middle","font-size":28,"font-weight":600,fill:C.ink,text:t2},K); });
+    R.eq=el("text",{x:800,y:578,"text-anchor":"middle","font-size":130,"font-weight":800,fill:C.gr,text:"="},K);
+    R.kT=el("text",{x:800,y:800,"text-anchor":"middle","font-size":40,"font-weight":800,fill:C.gr,text:"La balance indique la même masse !"},K);
+    /* ---------- manipulation ---------- */
+    a.manip.innerHTML=`Sucre : <button data-a="moins" aria-label="un morceau de moins">− 1 morceau</button> <b id="mN" style="min-width:36px;text-align:center">4</b> <button data-a="plus" aria-label="un morceau de plus">+ 1 morceau</button> <button data-a="stir" id="mS">Remuer</button> <button data-a="zero">à zéro</button>`;
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(!manActive){ manActive=true; manN=curN; manStir=curStir; } const k=b.dataset.a;
+      if(k==="plus"&&manN<10){ manN++; manStir=false; } else if(k==="moins"&&manN>0){ manN--; } else if(k==="stir"){ manStir=true; } else if(k==="zero"){ manN=0; manStir=false; }
+      a.redraw(); });
+    /* ---------- idée fausse ---------- */
+    R.myth=a.layer("myth"); R.mc=a.myth(R.myth,900,90,660,nb("Le sucre a disparu : le verre pèse donc moins que 220 g."),nb("Non : le sucre est dissous, il n'a pas disparu. Ses particules sont mélangées à l'eau. La masse du mélange est la somme des masses : 200 g + 20 g = 220 g."));
+    /* ---------- synthèse ---------- */
+    R.syn=a.layer("syn"); el("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},R.syn);
+    el("text",{x:800,y:78,"text-anchor":"middle","font-size":38,"font-weight":800,fill:C.ink,text:"À retenir"},R.syn);
+    R.pts=[["Quand le sucre se dissout, il ne disparaît pas : il est dispersé dans l'eau.",C.bl],["La masse du mélange est la somme des masses : 200 g d'eau + 20 g de sucre = 220 g, avant comme après.",C.or],["La masse se conserve quand rien n'entre ni ne sort du récipient.",C.gr]].map(([tx,c],i)=>{
+      const g=el("g",{},R.syn); const y=140+i*210; el("rect",{x:60,y,width:930,height:170,rx:18,fill:"#fff",stroke:c,"stroke-width":4},g); el("circle",{cx:120,cy:y+85,r:34,fill:c},g); el("text",{x:120,y:y+98,"text-anchor":"middle","font-size":38,"font-weight":800,fill:"#fff",text:i+1},g);
+      const t=el("text",{x:180,y:y+62,"font-size":28,"font-weight":600,fill:C.ink},g); a.wrap(t,nb(tx),50,1.2); return g; });
+    R.ph2=a.photo(R.syn,{id:"s-e4-sucre-dissolution",x:1060,y:230,w:440,h:300,cap:"Du sucre dans l'eau",rot:2});
+  },
+  reset(a){ [R.L,R.Z,R.K,R.myth,R.syn,R.ph1,R.ph2].forEach(e=>a.op(e,0)); },
+  etapes:[
+  { titre:"On pèse l'eau", duree:8000,
+    legende:"On verse de l'eau dans un verre posé sur la balance : elle indique 200 g. C'est la masse de l'eau, car on a fait la tare pour ne pas compter le verre.",
+    voix:"Posons un verre sur une balance et faisons la tare : la balance ne compte pas le verre. Versons de l'eau. La balance indique deux cents grammes : c'est la masse de l'eau. Prévoyez : si on ajoute vingt grammes de sucre, que va indiquer la balance ?",
+    anim(t,a){ const s=a.seg; const w=s(t,.08,.55); pose(a,{w,stream:s(t,.08,.12)*(1-s(t,.52,.58)),read:EAU*w,p1:s(t,.55,.7),ph1:s(t,.65,.85),st:"Avant d'ajouter du sucre"}); } },
+  { titre:"On ajoute 20 g de sucre", duree:11000,
+    legende:"On laisse tomber 4 morceaux de sucre de 5 g dans l'eau, sans remuer. La balance monte : 205 g, 210 g, 215 g, puis 220 g. Elle compte aussi le sucre.",
+    voix:"Laissons tomber quatre morceaux de sucre, de cinq grammes chacun, dans l'eau, sans remuer. À chaque morceau, la balance monte : deux cent cinq, deux cent dix, deux cent quinze, puis deux cent vingt grammes. La balance compte l'eau et le sucre : deux cents plus vingt, cela fait deux cent vingt grammes.",
+    anim(t,a){ const s=a.seg; const fall=i=>s(t,.08+i*.17,.28+i*.17); let k=0; for(let i=0;i<4;i++) if(fall(i)>.92) k++; pose(a,{n:4,fall,read:EAU+MORC*k,p1:1,p2:s(t,.2,.35),p3:s(t,.8,.92),l2:"Sucre : 4 morceaux = 20 g",st:"On a ajouté le sucre, sans remuer"}); } },
+  { titre:"On remue : le sucre se dissout", duree:12000,
+    legende:"On remue : les morceaux se dissolvent et on ne les voit plus. Pourtant la balance affiche toujours 220 g : avant comme après avoir remué, la masse est la même.",
+    voix:"Remuons maintenant. Les morceaux de sucre se dissolvent peu à peu, et on ne les voit plus. Mais regardez la balance : elle affiche toujours deux cent vingt grammes. Avant comme après avoir remué, la masse est la même. Le sucre n'a pas disparu.",
+    anim(t,a){ const s=a.seg; const dis=s(t,.15,.7); pose(a,{n:4,dis,spoon:t>.08&&t<.78?1:0,ph:t,read:220,glow:t>.8,p1:1,p2:1,p3:1,l2:"Sucre : 4 morceaux = 20 g",note:s(t,.75,.9)?"Avant de remuer : 220 g · Après : 220 g":"",noteA:s(t,.75,.9),st:dis<.05?"Avant de remuer":dis<.95?"On remue…":"Après avoir remué"}); } },
+  { titre:"Où est le sucre ? Dans l'eau !", duree:12000,
+    legende:"Si on regarde de très près, les particules de sucre se sont dispersées entre celles de l'eau. Elles sont toujours là, avec leur masse : 200 g + 20 g = 220 g.",
+    voix:"Regardons de très près, avec un microscope imaginaire. Les particules de sucre se sont détachées et dispersées entre les particules d'eau. Elles sont trop petites pour être vues, mais elles sont toujours là, avec leur masse. L'eau pèse deux cents grammes, le sucre vingt grammes : le mélange pèse deux cent vingt grammes.",
+    anim(t,a){ const s=a.seg; pose(a,{n:4,dis:1,read:220,p1:0,zoom:s(t,0,.12),spread:s(t,.12,.6),bar:s(t,.62,.85)}); } },
+  { titre:"Avant, après : même masse", duree:10000,
+    legende:"On compare les deux balances : avant de remuer, 220 g ; après avoir remué, 220 g. La masse n'a pas changé : la masse se conserve.",
+    voix:"Comparons. Avant de remuer, le sucre est au fond du verre : la balance indique deux cent vingt grammes. Après avoir remué, le sucre est dissous : la balance indique encore deux cent vingt grammes. La masse n'a pas changé : on dit que la masse se conserve.",
+    anim(t,a){ const s=a.seg; pose(a,{cmp:1,cA:s(t,0,.2),cB:s(t,.3,.5),eq:s(t,.6,.75),kT:s(t,.78,.92)}); } },
+  { titre:"À vous : ajoutez du sucre", duree:16000,
+    legende:"À vous : ajoutez ou retirez des morceaux de sucre (5 g chacun), remuez ou non, et lisez la balance. Prévoyez la valeur avant de regarder !",
+    voix:"À vous de jouer ! Ajoutez des morceaux de sucre, cinq grammes chacun, avec les boutons. Remuez, ou ne remuez pas. Avant de lire la balance, essayez de prévoir ce qu'elle va indiquer. Qu'est-ce qui change quand on remue ? Prenez votre temps.",
+    anim(t,a){ const s=a.seg; if(t<.02) manActive=false;
+      let n,dis; if(manActive){ n=manN; dis=manStir?1:0; } else { n=t<.1?0:Math.min(4,1+Math.floor((t-.1)/.1)); dis=s(t,.62,.9); }
+      const f=manActive?(()=>1):(i=>s(t,.1+i*.1,.2+i*.1)); curN=n; curStir=dis>=.5;
+      pose(a,{n,dis,fall:f,read:EAU+MORC*n,spoon:(!manActive&&dis>0&&dis<1)?1:0,ph:t,man:1,p1:1,p2:1,p3:1,glow:false,
+        l2:n?`Sucre : ${n} morceau${n>1?"x":""} × 5 g = ${MORC*n} g`:"Pas encore de sucre",l3:`200 g + ${MORC*n} g = ${EAU+MORC*n} g`,st:n?(dis>=.5?"Le sucre est dissous : on ne le voit plus":"Le sucre est au fond du verre"):"Seulement de l'eau"});
+      const mn=document.getElementById("mN"); if(mn) mn.textContent=n; } },
+  { titre:"Idée fausse : le sucre a disparu ?", duree:11000,
+    legende:"Si le sucre avait vraiment disparu, la balance indiquerait moins de 220 g. Or elle indique 220 g : le sucre est toujours là, dissous dans l'eau.",
+    voix:"On croit parfois que le sucre disparaît quand il se dissout, et que le verre devient plus léger. C'est faux ! La balance indique toujours deux cent vingt grammes. Le sucre est dissous dans l'eau : il n'a pas disparu, et sa masse non plus.",
+    anim(t,a){ const s=a.seg; pose(a,{n:4,dis:1,read:220,glow:false,myth:s(t,.2,.4),p1:0}); a.cls(R.mc.faux,"pulse",t>.5); } },
+  { titre:"À retenir", duree:9000,
+    legende:"Le sucre dissous n'a pas disparu ; la masse du mélange est la somme des masses (200 g + 20 g = 220 g) ; la masse se conserve si rien n'entre ni ne sort.",
+    voix:"À retenir. Un : quand le sucre se dissout, il ne disparaît pas, il est dispersé dans l'eau. Deux : la masse du mélange est la somme des masses, deux cents grammes plus vingt grammes égalent deux cent vingt grammes, avant comme après. Trois : la masse se conserve quand rien n'entre ni ne sort du récipient.",
+    anim(t,a){ const s=a.seg; pose(a,{syn:1}); R.pts.forEach((g,i)=>a.op(g,s(t,.1+i*.22,.3+i*.22))); a.op(R.ph2,s(t,.75,.95)); } },
+  ]
+});
+function pose(a,o){ const d=k=>o[k]||0, op=a.op;
+  op(R.syn,o.syn?1:0); if(o.syn){ [R.L,R.Z,R.K,R.myth].forEach(e=>op(e,0)); return; } op(R.ph2,0);
+  op(R.K,o.cmp?1:0); op(R.L,o.cmp?0:1); op(R.Z,d("zoom")>0?1:0);
+  if(o.cmp){ R.rA.upd({n:4,dis:0,read:220,w:1}); R.rB.upd({n:4,dis:1,read:220,w:1}); op(R.rA,d("cA")); op(R.rB,d("cB")); op(R.eq,d("eq")); op(R.kT,d("kT")); return; }
+  R.rig.upd(o); op(R.ph1,d("ph1")); op(R.tare,1);
+  // panneau
+  const pn=d("p1")||d("p2")||d("p3")||o.man; const showPnl=!(o.zoom>0)&&!o.myth&&(o.p1!==undefined&&o.p1>0);
+  op(R.pnl,showPnl?1:0); R.l1.textContent="Eau : 200 g"; op(R.l1,d("p1")); R.l2.textContent=o.l2||"Sucre : 4 morceaux = 20 g"; op(R.l2,d("p2")||(o.man?1:0)); R.l3.textContent=o.l3||"Balance : 220 g"; op(R.l3,d("p3")); op(R.ln,d("p3")||(o.man?1:0)); R.st.textContent=o.st||""; op(R.st,o.st?1:0);
+  R.nt.textContent=o.note||""; op(R.nt,o.noteA!==undefined?o.noteA:0);
+  // zoom
+  const z=d("zoom"), sp=d("spread"); op(R.Z,z>0?1:0); if(z>0){ R.wp.forEach((c,i)=>a.set(c,{cx:c._x+Math.sin(sp*25+i)*4,cy:c._y+Math.cos(sp*23+i)*4})); R.sp.forEach((c,i)=>{ const v=a.clamp(sp*1.5-(i/20)*.5,0,1); a.set(c,{cx:a.lerp(c._cx,c._x,a.ease(v))+Math.sin(sp*25+i)*3,cy:a.lerp(c._cy,c._y,a.ease(v))+Math.cos(sp*22+i)*3}); }); op(R.bar,d("bar")); R.b1.setAttribute("opacity",1); }
+  // idée fausse
+  op(R.myth,d("myth")); if(d("myth")>0){ op(R.pnl,0); }
+}
+})();
+</script></body></html>

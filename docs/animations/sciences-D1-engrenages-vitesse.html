@@ -1,0 +1,503 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les engrenages : tourner plus vite, tourner dans l'autre sens</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-D1-engrenages-vitesse","matiere":"sciences","annee":"connexe","periode":1,"theme":"Mouvement, objets techniques : les engrenages","resume":"Deux roues dentées engrenées tournent en sens opposés ; la petite tourne plus vite selon le rapport des dents ; une roue intermédiaire rétablit le sens.","motsCles":["engrenage","roue dentée","rapport","sens de rotation","horloge","boîte de vitesses"]} */
+(function(){
+let R={}, E=null;
+let nB=10, spin=0; // manipulation : nombre de dents de la roue menée ; angle de la roue menante (°)
+const KM=3; // indice de l'étape de manipulation
+const NS=[10,15,20,30,40], PM=40, AXm=250, AYm=430;
+const TIERS={10:"2 tours",15:"1 tour et un tiers",20:"1 tour",30:"deux tiers de tour",40:"un demi-tour"};
+const C={A:"#2563A8",B:"#E07A1F",Cc:"#2E8B57",ink:"#1E2430",gris:"#5A6478",red:"#C0392B"};
+const FILL={A:"#C9DBF5",B:"#F9D9B4",Cc:"#C6E7D3"};
+const P=44; // pas des dents (px) : rayon = n*P/(2π)
+const rad=(n,p)=>n*(p||P)/(2*Math.PI);
+const f1=v=>(Math.round(v*10)/10).toString().replace(".",",");
+const f2=v=>v.toFixed(2).replace(".",",");
+function gearPath(n,r,d){ const s=2*Math.PI/n; let p=""; const pt=(a,rr)=>`${(rr*Math.cos(a)).toFixed(1)},${(rr*Math.sin(a)).toFixed(1)}`;
+  for(let i=0;i<n;i++){ const c=i*s; p+=(i?" L":"M")+pt(c-.30*s,r-d)+" L"+pt(c-.16*s,r+d)+" L"+pt(c+.16*s,r+d)+" L"+pt(c+.30*s,r-d); }
+  return p+" Z"; }
+// angle (deg) de la roue menée B (nB dents) quand la menante A (nA dents) est à thA (deg) ; B est dans la direction alpha (deg) depuis A
+function mesh(nA,nB,thA,alpha){ return -(nA/nB)*(thA-alpha)+alpha+180+180/nB; }
+function mkGear(parent,n,col,p){ p=p||P; const r=rad(n,p), d=p*.3; const g=E("g",{},parent); const body=E("g",{},g);
+  E("path",{d:gearPath(n,r,d),fill:FILL[col],stroke:C[col],"stroke-width":3,"stroke-linejoin":"round"},body);
+  E("circle",{r:r*.62,fill:"none",stroke:C[col],"stroke-width":2,opacity:.45},body);
+  E("line",{x1:0,y1:0,x2:r*.80,y2:0,stroke:C[col],"stroke-width":Math.max(4,r*.07),"stroke-linecap":"round"},body);
+  E("circle",{cx:r*.80,cy:0,r:Math.max(5,r*.075),fill:C.red,stroke:"#fff","stroke-width":2},body);
+  E("circle",{r:Math.max(6,r*.09),fill:C.ink},body);
+  g.body=body; g.n=n; g.r=r; return g; }
+function put(g,x,y,deg){ g.setAttribute("transform",`translate(${x},${y})`); g.body.setAttribute("transform",`rotate(${deg})`); }
+function turnArrow(a,parent,cx,cy,rr,dir,color){ const t=Math.PI/180; const a0=(dir>0?-150:-30)*t, a1=(dir>0?-35:-145)*t;
+  const x0=cx+rr*Math.cos(a0), y0=cy+rr*Math.sin(a0), x1=cx+rr*Math.cos(a1), y1=cy+rr*Math.sin(a1);
+  return a.arrow(parent,`M${x0},${y0} A${rr},${rr} 0 0 ${dir>0?1:0} ${x1},${y1}`,{color,w:9,head:3.2}); }
+let a=null;
+const panel=(parent,x,y,w,h,col)=>E("rect",{x,y,width:w,height:h,rx:16,fill:"#fff",stroke:col||"#D6DBE4","stroke-width":3},parent);
+const txt=(parent,x,y,s,o)=>{ o=o||{}; return E("text",{x,y,"font-size":o.size||24,"font-weight":o.w||700,fill:o.color||C.ink,"text-anchor":o.anchor||"start",text:s,stroke:o.halo?"#fff":null,"stroke-width":o.halo?5:null,"paint-order":o.halo?"stroke":null},parent); };
+
+Anim.run({
+  titre:"Les engrenages : tourner plus vite, tourner dans l'autre sens",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Mouvement et objets techniques",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Deux roues dentées qui s'engrènent tournent-elles pareil ?",
+  manipDes:KM, manipJusqua:KM,
+  init(api){
+    a=api; E=api.el;
+    // ---------- étape 1 : deux roues identiques
+    const L1=a.layer("s1"); R.L1=L1; const x1=420, y1=410, d1=2*rad(20,56); R.x1=x1; R.y1=y1; R.d1=d1;
+    R.g1a=mkGear(L1,20,"A",56); R.g1b=mkGear(L1,20,"B",56);
+    R.ar1=E("g",{},L1); turnArrow(a,R.ar1,x1,y1,90,1,C.A); turnArrow(a,R.ar1,x1+d1,y1,90,-1,C.B);
+    txt(R.ar1,380,660,"roue bleue : sens des aiguilles",{anchor:"middle",color:C.A,halo:1});
+    txt(R.ar1,380,692,"d'une montre",{anchor:"middle",color:C.A,halo:1});
+    txt(R.ar1,830,660,"roue orange : sens contraire",{anchor:"middle",color:C.B,halo:1});
+    txt(R.ar1,830,692,"des aiguilles d'une montre",{anchor:"middle",color:C.B,halo:1});
+    R.c1=E("g",{},L1); panel(R.c1,1010,120,540,310);
+    txt(R.c1,1040,170,"Chaque roue a 20 dents",{size:26});
+    R.c1a=txt(R.c1,1040,240,"",{color:C.A,size:30,w:800}); R.c1b=txt(R.c1,1040,300,"",{color:C.B,size:30,w:800});
+    txt(R.c1,1040,375,"même nombre de dents = même vitesse",{size:24,w:600});
+    R.ph1=a.photo(L1,{id:"s-d1-horloge",x:1090,y:500,w:360,h:240,cap:"Engrenages d'une horloge",rot:-2});
+    // ---------- étapes 2-3 : grande roue 30 dents / petite roue 10 dents
+    const L2=a.layer("s2"); R.L2=L2; const GX=340, GY=470, rG=rad(30), rS=rad(10); R.GX=GX; R.GY=GY; R.PX=GX+rG+rS;
+    R.gG=mkGear(L2,30,"A"); R.gS=mkGear(L2,10,"B");
+    R.ar2=E("g",{},L2); turnArrow(a,R.ar2,GX,GY,100,1,C.A); turnArrow(a,R.ar2,R.PX,GY,rS*.55,-1,C.B);
+    R.ar3=E("g",{},L2); turnArrow(a,R.ar3,GX,GY,100,-1,C.A); turnArrow(a,R.ar3,R.PX,GY,rS*.55,1,C.B);
+    R.t2=E("g",{},L2); a.label(R.t2,GX,GY+rG+52,"grande roue : 30 dents\n(on la fait tourner)",{size:24,stroke:C.A,color:C.A}); a.label(R.t2,R.PX+30,GY-rS-120,"petite roue : 10 dents",{size:24,stroke:C.B,color:C.B});
+    R.t3=E("g",{},L2); a.label(R.t3,GX,GY+rG+52,"grande roue : 30 dents",{size:24,stroke:C.A,color:C.A}); a.label(R.t3,R.PX+30,GY-rS-120,"petite roue : 10 dents\n(on la fait tourner)",{size:24,stroke:C.B,color:C.B});
+    R.c2=E("g",{},L2); panel(R.c2,820,120,730,640);
+    R.c2h=txt(R.c2,850,170,"",{size:28,w:800});
+    R.c2a=txt(R.c2,850,240,"",{size:30,w:800}); R.c2b=txt(R.c2,850,300,"",{size:30,w:800});
+    R.c2d=E("g",{},R.c2); R.c2dx=txt(R.c2d,850,375,"",{size:28,w:800});
+    R.c2e=E("g",{},R.c2); R.b2l1=txt(R.c2e,850,470,"",{size:24,color:C.A}); R.b2l2=txt(R.c2e,850,545,"",{size:24,color:C.B});
+    R.b2a=E("rect",{x:1070,y:444,width:0,height:36,rx:10,fill:C.A},R.c2e); R.b2b=E("rect",{x:1070,y:519,width:0,height:36,rx:10,fill:C.B},R.c2e);
+    E("line",{x1:1070,y1:430,x2:1070,y2:570,stroke:C.ink,"stroke-width":2},R.c2e);
+    R.c2n=E("text",{x:850,y:640,"font-size":26,"font-weight":700,fill:C.ink},R.c2); R.c2n2=E("text",{x:850,y:680,"font-size":26,"font-weight":700,fill:C.ink},R.c2);
+    // ---------- étape 4 : MANIPULATION, on choisit le nombre de dents de la roue menée
+    const LM=a.layer("s2m"); R.L2m=LM; const rA=rad(20,PM);
+    R.gmA=mkGear(LM,20,"A",PM); R.gm=NS.map(n=>{ const g=mkGear(LM,n,"B",PM); g.cx=AXm+rA+rad(n,PM); return g; });
+    R.cmA=txt(LM,AXm,AYm-rA-48,"bleue : 20 dents",{size:26,color:C.A,anchor:"middle",halo:1}); R.cmB=txt(LM,0,0,"",{size:26,color:C.B,anchor:"middle",halo:1});
+    R.cm=E("g",{},LM); panel(R.cm,930,110,630,600,C.B);
+    txt(R.cm,960,162,"La roue bleue mène (20 dents)",{size:28,w:800,color:C.A});
+    R.cm1=txt(R.cm,960,222,"",{size:28,w:800,color:C.B});
+    R.cm2=txt(R.cm,960,300,"",{size:30,w:800,color:C.A}); R.cm3=txt(R.cm,960,350,"",{size:30,w:800,color:C.B});
+    E("line",{x1:960,y1:385,x2:1530,y2:385,stroke:"#D6DBE4","stroke-width":3},R.cm);
+    R.cm4=txt(R.cm,960,440,"",{size:28,w:800}); R.cm5=E("text",{x:960,y:487,"font-size":28,"font-weight":800,fill:C.B},R.cm);
+    R.cm6=E("text",{x:960,y:600,"font-size":26,"font-weight":700,fill:C.ink},R.cm);
+    // ---------- étape 5 : chaîne de 3 roues
+    const L4=a.layer("s4"); R.L4=L4; const n4=16, r4=rad(n4), X4=[300,300+2*r4,300+4*r4], Y4=400; R.X4=X4; R.Y4=Y4;
+    R.g4=[mkGear(L4,n4,"A"),mkGear(L4,n4,"B"),mkGear(L4,n4,"Cc")];
+    R.ar4=E("g",{},L4); [[C.A,1],[C.B,-1],[C.Cc,1]].forEach(([c,d],i)=>turnArrow(a,R.ar4,X4[i],Y4,62,d,c));
+    R.lab4=E("g",{},L4);
+    [["roue 1 : roue menante",C.A,X4[0],Y4+r4+55],["roue 2 : roue intermédiaire",C.B,X4[1],Y4+r4+130],["roue 3",C.Cc,X4[2],Y4+r4+55]].forEach(([t,c,x,y])=>a.label(R.lab4,x,y,t,{size:24,stroke:c,color:c}));
+    R.s4t=E("g",{},L4); panel(R.s4t,1050,110,500,370,C.B);
+    txt(R.s4t,1075,160,"Trois roues de 16 dents",{size:26,w:800});
+    R.s4a=txt(R.s4t,1075,225,"1 : sens des aiguilles",{color:C.A,size:26}); R.s4b=txt(R.s4t,1075,275,"2 : sens contraire",{color:C.B,size:26}); R.s4c=txt(R.s4t,1075,325,"3 : sens des aiguilles",{color:C.Cc,size:26});
+    R.s4n=E("text",{x:1075,y:390,"font-size":24,"font-weight":600,fill:C.ink},R.s4t); a.wrap(R.s4n,"La roue du milieu ne change pas la vitesse : elle change seulement le sens.",30);
+    R.ph4=a.photo(L4,{id:"s-d1-montre",x:1100,y:560,w:340,h:226,cap:"Mécanisme d'une montre",rot:2});
+    // ---------- étape 5 : applications
+    const L5=a.layer("s5"); R.L5=L5; const PY=95, PH=620, PW=490, PXs=[40,555,1070];
+    PXs.forEach(x=>panel(L5,x,PY,PW,PH));
+    txt(L5,PXs[0]+PW/2,PY+46,"Horloge",{size:30,w:800,anchor:"middle",color:C.A});
+    txt(L5,PXs[1]+PW/2,PY+46,"Perceuse à main",{size:30,w:800,anchor:"middle",color:C.B});
+    txt(L5,PXs[2]+PW/2,PY+46,"Boîte de vitesses",{size:30,w:800,anchor:"middle",color:C.Cc});
+    const cx=PXs[0]+PW/2, cy=PY+250; R.hcx=cx; R.hcy=cy;
+    E("circle",{cx,cy,r:150,fill:"#FBFCFE",stroke:C.ink,"stroke-width":6},L5);
+    for(let i=0;i<12;i++){ const t=i/12*2*Math.PI; E("line",{x1:cx+132*Math.sin(t),y1:cy-132*Math.cos(t),x2:cx+146*Math.sin(t),y2:cy-146*Math.cos(t),stroke:C.ink,"stroke-width":i%3?3:6},L5); }
+    [["12",0],["3",3],["6",6],["9",9]].forEach(([s,i])=>{ const t=i/12*2*Math.PI; E("text",{x:cx+104*Math.sin(t),y:cy-104*Math.cos(t)+10,"text-anchor":"middle","font-size":28,"font-weight":800,fill:C.ink,text:s},L5); });
+    R.hH=E("line",{x1:0,y1:0,x2:0,y2:-80,stroke:C.A,"stroke-width":12,"stroke-linecap":"round"},L5); R.hM=E("line",{x1:0,y1:0,x2:0,y2:-118,stroke:C.B,"stroke-width":7,"stroke-linecap":"round"},L5);
+    E("circle",{cx,cy,r:9,fill:C.ink},L5);
+    R.hT1=txt(L5,cx,PY+470,"",{size:26,w:800,anchor:"middle",color:C.B}); R.hT2=txt(L5,cx,PY+510,"",{size:26,w:800,anchor:"middle",color:C.A});
+    txt(L5,cx,PY+570,"des engrenages relient les aiguilles",{size:22,w:600,anchor:"middle",color:C.gris});
+    const px=PXs[1], p2=26, r24=rad(24,p2), r8=rad(8,p2); R.p2=p2; R.pgx=px+150; R.pgy=PY+250; R.ppx=R.pgx+r24+r8;
+    R.gD=mkGear(L5,24,"B",p2); R.gD2=mkGear(L5,8,"A",p2);
+    a.label(L5,R.pgx,R.pgy+r24+52,"manivelle (grande roue)",{size:22,stroke:C.B,color:C.B});
+    a.label(L5,R.ppx+10,R.pgy-r8-70,"petit pignon\n(il tient le foret)",{size:22,stroke:C.A,color:C.A});
+    R.pT1=txt(L5,px+PW/2,PY+470,"",{size:26,w:800,anchor:"middle",color:C.B}); R.pT2=txt(L5,px+PW/2,PY+510,"",{size:26,w:800,anchor:"middle",color:C.A});
+    txt(L5,px+PW/2,PY+570,"schéma simplifié",{size:22,w:600,anchor:"middle",color:C.gris});
+    const bx=PXs[2], bp=22, r12=rad(12,bp), r24b=rad(24,bp);
+    R.bx=bx; R.by1=PY+195; R.by2=PY+455; R.bp=bp; R.r12=r12; R.r24b=r24b;
+    R.gB1=mkGear(L5,12,"Cc",bp); R.gB1o=mkGear(L5,24,"A",bp); R.gB2=mkGear(L5,24,"Cc",bp); R.gB2o=mkGear(L5,12,"A",bp);
+    txt(L5,bx+30,PY+90,"moteur",{size:22,color:C.Cc}); txt(L5,bx+PW-30,PY+90,"sortie (roues)",{size:22,color:C.A,anchor:"end"});
+    txt(L5,bx+PW/2,PY+318,"vitesse lente : moteur 2 tours = sortie 1 tour",{size:22,anchor:"middle"}); txt(L5,bx+PW/2,PY+346,"lent, mais avec de la force (exemple)",{size:22,w:600,anchor:"middle",color:C.gris});
+    txt(L5,bx+PW/2,PY+578,"vitesse rapide : moteur 1 tour = sortie 2 tours",{size:22,anchor:"middle"}); txt(L5,bx+PW/2,PY+606,"rapide, mais moins de force (exemple)",{size:22,w:600,anchor:"middle",color:C.gris});
+    txt(L5,800,775,"Petite → grande : lent mais puissant. Grande → petite : rapide.",{size:26,anchor:"middle"});
+    // ---------- synthèse
+    const sy=a.layer("syn"); R.syn=sy; E("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy);
+    txt(sy,800,70,"À retenir",{size:38,w:800,anchor:"middle"});
+    R.pts=[["1","Deux roues dentées qui s'engrènent tournent dans des sens contraires.",C.A],["2","La petite roue tourne plus vite : 30 dents ÷ 10 dents = 3 tours pour 1 tour.",C.B],["3","Une roue intermédiaire permet de retrouver le sens de départ.",C.Cc]].map(([n,t,c],i)=>{
+      const g=E("g",{},sy); E("rect",{x:150,y:110+i*105,width:1300,height:88,rx:16,fill:"#fff",stroke:c,"stroke-width":4},g); E("circle",{cx:205,cy:154+i*105,r:28,fill:c},g); E("text",{x:205,y:166+i*105,"text-anchor":"middle","font-size":34,"font-weight":800,fill:"#fff",text:n},g);
+      E("text",{x:255,y:164+i*105,"font-size":26,"font-weight":700,fill:C.ink,text:t},g); return g; });
+    R.myth=a.layer("myth"); a.myth(R.myth,150,450,1300,"Deux roues engrenées tournent toujours à la même vitesse et dans le même sens.","Elles tournent en sens contraires. Et si elles n'ont pas le même nombre de dents, la plus petite tourne plus vite : on compte les dents !");
+    // manipulation : la roue bleue tourne tant qu'on est dans l'étape (la classe a le temps de compter les tours)
+    a.manip.innerHTML='Roue orange (menée) : '+NS.map(n=>`<button data-n="${n}" class="${n===nB?"sel":""}">${n} dents</button>`).join(" ");
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ nB=+b.dataset.n; spin=0; a.manip.querySelectorAll("button").forEach(x=>x.classList.toggle("sel",x===b)); a.redraw(); });
+    let last=performance.now();
+    setInterval(()=>{ const now=performance.now(), dt=Math.min(now-last,100); last=now; if(a.step()===KM){ spin+=dt*0.09; a.redraw(); } },40);
+  },
+  reset(a){ [R.L1,R.L2,R.L2m,R.cm,R.L4,R.L5,R.syn,R.myth,R.ar1,R.c1,R.ph1,R.ph4,R.ar2,R.ar3,R.t2,R.t3,R.c2,R.c2d,R.c2e,R.ar4,R.lab4,R.s4t].forEach(e=>a.op(e,0));
+    R.pts.forEach(g=>a.op(g,0)); },
+  etapes:[
+  { titre:"Deux roues dentées", duree:8000,
+    legende:"Deux roues de 20 dents s'engrènent. La roue bleue tourne dans le sens des aiguilles d'une montre, la roue orange tourne dans l'autre sens.",
+    voix:"Voici deux roues dentées qui s'engrènent : les dents de l'une se glissent entre les dents de l'autre. Quand la roue bleue tourne dans le sens des aiguilles d'une montre, la roue orange est poussée par ses dents : elle tourne dans l'autre sens ! Ici, les deux roues ont le même nombre de dents, donc elles font le même nombre de tours.",
+    anim(t,a){ const s=a.seg; a.op(R.L1,1); const x0=R.x1, y0=R.y1, d=R.d1; const th=360*2*s(t,.15,.95,true);
+      put(R.g1a,x0,y0,th); put(R.g1b,x0+d,y0,mesh(20,20,th,0));
+      a.op(R.ar1,s(t,.05,.2)); a.op(R.c1,s(t,.1,.25)); a.op(R.ph1,s(t,.4,.6));
+      R.c1a.textContent="Roue bleue : "+f1(th/360)+(th/360>=2?" tours":" tour"); R.c1b.textContent="Roue orange : "+f1(th/360)+(th/360>=2?" tours":" tour"); } },
+  { titre:"La petite roue tourne plus vite", duree:11000,
+    legende:"La grande roue (30 dents) fait 1 tour : 30 dents passent. La petite roue (10 dents) doit donc faire 3 tours pour les laisser passer. 30 ÷ 10 = 3.",
+    voix:"Maintenant, la grande roue a trente dents et la petite en a dix. Quand la grande roue fait un tour, trente dents passent. La petite roue n'a que dix dents : pour laisser passer les trente dents, elle doit faire trois tours ! Trente divisé par dix égale trois. La petite roue tourne trois fois plus vite.",
+    anim(t,a){ const s=a.seg; a.op(R.L2,1); a.op(R.L1,1-s(t,0,.12)); a.op(R.ar2,s(t,.05,.2)); a.op(R.t2,s(t,.05,.2)); a.op(R.c2,s(t,.05,.2)); a.op(R.c2e,s(t,.1,.25));
+      const th=360*s(t,.25,.9,true); put(R.gG,R.GX,R.GY,th); put(R.gS,R.PX,R.GY,mesh(30,10,th,0));
+      R.c2h.textContent="On compte les tours"; const u=th/360;
+      R.c2a.textContent="Grande roue (30 dents) : "+f2(u)+(u>=2?" tours":" tour"); R.c2b.textContent="Petite roue (10 dents) : "+f2(u*3)+(u*3>=2?" tours":" tour");
+      a.op(R.c2d,s(t,.86,.97)); R.c2dx.textContent="30 dents ÷ 10 dents = 3";
+      R.b2l1.textContent="grande roue"; R.b2l2.textContent="petite roue"; R.b2a.setAttribute("width",130*u); R.b2b.setAttribute("width",130*u*3);
+      R.c2n.textContent=""; R.c2n2.textContent=""; } },
+  { titre:"Et dans l'autre sens ?", duree:9000,
+    legende:"Si c'est la petite roue qui entraîne la grande, tout s'inverse : la grande tourne 3 fois moins vite. Elle est plus lente, mais plus puissante.",
+    voix:"Et si c'est la petite roue qui entraîne la grande ? Tout s'inverse. Pour faire faire un tour à la grande roue, il faut trois tours de la petite. La grande roue tourne donc trois fois moins vite. Elle est plus lente, mais elle tourne avec plus de force.",
+    anim(t,a){ const s=a.seg; a.op(R.L2,1); a.op(R.ar2,1-s(t,0,.15)); a.op(R.t2,1-s(t,0,.15)); a.op(R.ar3,s(t,.05,.2)); a.op(R.t3,s(t,.05,.2)); a.op(R.c2,1); a.op(R.c2e,1); a.op(R.c2d,1);
+      const thS=-882+1080*s(t,.2,.9,true); put(R.gS,R.PX,R.GY,thS); put(R.gG,R.GX,R.GY,mesh(10,30,thS,180));
+      const u=(thS+882)/360; R.c2h.textContent="On compte les tours";
+      R.c2a.textContent="Petite roue (10 dents) : "+f2(u)+(u>=2?" tours":" tour"); R.c2b.textContent="Grande roue (30 dents) : "+f2(u/3)+" tour";
+      R.c2dx.textContent="10 dents ÷ 30 dents = un tiers";
+      R.b2l1.textContent="grande roue"; R.b2l2.textContent="petite roue"; R.b2a.setAttribute("width",130*u/3); R.b2b.setAttribute("width",130*u);
+      R.c2n.textContent="la grande roue est 3 fois plus lente,"; R.c2n2.textContent="mais elle tourne avec plus de force."; a.op(R.c2n,s(t,.8,.95)); a.op(R.c2n2,s(t,.8,.95)); } },
+  { titre:"À vous : choisissez la roue orange", duree:7000,
+    legende:"À vous : choisissez le nombre de dents de la roue orange et regardez ce qui change. Moins de dents : elle tourne plus vite. Plus de dents : plus lentement.",
+    voix:"À vous ! La roue bleue a vingt dents et c'est elle qui tourne. Avec les boutons, choisissez le nombre de dents de la roue orange, et regardez ce qui change. Avec moins de dents, la roue orange tourne plus vite. Avec plus de dents, elle tourne plus lentement. Et avec vingt dents aussi, les deux roues tournent pareil. Prenez votre temps : comptez les tours !",
+    anim(t,a){ const s=a.seg; a.op(R.L2m,s(t,0,.12)); a.op(R.L2,1-s(t,0,.12)); a.op(R.L1,0); a.op(R.cm,s(t,.05,.2));
+      const i=NS.indexOf(nB), g=R.gm[i], rB=rad(nB,PM); R.gm.forEach((h,j)=>a.op(h,j===i?1:0));
+      put(R.gmA,AXm,AYm,spin); put(g,g.cx,AYm,mesh(20,nB,spin,0));
+      R.cmB.setAttribute("x",g.cx); R.cmB.setAttribute("y",AYm+Math.max(rB,rad(20,PM))+58); R.cmB.textContent="orange : "+nB+" dents";
+      const u=spin/360, v=u*20/nB;
+      R.cm1.textContent="Roue orange (menée) : "+nB+" dents";
+      R.cm2.textContent="Roue bleue : "+f1(u)+(u>=2?" tours":" tour"); R.cm3.textContent="Roue orange : "+f1(v)+(v>=2?" tours":" tour");
+      R.cm4.textContent="20 dents ÷ "+nB+" dents = "+(Math.round(200/nB)/10).toString().replace(".",",");
+      a.wrap(R.cm5,"Quand la bleue fait 1 tour, l'orange fait "+TIERS[nB]+".",34);
+      a.wrap(R.cm6,nB<20?"L'orange a moins de dents : elle tourne plus vite.":nB===20?"Même nombre de dents : même vitesse.":"L'orange a plus de dents : elle tourne plus lentement (mais avec plus de force).",36); } },
+  { titre:"Trois roues à la suite", duree:9000,
+    legende:"Avec trois roues, la roue 2 tourne dans le sens contraire de la roue 1, et la roue 3 retrouve le sens de la roue 1. La roue du milieu s'appelle roue intermédiaire.",
+    voix:"Et avec trois roues à la suite ? La roue un tourne dans un sens. La roue deux tourne dans le sens contraire. Et la roue trois, poussée par la roue deux, tourne de nouveau dans le sens de la roue un ! La roue du milieu s'appelle la roue intermédiaire : elle ne change pas la vitesse, mais elle change le sens.",
+    anim(t,a){ const s=a.seg; a.op(R.L4,1); a.op(R.L2,0); a.op(R.L2m,1-s(t,0,.12)); const th=360*2*s(t,.15,.95,true); const thB=mesh(16,16,th,0), thC=mesh(16,16,thB,0);
+      put(R.g4[0],R.X4[0],R.Y4,th); put(R.g4[1],R.X4[1],R.Y4,thB); put(R.g4[2],R.X4[2],R.Y4,thC);
+      a.op(R.ar4,s(t,.05,.2)); a.op(R.lab4,s(t,.05,.2)); a.op(R.s4t,s(t,.15,.3)); a.op(R.ph4,s(t,.5,.7)); } },
+  { titre:"Dans la vie de tous les jours", duree:11000,
+    legende:"Horloge : l'aiguille des minutes fait 12 tours pendant que celle des heures en fait 1. Perceuse à main : le foret tourne 3 fois plus vite que la manivelle. Boîte de vitesses : on choisit entre force et vitesse.",
+    voix:"Les engrenages sont partout. Dans une horloge, l'aiguille des minutes fait douze tours pendant que celle des heures en fait un seul. Dans une perceuse à main, la manivelle fait tourner un petit pignon trois fois plus vite qu'elle. Et dans la boîte de vitesses d'une voiture, on choisit des roues différentes : une petite qui entraîne une grande pour avoir de la force, ou l'inverse pour aller vite.",
+    anim(t,a){ const s=a.seg; a.op(R.L5,1); a.op(R.L4,1-s(t,0,.12)); const u=s(t,.1,.95,true);
+      // horloge
+      const hh=u*360, mm=u*360*12; a.set(R.hH,{transform:`translate(${R.hcx},${R.hcy}) rotate(${hh})`}); a.set(R.hM,{transform:`translate(${R.hcx},${R.hcy}) rotate(${mm})`});
+      R.hT1.textContent="minutes : "+f1(u*12)+(u*12>=2?" tours":" tour"); R.hT2.textContent="heures : "+f1(u)+" tour";
+      // perceuse
+      const thc=360*2*u; put(R.gD,R.pgx,R.pgy,thc); put(R.gD2,R.ppx,R.pgy,mesh(24,8,thc,0));
+      R.pT1.textContent="manivelle : "+f1(2*u)+(2*u>=2?" tours":" tour"); R.pT2.textContent="foret : "+f1(6*u)+(6*u>=2?" tours":" tour");
+      // boîte de vitesses
+      const thm=720*u; const bx=R.bx, a1=R.bx+110;
+      put(R.gB1,a1,R.by1,thm); put(R.gB1o,a1+R.r12+R.r24b,R.by1,mesh(12,24,thm,0));
+      put(R.gB2,a1+20,R.by2,thm); put(R.gB2o,a1+20+R.r12+R.r24b,R.by2,mesh(24,12,thm,0)); } },
+  { titre:"Synthèse", duree:10000,
+    legende:"Roues engrenées : sens contraires. Plus la roue a de dents, plus elle tourne lentement. Une roue intermédiaire rétablit le sens.",
+    voix:"Pour retenir. Deux roues dentées qui s'engrènent tournent dans des sens contraires. La petite roue tourne plus vite que la grande : on compte les dents, trente divisé par dix égale trois. Et une roue intermédiaire permet de retrouver le sens de départ. Attention : deux roues engrenées ne tournent pas toujours à la même vitesse, ni dans le même sens !",
+    anim(t,a){ const s=a.seg; a.op(R.L5,1-s(t,0,.1)); a.op(R.syn,s(t,0,.1)); R.pts.forEach((g,i)=>a.op(g,s(t,.08+i*.12,.18+i*.12))); a.op(R.myth,s(t,.55,.7)); } },
+  ]
+});
+})();
+</script></body></html>

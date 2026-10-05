@@ -1,0 +1,447 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flotte ou coule ?</title><style>:root{
+  --ink:#1E2430; --ink2:#4A5468; --line:#D6DBE4; --paper:#FFFFFF;
+  --bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;
+  --donnee:#2563A8; --transfo:#E07A1F; --resultat:#2E8B57; --alerte:#C0392B;
+}
+body.m-histoire{--bg:#FBF6EE; --accent:#A8431F; --accent-soft:#F3E1D3;}
+body.m-geographie{--bg:#F1F7F5; --accent:#1C6E61; --accent-soft:#D5EAE4;}
+body.m-sciences{--bg:#F3F6FC; --accent:#2856A8; --accent-soft:#DCE6F7;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Trebuchet MS",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;background:var(--bg)}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:3px solid var(--accent);background:var(--paper);min-height:56px}
+header .badge{background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+header h1{font-size:clamp(18px,2.2vw,28px);margin:0;flex:1;line-height:1.15}
+header h1 small{display:block;font-size:.58em;font-weight:500;color:var(--ink2)}
+.hbtn{border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;min-width:44px;min-height:44px;font-size:20px;cursor:pointer;font-weight:700;padding:0 10px}
+.hbtn:hover{background:var(--accent-soft)}
+.hbtn.off{opacity:.45;text-decoration:line-through}
+#stageWrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+#stage{width:100%;height:100%;display:block;background:var(--paper);border-radius:14px;box-shadow:0 2px 10px rgba(30,36,48,.12)}
+#stage text{font-family:"Segoe UI","Trebuchet MS",system-ui,Roboto,Arial,sans-serif}
+#overlay{position:absolute;inset:6px 10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(255,255,255,.78);border-radius:14px;cursor:pointer;backdrop-filter:blur(2px)}
+#overlay.hide{display:none}
+#overlay .big{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.25);padding-left:10px}
+#overlay p{font-size:24px;margin:0;font-weight:600;color:var(--ink);text-align:center;padding:0 20px}
+#overlay p.sub{font-size:18px;font-weight:400;color:var(--ink2)}
+#manip{display:none;align-items:center;justify-content:center;gap:16px;padding:6px 16px;background:var(--accent-soft);font-size:20px;font-weight:600;flex-wrap:wrap}
+#manip.on{display:flex}
+#manip input[type=range]{width:min(420px,60vw);height:32px;accent-color:var(--transfo)}
+#manip button{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--transfo);background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+#manip button.sel{background:var(--transfo);color:#fff}
+#caption{background:var(--paper);margin:0 10px;border-radius:12px;border-left:8px solid var(--accent);padding:10px 16px;font-size:clamp(18px,1.75vw,26px);line-height:1.35;min-height:3.2em;display:flex;align-items:center;gap:12px}
+#caption .num{flex:none;background:var(--accent);color:#fff;border-radius:8px;font-weight:800;font-size:.8em;padding:3px 9px}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 12px 10px;flex-wrap:wrap;justify-content:center}
+#dots{display:flex;align-items:center;gap:0;flex:1 1 320px;justify-content:center;min-width:260px}
+#dots .dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);background:#fff;color:var(--accent);font-weight:800;font-size:16px;cursor:pointer;flex:none;padding:0}
+#dots .dot.done{background:var(--accent);color:#fff}
+#dots .dot.cur{box-shadow:0 0 0 5px var(--accent-soft);transform:scale(1.12)}
+#dots .seg{height:4px;flex:1 1 10px;max-width:60px;background:var(--line)}
+#dots .seg.done{background:var(--accent)}
+.ctl{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:52px;min-height:48px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;font-weight:700;padding:0 12px}
+.cbtn.play{min-width:76px;font-size:26px;background:var(--transfo)}
+.cbtn:hover{filter:brightness(1.1)}
+.speed{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--ink2)}
+.speed input{width:120px;accent-color:var(--accent)}
+.speed b{min-width:44px;color:var(--ink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pulse{animation:pulse 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0 rgba(224,122,31,0))}50%{filter:drop-shadow(0 0 10px rgba(224,122,31,.95))}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@media (max-width:700px){header .badge{display:none}.speed input{width:80px}}
+
+.cbtn.go{min-width:150px;font-size:22px;background:var(--resultat);color:#fff}
+#manip.wait::after{content:"Prenez votre temps, puis « Continuer ».";font-size:17px;font-weight:600;color:var(--ink2);font-style:italic}
+</style><script src="../photos/credits.js"></script></head><body><script>/* Moteur d'animations pédagogiques — étapes, pas-à-pas, vitesse, voix off fr-FR */
+(function(){
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* ---------- helpers SVG ---------- */
+function el(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else if(attrs[k]!==undefined&&attrs[k]!==null) e.setAttribute(k,attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function set(e,attrs){ for(const k in attrs){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } return e; }
+
+const H={
+  ease,lerp,clamp,el,set,
+  /* progression locale d'un sous-intervalle [a,b] de t, avec easing */
+  seg(t,a,b,noEase){ const v=clamp((t-a)/(b-a),0,1); return noEase?v:ease(v); },
+  op(e,v){ if(!e) return; if(e._missing){ e.style.display="none"; return; } e.setAttribute("opacity",clamp(v,0,1)); e.style.display=v<=0.001?"none":""; },
+  show(e){H.op(e,1)}, hide(e){H.op(e,0)},
+  /* tracé progressif d'un chemin */
+  draw(p,t){ if(!p) return; let L=p._len; if(L===undefined){ try{L=p.getTotalLength();}catch(_){L=1000} p._len=L; }
+    p.style.strokeDasharray=L+" "+L; p.style.strokeDashoffset=L*(1-clamp(t,0,1)); p.style.display=t<=0.001?"none":""; },
+  tr(e,x,y,s,r){ e.setAttribute("transform",`translate(${x},${y})`+(s!==undefined&&s!==1?` scale(${s})`:"")+(r?` rotate(${r})`:"")); },
+  /* point le long d'un chemin */
+  along(p,t){ let L=p._len; if(L===undefined){L=p.getTotalLength();p._len=L;} const q=p.getPointAtLength(L*clamp(t,0,1)); return {x:q.x,y:q.y}; },
+  num(e,v,dec,suffix){ e.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("fr-FR"))+(suffix||""); },
+  cls(e,c,on){ if(e) e.classList.toggle(c,!!on); },
+  /* texte multi-lignes (retour à la ligne approximatif) */
+  wrap(textEl,str,maxChars,lh){
+    while(textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    const x=textEl.getAttribute("x")||0; lh=lh||1.2;
+    const lines=[]; str.split("\n").forEach(par=>{ let cur=""; par.split(" ").forEach(w=>{ if((cur+" "+w).trim().length>maxChars&&cur){lines.push(cur);cur=w;} else cur=(cur?cur+" ":"")+w; }); lines.push(cur); });
+    lines.forEach((l,i)=>{ const ts=el("tspan",{x,dy:i===0?0:lh+"em"},textEl); ts.textContent=l; });
+    return lines.length;
+  },
+  /* étiquette = rectangle arrondi + texte centré */
+  label(parent,x,y,str,o){
+    o=o||{}; const g=el("g",{},parent); const fs=o.size||26;
+    const lines=str.split("\n"); const w=o.w||Math.max(...lines.map(l=>l.length))*fs*0.56+fs*1.1; const h=o.h||lines.length*fs*1.22+fs*0.7;
+    el("rect",{x:x-w/2,y:y-h/2,width:w,height:h,rx:o.rx??12,fill:o.fill||"#fff",stroke:o.stroke||"#1E2430","stroke-width":o.sw??2.5},g);
+    const t=el("text",{x,y:y-(lines.length-1)*fs*0.61+fs*0.35,"text-anchor":"middle","font-size":fs,"font-weight":o.weight||700,fill:o.color||"#1E2430"},g);
+    lines.forEach((l,i)=>{ el("tspan",{x,dy:i?fs*1.22:0,text:l},t); });
+    g._w=w; g._h=h; return g;
+  },
+  /* flèche (ligne ou courbe) avec pointe */
+  arrow(parent,d,o){
+    o=o||{}; const g=el("g",{},parent); const col=o.color||"#E07A1F"; const id="ah"+Math.random().toString(36).slice(2,8);
+    const defs=el("defs",{},g); const m=el("marker",{id,viewBox:"0 0 10 10",refX:7,refY:5,markerWidth:o.head||4,markerHeight:o.head||4,orient:"auto-start-reverse"},defs);
+    el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m);
+    const p=el("path",{d,fill:"none",stroke:col,"stroke-width":o.w||6,"stroke-linecap":"round","marker-end":`url(#${id})`,"stroke-dasharray":o.dash||null},g);
+    g.path=p; return g;
+  },
+  /* photo d'illustration (chargée depuis ../photos/<id>.jpg ; ignorée si absente — voir telecharger-photos.mjs) */
+  photo(parent,o){
+    const g=el("g",{},parent); const cr=(window.PHOTO_CREDITS||{})[o.id];
+    if(!cr){ g._missing=true; g.style.display="none"; return g; }
+    const {x,y,w,h}=o, cap=o.cap||"", uid="pc"+Math.random().toString(36).slice(2,8);
+    const inner=el("g",{transform:`translate(${x},${y})`+(o.rot?` rotate(${o.rot})`:"")},g);
+    const fh=h+(cap?58:20)+22;
+    el("rect",{x:-12,y:-12,width:w+24,height:fh,rx:8,fill:"#fff",stroke:"#C9CED8","stroke-width":2,filter:"drop-shadow(0 4px 8px rgba(0,0,0,.28))"},inner);
+    const cp=el("clipPath",{id:uid},inner); el("rect",{x:0,y:0,width:w,height:h,rx:3},cp);
+    el("rect",{x:0,y:0,width:w,height:h,fill:"#E6E9EF"},inner);
+    el("image",{href:"../photos/"+o.id+".jpg",x:0,y:0,width:w,height:h,preserveAspectRatio:"xMidYMid slice","clip-path":`url(#${uid})`},inner);
+    if(cap) el("text",{x:w/2,y:h+32,"text-anchor":"middle","font-size":o.size||22,"font-weight":700,fill:"#1E2430",text:cap},inner);
+    const mx=Math.floor(w/6.6); const ct=cr.length>mx?cr.slice(0,mx-1)+"…":cr;
+    el("text",{x:w/2,y:h+(cap?52:16),"text-anchor":"middle","font-size":13,fill:"#5A6478",text:ct},inner);
+    g._h=fh; return g;
+  },
+  /* carte "idée fausse / en réalité" */
+  myth(parent,x,y,w,faux,vrai){
+    const g=el("g",{},parent); const fs=24;
+    const t1=el("text",{x:x+70,y:y+44,"font-size":fs,"font-weight":600,fill:"#7A1D12"},null);
+    const t2=el("text",{x:x+70,y:0,"font-size":fs,"font-weight":600,fill:"#14532D"},null);
+    const n1=H.wrap(t1,faux,Math.floor((w-90)/(fs*0.5)));
+    const h1=n1*fs*1.2+40;
+    const r1=el("rect",{x,y,width:w,height:h1,rx:14,fill:"#FDECEA",stroke:"#C0392B","stroke-width":3},g);
+    el("text",{x:x+20,y:y+46,"font-size":34,"font-weight":800,fill:"#C0392B",text:"✗"},g); g.appendChild(t1);
+    const y2=y+h1+14; t2.setAttribute("y",y2+44);
+    const n2=H.wrap(t2,vrai,Math.floor((w-90)/(fs*0.5)));
+    const h2=n2*fs*1.2+40;
+    el("rect",{x,y:y2,width:w,height:h2,rx:14,fill:"#E8F6EE",stroke:"#2E8B57","stroke-width":3},g);
+    el("text",{x:x+18,y:y2+46,"font-size":34,"font-weight":800,fill:"#2E8B57",text:"✓"},g); g.appendChild(t2);
+    g.faux=r1; g._h=h1+14+h2; return g;
+  },
+  /* frise chronologique persistante */
+  frise(parent,o){
+    const g=el("g",{},parent); const {x,y,w,debut,fin}=o; const sc=v=>x+(v-debut)/(fin-debut)*w;
+    el("rect",{x:x-10,y:y-34,width:w+20,height:92,rx:12,fill:"#fff",stroke:"#D6DBE4","stroke-width":2},g);
+    el("line",{x1:x,y1:y,x2:x+w,y2:y,stroke:"#1E2430","stroke-width":4},g);
+    (o.ticks||[]).forEach(v=>{ el("line",{x1:sc(v),y1:y-8,x2:sc(v),y2:y+8,stroke:"#1E2430","stroke-width":2},g); el("text",{x:sc(v),y:y+32,"text-anchor":"middle","font-size":20,fill:"#4A5468",text:v<0?(-v)+" av. J.-C.":String(v)},g); });
+    (o.periodes||[]).forEach(p=>{ const r=el("rect",{x:sc(p.a),y:y-24,width:sc(p.b)-sc(p.a),height:14,rx:5,fill:p.color,opacity:.85},g); el("text",{x:(sc(p.a)+sc(p.b))/2,y:y-30,"text-anchor":"middle","font-size":17,"font-weight":700,fill:p.color,text:p.nom},g); });
+    const evts={}; (o.events||[]).forEach(e=>{ const eg=el("g",{},g); el("circle",{cx:sc(e.d),cy:y,r:9,fill:e.color||"#A8431F",stroke:"#fff","stroke-width":2},eg); el("text",{x:sc(e.d),y:y+(e.up?-40:54),"text-anchor":"middle","font-size":19,"font-weight":700,fill:e.color||"#A8431F",text:e.label},eg); evts[e.id]=eg; });
+    const cur=el("g",{},g); el("path",{d:"M0,-30 L0,14",stroke:"#E07A1F","stroke-width":5},cur); el("path",{d:"M-11,-40 L11,-40 L0,-26 z",fill:"#E07A1F"},cur);
+    const curT=el("text",{x:0,y:-46,"text-anchor":"middle","font-size":22,"font-weight":800,fill:"#E07A1F"},cur);
+    g.events=evts; g.sc=sc;
+    g.at=(v,lbl)=>{ H.tr(cur,sc(v),y); curT.textContent=lbl!==undefined?lbl:Math.round(v); };
+    g.cursor=cur; return g;
+  }
+};
+
+
+/* ---------- lexique de prononciation (voix off uniquement : l'affichage ne change pas) ---------- */
+const ORD={1:"premier",2:"deuxième",3:"troisième",4:"quatrième",5:"cinquième",6:"sixième",7:"septième",8:"huitième",9:"neuvième",10:"dixième",11:"onzième",12:"douzième",13:"treizième",14:"quatorzième",15:"quinzième",16:"seizième",17:"dix-septième",18:"dix-huitième",19:"dix-neuvième",20:"vingtième",21:"vingt et unième"};
+function roman(r){ const m={I:1,V:5,X:10,L:50,C:100}; let n=0; for(let i=0;i<r.length;i++){ const v=m[r[i]],w=m[r[i+1]]||0; n+=v<w?-v:v; } return n; }
+const LEXIQUE=[
+  [/\bmoyen[\s\-]+[aâ]ge\b/gi,"moyin nâge"],
+  [/\bmoyen[\s\-]+[aâ]geux\b/gi,"moyin nâgeux"],
+  [/\btamis(age|ages|er|é|ée|és|ées|e|es|eur|ons|ez)\b/gi,(m,x)=>"tamiz"+x],
+  [/\bsiècles?\b/gi,m=>m],
+  [/\bœ/g,"eu"],
+  [/\bhPa\b/g,"hectopascals"],[/\bm\/s\b/g,"mètres par seconde"],[/\bm³/g,"mètres cubes"],[/\bcm³/g,"centimètres cubes"],[/\bmL\b/g,"millilitres"],[/\bCO₂|\bCO2\b/g,"dioxyde de carbone"],
+  [/\bVézelay\b/g,"Vézelé"],[/\bCîteaux\b/g,"Cito"],[/\bGreenwich\b/g,"Grénitch"],[/\bhôtels?-Dieu\b/gi,"ôtel-Dieu"],
+  [/\bkm\/h\b/gi,"kilomètres par heure"],
+  [/\bkm\b/gi,"kilomètres"],
+  [/\bcm\b/gi,"centimètres"],
+  [/\bmm\b/gi,"millimètres"],
+  [/\b(\d+)\s?g\b/g,"$1 grammes"],
+  [/\bkg\b/gi,"kilogrammes"],
+  [/°C/g," degrés Celsius"],
+  [/%/g," pour cent"],
+  [/×/g," fois "],
+  [/\bhab\.?\/km²/gi,"habitants par kilomètre carré"],
+  [/\bkm²/gi,"kilomètres carrés"],
+  [/\bav\. J\.?-C\.?/gi,"avant Jésus-Christ"],
+  [/\bapr\. J\.?-C\.?/gi,"après Jésus-Christ"],
+  [/\bM\.\s/g,"monsieur "],
+  [/\bXIe\b/g,"onzième"],
+  [/\b([IVXL]+)(e|er|ème)\b/g,(m,r,e)=>{ const n=roman(r); return ORD[n]?(e==="er"?"premier":ORD[n]):m; }],
+  [/\b1er\b/g,"premier"],[/\b(\d+)e\b/g,(m,n)=>ORD[+n]||m],
+  [/\s*[—–]\s*/g,", "],
+  [/\s*\/\s*/g," ou "],
+  [/\s*\(\s*/g,", "],[/\s*\)\s*/g,", "],
+];
+function prononcer(txt){ let t=" "+txt+" "; for(const [re,rep] of LEXIQUE) t=t.replace(re,rep); return t.replace(/\s+/g," ").replace(/(,\s*){2,}/g,", ").replace(/\s+,/g,",").trim(); }
+
+/* ---------- voix off ---------- */
+const Voice={
+  on:true, voice:null, ready:false, cur:null,
+  init(){
+    if(!("speechSynthesis" in window)){ this.on=false; this.ok=false; return; }
+    this.ok=true;
+    const pick=()=>{ const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); if(!vs.length) return;
+      const pref=["Denise","Vivienne","Eloise","Henri","Rémy","Remy","Google français","Amélie","Amelie","Thomas","Audrey","Hortense","Julie","Paul"];
+      const fr=vs.filter(v=>/fr[-_]FR/i.test(v.lang)); const pool=fr.length?fr:vs;
+      let best=null; for(const p of pref){ best=pool.find(v=>v.name.includes(p)&&/Natural|Online|Neural/i.test(v.name))||null; if(best) break; }
+      if(!best) for(const p of pref){ best=pool.find(v=>v.name.includes(p))||null; if(best) break; }
+      this.voice=best||pool[0]; this.ready=true; };
+    pick(); speechSynthesis.onvoiceschanged=pick;
+  },
+  speak(text,rate){
+    return new Promise(res=>{
+      if(!this.on||!this.ok||!text){ res(); return; }
+      try{ speechSynthesis.cancel(); }catch(_){}
+      const id=(this.id=(this.id||0)+1);
+      // découpage en phrases (évite la coupure des longues lectures dans Chrome)
+      const parts=(prononcer(text).replace(/[✗✓→←]/g,"").match(/[^.!?;:]+[.!?;:]*/g)||[text]).map(x=>x.trim()).filter(Boolean);
+      let done=false; const fin=()=>{ if(!done){done=true; clearTimeout(to); res();} };
+      const to=setTimeout(fin,(text.length/11/rate+5)*1000); // garde-fou
+      const next=k=>{ if(id!==this.id||k>=parts.length){ fin(); return; }
+        const u=new SpeechSynthesisUtterance(parts[k]); u.lang="fr-FR"; if(this.voice) u.voice=this.voice; u.rate=rate; u.pitch=1;
+        u.onend=()=>next(k+1); u.onerror=()=>next(k+1); this.cur=u; speechSynthesis.speak(u); };
+      next(0);
+    });
+  },
+  stop(){ this.id=(this.id||0)+1; if(this.ok) try{ speechSynthesis.cancel(); }catch(_){} }
+};
+
+/* ---------- application ---------- */
+window.Anim={ H, run(cfg){
+  document.body.className="m-"+(cfg.matiere||"sciences");
+  document.title=cfg.titre;
+  const [VW,VH]=cfg.viewBox||[1600,900];
+  document.body.innerHTML=`<div id="app">
+   <header><a class="hbtn" href="../index.html" title="Toutes les animations" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">☰</a><span class="badge">${cfg.badge||cfg.matiere}</span><h1>${cfg.titre}<small>${cfg.sousTitre||""}</small></h1>
+   <button class="hbtn" id="bVoice" title="Voix off (V)">🔊</button><button class="hbtn" id="bFull" title="Plein écran (F)">⛶</button></header>
+   <div id="stageWrap"><svg id="stage" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet"></svg>
+     <div id="overlay"><div class="big">▶</div><p>${cfg.accroche||"Lance l'animation"}</p><p class="sub">Espace : lecture/pause · ← → : étapes · R : recommencer · F : plein écran</p></div></div>
+   <div id="manip"></div>
+   <div id="caption"><span class="num" id="cNum">1</span><span id="cTxt"></span></div>
+   <div id="bar"><div class="ctl"><button class="cbtn" id="bRe" title="Recommencer (R)">⏮</button><button class="cbtn" id="bPrev" title="Étape précédente (←)">◀</button><button class="cbtn play" id="bPlay" title="Lecture / pause (Espace)">▶</button><button class="cbtn" id="bNext" title="Étape suivante (→)">▶|</button></div>
+   <button class="cbtn go" id="bGo" style="display:none" title="Continuer (Espace)">Continuer ▶</button><div id="dots"></div>
+   <div class="speed">Vitesse <input type="range" id="sp" min="0" max="6" step="1" value="3"><b id="spv">×1</b></div></div></div>`;
+  const svg=document.getElementById("stage");
+  const $=id=>document.getElementById(id);
+  const steps=cfg.etapes, N=steps.length;
+  const api=Object.assign({interactif:true,svg,W:VW,H:VH,manip:$("manip"),step:()=>S.k,redraw:()=>render()},H);
+  // fond et calques
+  el("rect",{x:0,y:0,width:VW,height:VH,fill:"#fff",rx:14},svg);
+  api.layer=name=>el("g",{id:name},svg);
+  cfg.init(api);
+
+  const SPEEDS=[.25,.5,.75,1,1.25,1.5,2];
+  const S={k:0,t:0,playing:false,running:false,started:false,speed:1,raf:0,token:0};
+
+  // frise des étapes
+  const dots=$("dots");
+  steps.forEach((s,i)=>{ if(i){ const sg=document.createElement("div"); sg.className="seg"; dots.appendChild(sg);} const b=document.createElement("button"); b.className="dot"; b.textContent=i+1; b.title=s.titre||("Étape "+(i+1)); b.onclick=()=>{ jump(i); }; dots.appendChild(b); });
+
+  function render(){
+    if(cfg.reset) cfg.reset(api);
+    for(let i=0;i<S.k;i++) steps[i].anim(1,api);
+    steps[S.k].anim(S.t,api);
+    if(cfg.after) cfg.after(api,S.k,S.t);
+    // UI
+    $("cNum").textContent=(S.k+1)+"/"+N; $("cTxt").textContent=steps[S.k].legende;
+    [...dots.querySelectorAll(".dot")].forEach((d,i)=>{ d.classList.toggle("done",i<S.k||(i===S.k&&S.t>=1)); d.classList.toggle("cur",i===S.k); });
+    [...dots.querySelectorAll(".seg")].forEach((d,i)=>d.classList.toggle("done",i<S.k));
+    $("bPlay").textContent=S.playing?"⏸":"▶"; $("bGo").style.display=S.waiting?"":"none"; $("bGo").classList.toggle("pulse",!!S.waiting); $("manip").classList.toggle("wait",!!S.waiting);
+    const m=cfg.manipDes, mj=cfg.manipJusqua??N; $("manip").classList.toggle("on",m!==undefined&&S.k>=m&&S.k<=mj);
+  }
+  const enManip=k=>cfg.manipDes!==undefined&&k>=cfg.manipDes&&k<=(cfg.manipJusqua??N)&&k<N-1;
+  function stopAnim(){ S.waiting=false; cancelAnimationFrame(S.raf); S.running=false; S.token++; Voice.stop(); }
+  function runStep(){
+    stopAnim(); $("overlay").classList.add("hide"); S.started=true;
+    const tok=S.token; const st=steps[S.k]; const dur=(st.duree||4000);
+    let last=performance.now(); S.running=true;
+    const vp=Voice.speak(st.voix||st.legende, clamp(0.95*Math.sqrt(S.speed),0.6,1.5));
+    const tick=now=>{ if(tok!==S.token) return; const dt=Math.min(now-last,100); last=now; S.t=clamp(S.t+dt*S.speed/dur,0,1); render(); if(S.t<1) S.raf=requestAnimationFrame(tick); else { S.running=false; vp.then(()=>{ if(tok!==S.token) return; if(S.playing&&enManip(S.k)){ S.playing=false; S.waiting=true; render(); return; } if(S.playing){ if(S.k<N-1){ setTimeout(()=>{ if(tok!==S.token||!S.playing) return; S.k++; S.t=0; runStep(); },700/S.speed); } else { S.playing=false; render(); } } }); } };
+    S.raf=requestAnimationFrame(tick);
+  }
+  function play(){ if(S.waiting){ goOn(); return; } if(S.playing){ S.playing=false; stopAnim(); render(); return; }
+    S.playing=true; if(S.t>=1){ if(S.k<N-1){S.k++;S.t=0;} else {S.k=0;S.t=0;} } runStep(); render(); }
+  function goOn(){ S.waiting=false; if(S.k<N-1){ S.k++; S.t=0; S.playing=true; runStep(); render(); } }
+  function next(){ if(S.waiting){ goOn(); return; } S.playing=false; if(!S.started||(S.t<1&&!S.running)){ runStep(); return; } if(S.k<N-1){ S.k++; S.t=0; runStep(); } else { stopAnim(); S.t=1; render(); } }
+  function prev(){ S.playing=false; if(S.k>0) S.k--; S.t=0; runStep(); }
+  function jump(i){ S.playing=false; S.k=i; S.t=0; runStep(); }
+  function restart(){ S.playing=false; stopAnim(); S.k=0; S.t=0; S.started=false; $("overlay").classList.remove("hide"); render(); }
+  $("overlay").onclick=()=>{ S.playing=true; runStep(); render(); };
+  $("bGo").onclick=goOn; $("bPlay").onclick=play; $("bNext").onclick=next; $("bPrev").onclick=prev; $("bRe").onclick=restart;
+  $("sp").oninput=e=>{ S.speed=SPEEDS[+e.target.value]; $("spv").textContent="×"+String(S.speed).replace(".",","); };
+  Voice.init(); if(!Voice.ok) $("bVoice").classList.add("off");
+  $("bVoice").onclick=()=>{ Voice.on=!Voice.on; if(!Voice.on) Voice.stop(); $("bVoice").classList.toggle("off",!Voice.on); $("bVoice").textContent=Voice.on?"🔊":"🔇"; };
+  $("bFull").onclick=()=>{ const a=$("app"); if(!document.fullscreenElement) (a.requestFullscreen||a.webkitRequestFullscreen).call(a).catch?.(()=>{}); else document.exitFullscreen(); };
+  document.addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT"&&e.target.type!=="range") return;
+    if(e.code==="Space"){e.preventDefault();play();} else if(e.key==="ArrowRight"){e.preventDefault();next();} else if(e.key==="ArrowLeft"){e.preventDefault();prev();}
+    else if(e.key==="r"||e.key==="R") restart(); else if(e.key==="f"||e.key==="F") $("bFull").click(); else if(e.key==="v"||e.key==="V") $("bVoice").click(); });
+  window.__anim={S,N,render,jump,next,prev,restart,setT:(k,t)=>{stopAnim();S.k=k;S.t=t;S.started=true;$("overlay").classList.add("hide");render();}};
+  render();
+}};
+})();
+</script><script>/* META {"id":"sciences-C5-flotte-coule","matiere":"sciences","annee":"B","periode":1,"theme":"Matière : masse et volume, flotter ou couler","resume":"Un objet flotte s'il est plus léger que l'eau de même volume, pas simplement s'il est « léger » : c'est pourquoi un bateau en acier à coque creuse flotte et qu'une petite bille d'acier coule.","motsCles":["flotter","couler","masse","volume","bateau","acier","iceberg","glace","eau de même volume"]} */
+(function(){
+const C={ink:"#1E2430",or:"#E07A1F",bl:"#2563A8",gr:"#2E8B57",red:"#C0392B",sea:"#4A90D9"};
+const rnd=(i,k)=>{ const x=Math.sin(i*12.9898+k*78.233)*43758.5453; return x-Math.floor(x); };
+const MANIP=3;
+const WY=400, FY=700, TX0=60, TX1=860;            // niveau de l'eau, fond, bords de la cuve
+// objets : nom, masse (g), volume (cm³), type de dessin, largeur, hauteur (px)  -- valeurs d'exemple réalistes
+const K=[
+ {s:"bouchon de liège",n:"bouchon de liège",m:3,v:12,k:0,w:50,h:64},{s:"bûche de pin",n:"bûche de pin",m:500,v:1000,k:1,w:210,h:80},{s:"glaçon",n:"glaçon",m:18,v:20,k:2,w:90,h:90},{s:"balle de ping-pong",n:"balle de ping-pong",m:3,v:33,k:3,w:88,h:88},
+ {s:"bille d'acier",n:"bille d'acier",m:4,v:.5,k:4,w:40,h:40},{s:"caillou",n:"caillou",m:270,v:100,k:5,w:130,h:90},{s:"bloc d'acier plein",n:"bloc d'acier plein",m:1000,v:127,k:6,w:76,h:76},{s:"bateau en acier",n:"bateau en acier (coque creuse)",m:1000,v:4000,k:7,w:330,h:140}];
+const NB=[{n:"bois (pin)",m:50,k:8,sc:.62},{n:"glace",m:92,k:2,sc:.62},{n:"pierre",m:270,k:5,sc:.6}];   // 100 cm³ chacun
+const SZ={0:[50,64],1:[210,80],2:[90,90],3:[88,88],4:[40,40],5:[130,90],6:[76,76],7:[330,140],8:[80,80],9:[80,80]};
+const fmt=v=>(Math.round(v*10)/10).toLocaleString("fr-FR");
+let R={}, sel=0, T0=0, RT=0, manipActive=false, lastSel=0;
+
+function obj(a,p,k){ const g=a.el("g",{},p), e=a.el;
+  if(k===0){ e("rect",{x:-25,y:0,width:50,height:64,rx:5,fill:"#E3C79A",stroke:"#A98A55","stroke-width":3},g); for(let i=0;i<7;i++) e("circle",{cx:-16+rnd(i,1)*32,cy:8+rnd(i,2)*48,r:2.5,fill:"#B8955E"},g); }
+  if(k===1){ e("rect",{x:-105,y:0,width:196,height:80,rx:12,fill:"#A0703C",stroke:"#6B4A2A","stroke-width":4},g); [20,40,60].forEach(y=>e("line",{x1:-90,y1:y,x2:70,y2:y,stroke:"#7C5530","stroke-width":2.5},g)); e("ellipse",{cx:90,cy:40,rx:15,ry:40,fill:"#D9B27C",stroke:"#6B4A2A","stroke-width":4},g); e("ellipse",{cx:90,cy:40,rx:7,ry:22,fill:"none",stroke:"#9C7440","stroke-width":2.5},g); }
+  if(k===2){ e("rect",{x:-45,y:0,width:90,height:90,rx:8,fill:"#D8F1FB",stroke:"#6FB3D4","stroke-width":4},g); e("line",{x1:-30,y1:18,x2:-12,y2:12,stroke:"#fff","stroke-width":6,"stroke-linecap":"round"},g); e("line",{x1:-30,y1:40,x2:-6,y2:32,stroke:"#fff","stroke-width":6,"stroke-linecap":"round"},g); }
+  if(k===3){ e("circle",{cx:0,cy:44,r:44,fill:"#fff",stroke:"#9AA3B2","stroke-width":4},g); e("circle",{cx:0,cy:44,r:11,fill:"none",stroke:C.or,"stroke-width":3},g); e("path",{d:"M-12,40 L12,40 M0,28 L0,52",stroke:C.or,"stroke-width":3},g); }
+  if(k===4){ e("circle",{cx:0,cy:20,r:20,fill:"#8C96A6",stroke:"#3E4658","stroke-width":4},g); e("circle",{cx:-7,cy:12,r:6,fill:"#fff",opacity:.7},g); }
+  if(k===5){ e("path",{d:"M-65,62 L-52,16 L-10,0 L36,8 L65,42 L50,88 L-30,90Z",fill:"#8C8C8C",stroke:"#555","stroke-width":4,"stroke-linejoin":"round"},g); e("path",{d:"M-30,30 L10,22 M0,60 L40,52",stroke:"#6B6B6B","stroke-width":3},g); }
+  if(k===6){ e("rect",{x:-38,y:0,width:76,height:76,rx:4,fill:"#7C8594",stroke:"#3E4658","stroke-width":4},g); e("path",{d:"M-30,10 L-30,60",stroke:"#B9C1CE","stroke-width":6,"stroke-linecap":"round"},g); }
+  if(k===7){ e("path",{d:"M-165,66 L165,66 L122,140 L-122,140Z",fill:"#3E6FA8",stroke:"#1E3E6A","stroke-width":4,"stroke-linejoin":"round"},g); e("path",{d:"M-150,74 L150,74 L114,132 L-114,132Z",fill:"#EAF4FB",opacity:.55},g); e("rect",{x:60,y:0,width:62,height:66,fill:"#fff",stroke:"#7C8594","stroke-width":3},g); [[-140,"#C0392B"],[-95,"#E07A1F"],[-50,"#2E8B57"],[-5,"#2563A8"]].forEach(([x,c])=>e("rect",{x,y:30,width:42,height:36,fill:c,stroke:"#1E2430","stroke-width":2},g)); e("rect",{x:70,y:10,width:20,height:16,fill:"#9CC6EA"},g); }
+  if(k===8){ e("rect",{x:-40,y:0,width:80,height:80,rx:4,fill:"#C99A5B",stroke:"#7A5530","stroke-width":4},g); [18,38,58].forEach(y=>e("path",{d:`M-30,${y} Q0,${y-8} 30,${y}`,fill:"none",stroke:"#9C7440","stroke-width":3},g)); }
+  if(k===9){ e("rect",{x:-40,y:0,width:80,height:80,rx:6,fill:"#BFE0F7",stroke:C.bl,"stroke-width":4},g); [26,46,66].forEach(y=>e("path",{d:`M-28,${y} q10,-8 20,0 t20,0 t20,0`,fill:"none",stroke:"#fff","stroke-width":3.5},g)); }
+  return g; }
+
+Anim.run({
+  titre:"Flotte ou coule ?",
+  sousTitre:"Sciences et technologie · CM1-CM2 · Matière : masse et volume",
+  matiere:"sciences", badge:"Sciences",
+  accroche:"Pourquoi un énorme bateau en acier flotte-t-il, alors qu'une petite bille d'acier coule ?",
+  manipDes:MANIP, manipJusqua:MANIP,
+  init(a){
+    const {el}=a, svg=a.svg;
+    R.title=el("text",{x:800,y:70,"text-anchor":"middle","font-size":38,"font-weight":800,fill:C.ink},svg);
+    // ===== cuve (étapes 1, 3, 4, 6) =====
+    const tk=a.layer("tk"); R.tk=tk;
+    R.ob=el("g",{},tk); R.O=K.map(o=>{ const g=obj(a,R.ob,o.k); a.op(g,0); return g; });
+    el("rect",{x:TX0+10,y:WY,width:TX1-TX0-20,height:FY-WY,fill:C.sea,opacity:.38},tk); el("line",{x1:TX0+10,y1:WY,x2:TX1-10,y2:WY,stroke:"#2F6FB5","stroke-width":4},tk);
+    el("path",{d:`M${TX0},${WY-150} L${TX0},${FY+10} L${TX1},${FY+10} L${TX1},${WY-150}`,fill:"none",stroke:"#7E9BB3","stroke-width":8,"stroke-linejoin":"round"},tk);
+    R.rip=[0,1].map(()=>el("ellipse",{fill:"none",stroke:"#fff","stroke-width":4},tk));
+    R.lab1=[0,1,2,3].map(()=>a.label(tk,0,0,"x\ny",{size:24,w:150,stroke:"#9AA3B2",sw:3}));
+    R.cm=a.label(tk,460,260,"Le poids seul ne décide pas !",{size:30,w:520,stroke:C.or,color:"#8A4A0E",sw:3});
+    R.tbl=el("g",{},tk); el("text",{x:1230,y:160,"text-anchor":"middle","font-size":32,"font-weight":800,fill:C.ink,text:"Ce qu'on observe"},R.tbl);
+    R.rows=[0,1,2,3].map(i=>{ const g=el("g",{},R.tbl), y=190+i*100; g.r=el("rect",{x:910,y,width:640,height:84,rx:14,fill:"#fff",stroke:C.ink,"stroke-width":3.5},g); g.t=el("text",{x:935,y:y+54,"font-size":30,"font-weight":700,fill:C.ink},g); g.v=el("text",{x:1530,y:y+54,"text-anchor":"end","font-size":34,"font-weight":800},g); return g; });
+    // 3 : chiffres du bateau
+    R.n3=el("g",{},tk); el("rect",{x:900,y:130,width:660,height:330,rx:18,fill:"#fff",stroke:C.ink,"stroke-width":4},R.n3); R.n3t=[0,1,2,3,4].map(i=>el("text",{x:930,y:180+i*55,"font-size":28,"font-weight":i===4?800:600,fill:C.ink},R.n3));
+    R.disL=a.label(tk,580,590,"eau repoussée : 1 000 g\n(autant que le bateau pèse)",{size:24,w:380,stroke:C.or,color:"#8A4A0E",sw:3});
+    R.ph3=a.photo(tk,{id:"s-c5-cargo",x:1260,y:520,w:280,h:180,cap:"Un cargo en acier",size:20,rot:1.5});
+    // ===== balance (étapes 2 et 4) =====
+    const bl=a.layer("bal"); R.bal=bl; R.B=el("g",{},bl);
+    el("path",{d:"M-70,330 L0,0 L70,330Z",fill:"#C9CFD8",stroke:"#7C8594","stroke-width":5,"stroke-linejoin":"round"},R.B); el("rect",{x:-110,y:326,width:220,height:20,rx:8,fill:"#8C96A6"},R.B);
+    R.beam=el("line",{stroke:"#4A5468","stroke-width":12,"stroke-linecap":"round"},R.B); R.sl=[0,1].map(()=>[el("line",{stroke:"#4A5468","stroke-width":4},R.B),el("line",{stroke:"#4A5468","stroke-width":4},R.B)]); R.pan=[0,1].map(()=>el("rect",{width:190,height:16,rx:8,fill:"#8C96A6",stroke:"#4A5468","stroke-width":3},R.B));
+    el("circle",{cx:0,cy:0,r:16,fill:"#4A5468"},R.B);
+    R.BO=[0,1,2,3,4,5,6,7,8].map(k=>{ const g=obj(a,R.B,k); a.op(g,0); return g; }); R.BW=obj(a,R.B,9);
+    R.bT=[0,1].map(()=>({a:el("text",{"text-anchor":"middle","font-size":26,"font-weight":700,fill:C.ink},R.B),b:el("text",{"text-anchor":"middle","font-size":40,"font-weight":800},R.B)}));
+    R.bV=el("text",{x:0,y:420,"text-anchor":"middle","font-size":34,"font-weight":800},R.B); R.bV2=el("text",{x:0,y:462,"text-anchor":"middle","font-size":26,"font-weight":700,fill:"#4A5468"},R.B);
+    R.eau=el("g",{},bl); el("rect",{x:60,y:170,width:600,height:470,rx:18,fill:"#F3F6FC",stroke:C.bl,"stroke-width":4},R.eau); el("text",{x:360,y:228,"text-anchor":"middle","font-size":34,"font-weight":800,fill:C.bl,text:"L'eau, notre référence"},R.eau);
+    R.er=[["1 cm³ d'eau","pèse 1 g"],["100 cm³ d'eau","pèsent 100 g"],["1 litre d'eau","pèse 1 kg"]].map(([t1,t2],i)=>{ const g=el("g",{},R.eau); const y=290+i*110; el("rect",{x:90,y,width:540,height:88,rx:14,fill:"#fff",stroke:C.bl,"stroke-width":3},g); el("text",{x:115,y:y+55,"font-size":32,"font-weight":700,fill:C.ink,text:t1},g); el("text",{x:610,y:y+55,"text-anchor":"end","font-size":34,"font-weight":800,fill:C.bl,text:t2},g); return g; });
+    R.bsub=el("text",{x:1000,y:150,"text-anchor":"middle","font-size":30,"font-weight":800,fill:C.or},bl);
+    // ===== iceberg =====
+    const ic=a.layer("ice"); R.ice=ic; el("rect",{x:60,y:140,width:800,height:200,fill:"#EAF4FB"},ic); R.sea5=el("rect",{x:60,y:340,width:800,height:460,fill:C.sea,opacity:.35},ic);
+    R.ib=el("g",{},ic); const kk=1.15, top=[[-120,0],[-80,-50],[-30,-110],[20,-70],[60,-95],[110,-30],[135,0]].map(([x,y])=>[x*kk,y*kk]), U=[[1,0],[.9,.35],[.55,.8],[0,1],[-.5,.9],[-.9,.45],[-1,0]];
+    const ar=pts=>{ let s=0; for(let i=0;i<pts.length;i++){ const p=pts[i],q=pts[(i+1)%pts.length]; s+=p[0]*q[1]-q[0]*p[1]; } return Math.abs(s)/2; }; const aT=ar(top), W=300, aU=ar(U.map(([x,y])=>[x*W,y])), D=9*aT/aU;   // surface immergée = 9 x surface émergée
+    const bot=U.map(([x,y])=>[x*W,y*D]); const bd=D;
+    R.ibB=el("path",{d:"M"+bot.map(p=>p.join(",")).join(" L")+"Z",fill:"#CBEAF7",stroke:"#6FB3D4","stroke-width":4,"stroke-linejoin":"round",opacity:.9},R.ib); R.ibT=el("path",{d:"M"+top.map(p=>p.join(",")).join(" L")+"Z",fill:"#fff",stroke:"#9CC6EA","stroke-width":4,"stroke-linejoin":"round"},R.ib);
+    R.ibd=bd; R.iw=el("line",{x1:60,y1:340,x2:860,y2:340,stroke:"#2F6FB5","stroke-width":4},ic); R.ivr=el("rect",{x:60,y:340,width:800,height:460,fill:C.sea,opacity:.18},ic);
+    R.il1=a.label(ic,720,265,"environ 1/10\nhors de l'eau",{size:26,w:240,stroke:C.bl,color:C.bl,sw:3}); R.il2=a.label(ic,740,520,"environ 9/10\nsous l'eau !",{size:28,w:250,stroke:C.red,color:C.red,sw:3});
+    R.ph5=a.photo(ic,{id:"s-c5-iceberg",x:1000,y:150,w:380,h:250,cap:"Un iceberg",rot:1.5});
+    R.ic5=el("g",{},ic); el("rect",{x:900,y:480,width:660,height:250,rx:18,fill:"#fff",stroke:C.bl,"stroke-width":4},R.ic5); const it=el("text",{x:930,y:535,"font-size":29,fill:C.ink},R.ic5); a.wrap(it,"1 litre d'eau pèse 1 kg.\n1 litre de glace pèse environ 0,92 kg.\nLa glace est un peu plus légère que l'eau : elle flotte, comme un glaçon dans un verre.",42,1.38);
+    // ===== idée fausse =====
+    const my=a.layer("myth"); R.my=my; R.myC=a.layer("mythC"); a.myth(R.myC,900,130,660,"« Ce qui est lourd coule, ce qui est léger flotte. »","Ce n'est pas le poids seul qui compte : on compare l'objet à de l'eau de même volume. Une grosse bûche lourde flotte, une toute petite bille légère coule.");
+    R.rule=el("g",{},my); el("rect",{x:900,y:540,width:660,height:200,rx:18,fill:"#FFF8EC",stroke:C.or,"stroke-width":5},R.rule); el("text",{x:930,y:592,"font-size":30,"font-weight":800,fill:"#8A4A0E",text:"La bonne question :"},R.rule); const rt=el("text",{x:930,y:640,"font-size":29,fill:C.ink},R.rule); a.wrap(rt,"l'objet est-il plus léger ou plus lourd que l'eau de même volume ?",44,1.35);
+    // ===== synthèse =====
+    const sy=a.layer("syn"); R.syn=sy; el("rect",{x:0,y:0,width:1600,height:900,fill:"#fff"},sy); el("text",{x:800,y:70,"text-anchor":"middle","font-size":38,"font-weight":800,fill:C.ink,text:"À retenir"},sy);
+    R.sC=[["1","On compare à l'eau de même volume","on regarde si l'objet pèse plus ou moins que la même quantité d'eau.",C.bl],["2","Plus léger que l'eau : il flotte","plus lourd que l'eau : il coule. Le bois, la glace et le liège flottent ; la pierre et l'acier plein coulent.",C.or],["3","Un bateau en acier flotte","sa coque creuse occupe un grand volume : au total, il est plus léger que l'eau qu'il remplace.",C.gr]].map(([n,t,d,c],i)=>{ const g=el("g",{},sy), y=130+i*230; el("rect",{x:60,y,width:900,height:200,rx:18,fill:"#fff",stroke:c,"stroke-width":4},g); el("circle",{cx:128,cy:y+100,r:38,fill:c},g); el("text",{x:128,y:y+114,"text-anchor":"middle","font-size":42,"font-weight":800,fill:"#fff",text:n},g); el("text",{x:190,y:y+68,"font-size":33,"font-weight":800,fill:c,text:t},g); const tx=el("text",{x:190,y:y+114,"font-size":27,fill:C.ink},g); a.wrap(tx,d,50,1.25); return g; });
+    R.synP=el("g",{},sy); R.ph7a=a.photo(R.synP,{id:"s-c5-cargo",x:1060,y:160,w:420,h:260,cap:"Un cargo en acier",rot:1.5}); R.ph7b=a.photo(R.synP,{id:"s-c5-iceberg",x:1090,y:520,w:360,h:220,cap:"Un iceberg",rot:-1.5});
+    // ===== manipulation =====
+    a.manip.innerHTML=`Plonger : `+K.map((o,i)=>`<button data-o="${i}">${o.s}</button>`).join(" ");
+    a.manip.querySelectorAll("button").forEach(b=>b.onclick=()=>{ manipActive=true; sel=+b.dataset.o; T0=performance.now()/1000; RT=T0; a.redraw(); });
+    const loop=()=>{ if(a.step()===MANIP){ RT=performance.now()/1000; a.redraw(); } requestAnimationFrame(loop); }; requestAnimationFrame(loop);
+  },
+  reset(a){ [R.tk,R.bal,R.ice,R.my,R.myC,R.syn,R.tbl,R.n3,R.disL,R.ph3,R.cm,R.eau,R.synP,R.ic5,R.ph5,R.il1,R.il2,R.rule,...R.O,...R.BO,R.BW,...R.lab1,...R.rip].forEach(e=>a.op(e,0)); R.title.textContent=""; R.bsub.textContent=""; a.op(R.B,1); },
+  etapes:[
+  { titre:"Flotte ou coule ?", duree:12000,
+    legende:"On plonge quatre objets dans l'eau. La bûche (500 g) flotte, mais la petite bille d'acier (4 g) coule ! Est-ce le poids qui décide ?",
+    voix:"Plongeons quatre objets dans l'eau. Le bouchon de liège, très léger, flotte. La grosse bûche de pin, qui pèse cinq cents grammes, flotte aussi. Le caillou coule. Et la petite bille d'acier, qui ne pèse que quatre grammes, coule ! La bûche est beaucoup plus lourde que la bille, pourtant c'est elle qui flotte. Alors, est-ce vraiment le poids qui décide ?",
+    anim(t,a){ const s=a.seg; CLR(a); a.op(R.tk,1); R.title.textContent="Qui flotte ? Qui coule ?"; a.op(R.tbl,1); const L=[[0,170],[1,380],[5,600],[4,775]]; L.forEach(([ki,x],i)=>{ const o=K[ki], p=s(t,.06+i*.2,.24+i*.2,true); DROP(a,ki,x,p,i); const lb=R.lab1[i]; a.tr(lb,x,170); a.op(lb,s(t,.02+i*.05,.1+i*.05)); SETLAB(lb,[o.s==="bouchon de liège"?"liège":o.s.split(" ")[0],o.m+" g"],150); const row=R.rows[i], fl=o.m/o.v<1; a.op(row,s(t,.26+i*.2,.34+i*.2)); row.t.textContent=(ki===0?"bouchon de liège":ki===1?"bûche de pin":ki===5?"caillou":"bille d'acier")+" : "+o.m+" g"; row.v.textContent=fl?"FLOTTE":"COULE"; a.set(row.v,{fill:fl?C.gr:C.red}); a.set(row.r,{stroke:fl?C.gr:C.red}); });
+      a.op(R.cm,s(t,.9,.98)); } },
+  { titre:"À volume égal : l'eau de référence", duree:13000,
+    legende:"Pour comparer, on prend le même volume : 100 cm³. 100 cm³ d'eau pèsent 100 g. Le bois (50 g) et la glace (92 g) sont plus légers : ils flottent. La pierre (270 g) est plus lourde : elle coule.",
+    voix:"Pour savoir si un objet flotte, on le compare à de l'eau, mais de même volume. Un centimètre cube d'eau pèse un gramme. Cent centimètres cubes d'eau pèsent donc cent grammes, et un litre d'eau pèse un kilogramme. Sur la balance : cent centimètres cubes de bois de pin pèsent cinquante grammes, c'est plus léger que l'eau, donc le bois flotte. La glace pèse quatre-vingt-douze grammes : plus légère que l'eau, elle flotte aussi. La pierre pèse deux cent soixante-dix grammes : plus lourde que l'eau, elle coule.",
+    anim(t,a){ const s=a.seg; CLR(a); a.op(R.tk,1-s(t,0,.08)); a.op(R.bal,s(t,0,.1)); R.title.textContent="Comparer à l'eau de même volume"; a.op(R.eau,1); R.er.forEach((g,i)=>a.op(g,s(t,.05+i*.07,.15+i*.07))); R.bsub.textContent="Chaque objet : 100 cm³"; a.set(R.bsub,{x:1050,y:150,"font-size":32,fill:"#8A4A0E"}); a.tr(R.B,1050,300);
+      const ci=t<.34?0:t<.64?1:2, st=[.33,.64][ci-1]||0; const ang=i=>BAL(NB[i].m,100); const prev=ci===0?0:ang(ci-1), p=s(t,(ci===0?.18:ci===1?.36:.66),(ci===0?.3:ci===1?.48:.78)); BAL_DRAW(a,NB[ci],NB[ci].m,100,prev+(ang(ci)-prev)*p,"bloc de "+NB[ci].n.replace(/\(.*\)/,"").trim()+" (100 cm³)",p,NB[ci].k,NB[ci].sc); } },
+  { titre:"Le bateau en acier", duree:13000,
+    legende:"1 kg d'acier plein coule. Façonné en coque creuse, il occupe un grand volume : la même masse d'acier est plus légère que l'eau de même volume. Le bateau flotte !",
+    voix:"Et le bateau en acier ? Un bloc d'acier plein d'un kilogramme coule : il occupe seulement cent vingt-sept centimètres cubes, et l'eau de ce volume ne pèse que cent vingt-sept grammes. Maintenant, façonnons le même acier en coque creuse, pleine d'air. La masse est toujours d'un kilogramme, mais le bateau occupe un très grand volume, quatre mille centimètres cubes. L'eau de ce volume pèserait quatre kilogrammes : le bateau est plus léger, donc il flotte. Il s'enfonce juste assez pour repousser autant d'eau qu'il pèse.",
+    anim(t,a){ const s=a.seg; CLR(a); a.op(R.bal,1-s(t,0,.08)); a.op(R.eau,0); a.op(R.tk,s(t,0,.08)); R.title.textContent="Le même acier : plein, puis en coque creuse"; a.op(R.n3,s(t,.08,.18));
+      const p1=s(t,.1,.42,true), p2=s(t,.55,.88,true); DROP(a,6,460,p1,0,s(t,.5,.58)); DROP(a,7,460,p2,1);
+      const N=R.n3t; N[0].textContent="Masse d'acier : 1 000 g (inchangée)"; N[1].textContent=t<.5?"Bloc plein : volume 127 cm³":"Coque creuse : volume 4 000 cm³"; N[2].textContent=t<.5?"Eau de même volume : 127 g":"Eau de même volume : 4 000 g"; N[3].textContent=t<.45?(p1>.5?"1 000 g > 127 g : plus lourd que l'eau":""):(p2>.5?"1 000 g < 4 000 g : plus léger que l'eau":""); N[4].textContent=t<.45?(p1>.5?"Le bloc COULE":""):(p2>.5?"Le bateau FLOTTE":""); a.set(N[4],{fill:t<.5?C.red:C.gr}); a.set(N[3],{fill:t<.5?C.red:C.gr});
+      a.op(R.disL,s(t,.9,.98)); a.op(R.ph3,s(t,.78,.95)); } },
+  { titre:"À vous : plongez un objet", duree:14000,
+    legende:"À vous : choisissez un objet avec les boutons et regardez s'il flotte ou s'il coule. Sur la balance, comparez sa masse à celle de l'eau de même volume.",
+    voix:"À vous maintenant ! Choisissez un objet avec les boutons : le liège, la bûche, le glaçon, la balle de ping-pong, la bille, le caillou, le bloc d'acier ou le bateau. Regardez s'il flotte ou s'il coule. Puis regardez la balance : l'objet est-il plus lourd ou plus léger que l'eau de même volume ? Essayez le bloc d'acier, puis le bateau : que remarquez-vous ? Prenez votre temps.",
+    anim(t,a){ const s=a.seg; CLR(a); if(t<.02){ manipActive=false; sel=7; } a.op(R.bal,s(t,0,.06)>0?1:0); a.op(R.tk,1); a.op(R.eau,0); R.title.textContent="À vous : flotte ou coule ?"; let ki,p; if(manipActive){ ki=sel; p=a.clamp((RT-T0)/1.6,0,1); } else { const sl=a.clamp(t/.96*8,0,7.9999); ki=Math.floor(sl); p=a.clamp((sl-ki)/.7,0,1); } lastSel=ki;
+      const o=K[ki]; DROP(a,ki,310,p,0); a.tr(R.B,1235,300); const vol=o.v, mw=vol, name=o.s; R.bsub.textContent="Comparaison à volume égal"; a.set(R.bsub,{x:1235,y:150,"font-size":30,fill:"#8A4A0E"});
+      const ang=BAL(o.m,mw); BAL_DRAW(a,{n:name,m:o.m},o.m,mw,ang*a.ease(p),name,p,o.k,K[ki].k===7?.42:K[ki].k===1?.55:K[ki].k===4?1:.6,fmt(vol)+" cm³");
+      if(a.manip) a.manip.querySelectorAll("button").forEach(b=>b.classList.toggle("sel",manipActive&&+b.dataset.o===sel)); } },
+  { titre:"La glace flotte : l'iceberg", duree:11000,
+    legende:"La glace est un peu plus légère que l'eau : elle flotte. Un iceberg dépasse de l'eau d'environ un dixième seulement : les neuf dixièmes sont sous l'eau !",
+    voix:"La glace aussi flotte, comme un glaçon dans un verre. Un litre de glace pèse environ zéro virgule quatre-vingt-douze kilogramme, un peu moins qu'un litre d'eau. Un iceberg flotte donc, mais il est presque aussi lourd que l'eau qu'il repousse. Seul environ un dixième dépasse de l'eau : les neuf dixièmes sont cachés sous la surface.",
+    anim(t,a){ const s=a.seg; CLR(a); a.op(R.bal,0); a.op(R.tk,1-s(t,0,.08)); a.op(R.ice,s(t,0,.08)); R.title.textContent="Un iceberg flotte"; const bob=Math.sin(t*14)*3; a.tr(R.ib,460,340+bob*.0); a.op(R.ibB,.35+.65*s(t,.3,.6)); a.op(R.il1,s(t,.2,.32)); a.op(R.il2,s(t,.5,.65)); a.op(R.ph5,s(t,.6,.78)); a.op(R.ic5,s(t,.7,.9)); } },
+  { titre:"Lourd coule, léger flotte ?", duree:12000,
+    legende:"Idée fausse : « ce qui est lourd coule ». Un bateau d'un kilogramme flotte, une bille de 4 grammes coule. Il faut comparer à l'eau de même volume.",
+    voix:"Une idée fausse très répandue dit que ce qui est lourd coule, et que ce qui est léger flotte. Regardez : le bateau pèse un kilogramme et il flotte, la petite bille ne pèse que quatre grammes et elle coule ! Ce n'est pas le poids seul qui compte. La bonne question est : l'objet est-il plus léger ou plus lourd que l'eau de même volume ?",
+    anim(t,a){ const s=a.seg; CLR(a); a.op(R.ice,0); a.op(R.tk,s(t,0,.08)); a.op(R.tbl,0); a.op(R.n3,0); a.op(R.ph3,0); R.title.textContent=""; a.op(R.my,1); a.op(R.myC,s(t,.45,.6)); a.op(R.rule,s(t,.72,.85));
+      DROP(a,7,360,1,0); DROP(a,4,720,1,1); a.set(R.lab1[0],{}); a.tr(R.lab1[0],360,255); a.op(R.lab1[0],s(t,.1,.2)); a.tr(R.lab1[1],720,585); a.op(R.lab1[1],s(t,.18,.28)); SETLAB(R.lab1[0],["bateau : 1 000 g","FLOTTE"],250); SETLAB(R.lab1[1],["bille : 4 g","COULE"],190); a.op(R.lab1[2],0); a.op(R.lab1[3],0); } },
+  { titre:"À retenir", duree:9000,
+    legende:"On compare l'objet à l'eau de même volume : plus léger, il flotte ; plus lourd, il coule. Un bateau en acier flotte grâce à sa coque creuse.",
+    voix:"À retenir. Un : pour savoir si un objet flotte, on le compare à l'eau de même volume. Deux : s'il est plus léger que cette eau, il flotte ; s'il est plus lourd, il coule. Trois : un bateau en acier flotte parce que sa coque creuse occupe un grand volume : au total, il est plus léger que l'eau qu'il remplace.",
+    anim(t,a){ const s=a.seg; CLR(a); a.op(R.tk,1-s(t,0,.1)); a.op(R.my,1-s(t,0,.1)); a.op(R.myC,0); a.op(R.syn,s(t,0,.1)); R.sC.forEach((g,i)=>{ const v=s(t,.1+i*.15,.25+i*.15); a.op(g,v); a.tr(g,0,(1-v)*30); }); a.op(R.synP,s(t,.5,.75)); } },
+  ]
+});
+// angle de la balance : >0 = côté de l'objet plus bas (objet plus lourd)
+function CLR(a){ [R.tbl,R.n3,R.disL,R.ph3,R.cm,R.eau,R.ph5,R.ic5,R.il1,R.il2,R.rule,R.myC,...R.lab1,...R.rip,...R.O,...R.BO,R.BW].forEach(e=>a.op(e,0)); R.bsub.textContent=""; }
+function SETLAB(g,lines,w){ const lt=g.querySelector("text"); lt.innerHTML=""; lines.forEach((ln,j)=>{ const ts=document.createElementNS("http://www.w3.org/2000/svg","tspan"); ts.setAttribute("x",0); ts.setAttribute("dy",j?27:0); ts.textContent=ln; lt.appendChild(ts); }); const r=g.querySelector("rect"); r.setAttribute("x",-w/2); r.setAttribute("width",w); }
+function BAL(mO,mW){ const r=Math.log(mO/mW); return Math.sign(r)*Math.min(14,Math.max(4,Math.abs(r)*9)); }
+function BAL_DRAW(a,o,mO,mW,ang,name,p,kind,sc,volTxt){
+  const L=200, th=ang*Math.PI/180, lx=-L*Math.cos(th), ly=L*Math.sin(th), rx=L*Math.cos(th), ry=-L*Math.sin(th);
+  a.set(R.beam,{x1:lx,y1:ly,x2:rx,y2:ry}); const H=120;
+  [[lx,ly,0],[rx,ry,1]].forEach(([x,y,i])=>{ const py=y+H; a.set(R.sl[i][0],{x1:x,y1:y,x2:x-80,y2:py}); a.set(R.sl[i][1],{x1:x,y1:y,x2:x+80,y2:py}); a.set(R.pan[i],{x:x-95,y:py}); });
+  R.BO.forEach((g,k)=>a.op(g,k===kind?1:0)); const g=R.BO[kind], h=SZ[kind][1]; a.tr(g,lx,ly+H-h*sc,sc); a.tr(R.BW,rx,ry+H-80*.62,.62); a.op(R.BW,1);
+  const T=R.bT; const wt=T[0], wt2=T[1]; const nm=name; wt.a.textContent=nm; wt.b.textContent=fmt(mO)+" g"; a.set(wt.a,{x:lx,y:H+268}); a.set(wt.b,{x:lx,y:H+312,fill:C.red}); wt2.a.textContent="eau de même volume"; wt2.b.textContent=fmt(mW)+" g"; a.set(wt2.a,{x:rx,y:H+268}); a.set(wt2.b,{x:rx,y:H+312,fill:C.bl});
+  const fl=mO<mW; R.bV.textContent=p>.55?(fl?"plus léger que l'eau : il FLOTTE":"plus lourd que l'eau : il COULE"):""; a.set(R.bV,{fill:fl?C.gr:C.red,y:H+372}); R.bV2.textContent=volTxt&&p>.2?"volume de l'objet : "+volTxt:""; a.set(R.bV2,{y:H+412}); }
+// chute d'un objet dans la cuve : p = progression (0..1), x = position horizontale ; fadeOut = disparition
+function DROP(a,ki,x,p,ri,fadeOut){ const o=K[ki], g=R.O[ki], d=o.m/o.v, fl=d<1, f=Math.min(d,1), s=a.seg;
+  const y0=180, yc=WY-o.h, yf=fl?WY-(1-f)*o.h:FY-o.h-4; let y;
+  const u1=s(p,0,.4,true), u2=s(p,.4,1);
+  if(p<=0){ a.op(g,0); return; }
+  y=a.lerp(y0,yc,u1*u1); if(p>.4){ y=fl?a.lerp(yc,yf,a.ease(Math.min(1,u2*1.4)))+(1-u2)*Math.sin(u2*16)*8*(1-u2):a.lerp(yc,yf,a.ease(u2)); }
+  const sway=fl?0:Math.sin(u2*7)*14*(1-u2); a.tr(g,x+sway,y,1,fl?Math.sin(u2*10)*3*(1-u2):(1-u2)*Math.sin(u2*9)*10); a.op(g,fadeOut!==undefined?1-fadeOut:1);
+  const rp=R.rip[ri%2], uu=s(p,.36,.7,true); a.set(rp,{cx:x,cy:WY,rx:20+90*uu,ry:6+14*uu}); a.op(rp,uu>0&&uu<1?(1-uu)*.9:0); }
+})();
+</script></body></html>

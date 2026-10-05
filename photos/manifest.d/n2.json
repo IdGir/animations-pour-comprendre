@@ -1,0 +1,9 @@
+[
+ {"id":"h-b2-hommage","q":"hommage féodal vassal mains jointes enluminure","must":["hommage"],"alt":"enluminure médiévale montrant un vassal rendant hommage à son seigneur, mains jointes"},
+ {"id":"h-b3-armure","q":"armure gothique complète Metropolitan Museum of Art","must":["armor"],"alt":"armure de plates complète d'un chevalier exposée dans un musée"},
+ {"id":"h-b3-bayeux","q":"Tapisserie de Bayeux chevaliers normands cavaliers","must":["bayeux"],"alt":"scène de la tapisserie de Bayeux montrant des chevaliers à cheval"},
+ {"id":"h-b4-provins-remparts","q":"Remparts de Provins","must":["Provins"],"alt":"les remparts médiévaux de Provins (Seine-et-Marne)"},
+ {"id":"h-b4-provins-tour","q":"Tour César Provins","must":["Provins"],"alt":"la tour César de Provins, ancienne ville de foires de Champagne"},
+ {"id":"h-b5-moulin-eau","q":"moulin à eau roue à aubes","must":["moulin"],"alt":"un moulin à eau avec sa roue à aubes"},
+ {"id":"h-b5-four-pain","q":"four à pain banal village","must":["four"],"alt":"un four à pain banal ancien dans un village"}
+]
