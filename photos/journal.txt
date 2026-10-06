@@ -1,0 +1,19 @@
+déjà là    h-a2-fontenay-cloitre
+déjà là    h-a2-fontenay-forge
+ÉCHEC      h-a3-aix-chapelle — aucun résultat libre et net pour « Chapelle palatine Aix-la-Chapelle Charlemagne »
+déjà là    h-a3-manuscrit-caroline
+déjà là    h-a4-vezelay-basilique
+déjà là    h-a4-compostelle-cathedrale
+ÉCHEC      h-a4-coquille-saint-jacques — aucun résultat libre et net pour « coquille Saint-Jacques pèlerin Camino de Santiago »
+ÉCHEC      h-a5-krak-chevaliers — aucun résultat libre et net pour « Krak des Chevaliers forteresse croisés Syrie »
+déjà là    h-a6-palais-ducs-dijon
+déjà là    h-a6-puits-de-moise
+déjà là    h-a6-hospices-beaune
+ÉCHEC      h-b2-hommage — aucun résultat libre et net pour « hommage féodal vassal mains jointes enluminure »
+ÉCHEC      h-b3-armure — aucun résultat libre et net pour « armure gothique complète Metropolitan Museum of Art »
+ÉCHEC      h-b3-bayeux — aucun résultat libre et net pour « Tapisserie de Bayeux chevaliers normands cavaliers »
+déjà là    h-b4-provins-remparts
+déjà là    h-b4-provins-tour
+déjà là    h-b5-moulin-eau
+déjà là    h-b5-four-pain
+^C
