@@ -1,0 +1,392 @@
+<title>Le tutorat en classe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caveat:wght@700&display=swap">
+<style>
+/* Layout: kinetic-typography stage (16:9) — a camera travels across one big "notebook" world of words; chapter bar above, controls + transcript below */
+:root{
+  --page:#EEF1F6; --ink:#1D2333; --ink-soft:#4E576B; --surface:#FFFFFF; --border:#D5DBE7; --track:#DDE3EE; --accent:#1F3FA8; --accent-ink:#FFFFFF;
+  /* the stage is a single deliberate look: notebook-blue ink, highlighter yellow, red-margin pink */
+  --st-bg:#1E3A9E; --st-line:#5C79D6; --st-fg:#FFFFFF; --st-yellow:#FFE14D; --st-pink:#FF8A8A; --st-outline:#0E1A4F;
+  --f-kin:'Anton', Impact, 'Arial Narrow', sans-serif;
+  --f-display:'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --f-body:'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --f-hand:'Caveat', 'Comic Sans MS', cursive;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --page:#10131B; --ink:#E9ECF3; --ink-soft:#A8B0C2; --surface:#1B2030; --border:#2E3648; --track:#2A3142; --accent:#8FA8FF; --accent-ink:#0E1220; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --page:#10131B; --ink:#E9ECF3; --ink-soft:#A8B0C2; --surface:#1B2030; --border:#2E3648; --track:#2A3142; --accent:#8FA8FF; --accent-ink:#0E1220; color-scheme:dark }
+
+body{background:var(--page);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 16px 48px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 20px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,4vw,2.3rem);letter-spacing:-.02em;line-height:1.1;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--ink-soft)}
+
+.chapters{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;list-style:none;margin:0;padding:0}
+.chapters button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0;padding-block:4px}
+.chapters .bar{height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+.chapters .fill{display:block;height:100%;width:0;background:var(--accent);border-radius:3px}
+.chapters .lbl{font-size:.72rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chapters button[aria-current="step"] .lbl{color:var(--ink);font-weight:700}
+.chapters button:focus-visible .bar{outline:2px solid var(--accent);outline-offset:3px}
+
+.stage-wrap{width:100%;max-width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:var(--st-bg);box-shadow:0 14px 34px -20px rgba(20,30,80,.6)}
+#stage{display:block;width:100%;height:100%}
+
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--ink)}
+.btn.main{width:52px;height:52px;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn svg{width:20px;height:20px;fill:currentColor}
+.where{margin-left:auto;font-size:.875rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+details{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 18px}
+summary{cursor:pointer;font-weight:700}
+details ol{margin:10px 0 4px;padding-left:1.3em;max-width:70ch}
+details li{margin-bottom:6px}
+
+/* ---- stage ---- */
+#cam{transition:transform 1.5s cubic-bezier(.75,0,.2,1)}
+#cam.far{transition-duration:2.4s}
+#drift{transform-box:view-box;transform-origin:800px 450px}
+.grid line{stroke:var(--st-line);stroke-width:1.4;opacity:.35;transition:opacity 1s}
+.far-mode .grid line{opacity:0}
+.A{font-family:var(--f-kin);letter-spacing:1px}
+.B{font-family:var(--f-display);font-weight:600}
+.C{font-family:var(--f-hand);font-weight:700}
+.cw{fill:var(--st-fg)} .cy{fill:var(--st-yellow)} .cp{fill:var(--st-pink)}
+.sw{stroke:var(--st-fg)} .sy{stroke:var(--st-yellow)} .sp{stroke:var(--st-pink)}
+.w{opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity .3s ease,transform .65s cubic-bezier(.2,1.35,.4,1)}
+.fx-pop{transform:scale(0)}
+.fx-stamp{transform:scale(1.9);transition:opacity .2s ease,transform .45s cubic-bezier(.2,.9,.3,1.15)}
+.fx-rise{transform:translateY(46px)}
+.fx-slide{transform:translateX(-70px)}
+.fx-drop{transform:translateY(-90px) rotate(-8deg)}
+.fx-spin{transform:scale(0) rotate(-120deg)}
+.w.on{opacity:1;transform:none}
+.ln{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 1;stroke-dashoffset:1;transition:stroke-dashoffset .8s cubic-bezier(.6,0,.3,1)}
+.ln.dash{stroke-dasharray:none}
+.ln.on{stroke-dashoffset:0}
+.ring-bg{fill:none;stroke:var(--st-line);stroke-width:18;opacity:.6}
+.ring{fill:none;stroke:var(--st-yellow);stroke-width:18;stroke-linecap:round}
+.scrim{fill:var(--st-bg);opacity:0;transition:opacity .9s}
+.scrim.on{opacity:.9}
+.bob{animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.o{stroke:var(--st-outline);stroke-width:3.5;stroke-linejoin:round}
+.no-anim .w,.no-anim .ln,.no-anim #cam{transition:none!important}
+
+@media (max-width:640px){ .chapters .lbl{display:none} }
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important} }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Le tutorat en classe</h1>
+    <p>Une séance expliquée aux familles, en une minute et demie</p>
+  </header>
+
+  <ol class="chapters" id="chapters" aria-label="Étapes de l'animation"></ol>
+
+  <div class="stage-wrap">
+    <svg id="stage" class="no-anim" viewBox="0 0 1600 900" role="img" aria-label="Animation en typographie cinétique : le déroulement d'une séance de tutorat">
+      <rect width="1600" height="900" style="fill:var(--st-bg)"/>
+      <g id="drift"><g id="cam"><g class="grid" id="grid"></g><g id="world"></g></g></g>
+      <g id="overlay"></g>
+    </svg>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prev" aria-label="Étape précédente"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+    <button class="btn main" id="play" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+    <button class="btn" id="next" aria-label="Étape suivante"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+    <span class="where" id="where"></span>
+  </div>
+
+  <details>
+    <summary>Lire le texte de l'animation</summary>
+    <ol>
+      <li>D'abord, des tuteurs sont désignés par l'enseignant.</li>
+      <li>L'enseignant s'assure qu'ils savent interroger : poser la question, écouter, vérifier.</li>
+      <li>Soit le tuteur connaît la réponse, soit il l'a sous la main (corrigé, fiche, livre, table…).</li>
+      <li>Chaque tuteur choisit un ou plusieurs tutorés.</li>
+      <li>Le maître donne les consignes et le contenu : multiplications, mots de dictée, etc.</li>
+      <li>Les élèves se répartissent en groupes et travaillent pendant un temps chronométré, entre 10 et 30 minutes selon les besoins.</li>
+      <li>Puis vient la mise en commun : on fait le point sur le déroulé, les difficultés des tuteurs, les outils qu'ils ont sollicités, ou même inventés.</li>
+      <li>Apprendre en aidant. Apprendre en étant aidé.</li>
+    </ol>
+  </details>
+</div>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const svg=$('stage'), world=$('world'), cam=$('cam'), drift=$('drift'), overlay=$('overlay');
+function E(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);if(attrs)for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function star(cx,cy,R,r){let p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r:R;p.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1));}return p.join(' ');}
+
+/* fond : lignes Seyès dans le monde */
+const grid=$('grid');
+for(let y=-1200;y<=4400;y+=64) E('line',{x1:-1400,y1:y,x2:7600,y2:y},grid);
+for(let x=-1400;x<=7600;x+=256) E('line',{x1:x,y1:-1200,x2:x,y2:4400},grid);
+
+/* ---------- mini-langage des éléments ----------
+   T: texte  [t, 'T', x, y, texte, police(A/B/C), taille, couleur(w/y/p), ancre(s/m/e), effet, rotation]
+   S: étoile [t, 'S', x, y, rayon, couleur]
+   L: trait  [t, 'L', d, couleur, pointillé?]
+   R: cadre  [t, 'R', x, y, w, h, couleur]
+   K: coche  [t, 'K', x, y, couleur]
+   F: fiche  [t, 'F', x, y]
+   O: cercle [t, 'O', x, y, r, couleur]
+   Z: chrono [t, 'Z', x, y, r, durée]
+   B: ampoule[t, 'B', x, y]  */
+const CL=[
+ {lbl:'Titre',c:[800,450],r:0,items:[
+  [300,'T',-470,-150,'le','C',110,'w','s','rise'],
+  [700,'T',0,90,'TUTORAT','A',300,'y','m','stamp'],
+  [1600,'T',470,215,'en classe','C',96,'p','e','rise'],
+  [2300,'L','M -470 140 L 470 140','y'],
+  [3100,'T',0,330,'comment ça marche ?','B',52,'w','m','slide']]},
+ {lbl:'Tuteurs',c:[800,1500],r:0,items:[
+  [300,'T',-600,-330,'D\u2019abord,','C',90,'p','s','rise'],
+  [900,'T',-600,-210,'des','B',72,'w','s','slide'],
+  [1300,'T',-610,60,'TUTEURS','A',280,'y','s','stamp',0,{max:1120}],
+  [2100,'S',0,-170,62,'y',{dx:80}],[2350,'S',0,-50,44,'y',{dx:190}],[2600,'S',0,50,32,'y',{dx:70}],
+  [3100,'T',-600,195,'sont désignés','B',80,'w','s','slide'],
+  [3700,'T',0,195,'par l\u2019enseignant.','C',78,'p','s','rise',0,{dx:28}],
+  [4300,'P',-560,445,.85,0,0],[4400,'P',-440,445,.85,2,0],
+  [4600,'P',240,445,.9,1,1],[4800,'P',370,445,.9,4,1],[5000,'P',500,445,.9,6,1],[5300,'M',670,445,.95,-20]]},
+ {lbl:'Interroger',c:[2350,1250],r:-90,items:[
+  [300,'T',0,-280,'L\u2019enseignant s\u2019assure','B',66,'w','m','rise'],
+  [1100,'T',0,-185,'qu\u2019ils savent','B',66,'w','m','rise'],
+  [1800,'T',-60,85,'INTERROGER','A',250,'y','m','stamp',0,{max:1150}],
+  [2700,'T',0,100,'?','A',300,'p','s','spin',12,{dx:40}],
+  [3500,'T',0,260,'poser la question · écouter · vérifier','B',50,'w','m','slide'],
+  [700,'M',-660,445,1.05,-25],[2400,'P',660,445,1,1,1]]},
+ {lbl:'Soit… soit',c:[3650,1250],r:0,items:[
+  [300,'T',-400,-250,'SOIT','A',110,'p','m','drop'],
+  [800,'T',-400,-160,'il connaît','B',62,'w','m','rise'],
+  [1300,'T',-400,-20,'LA RÉPONSE','A',130,'y','m','stamp',0,{max:560}],
+  [2100,'T',-430,120,'7 × 8 = 56','C',90,'w','m','rise'],
+  [2600,'K',0,95,'y',{dx:50}],
+  [3300,'O',0,-90,72,'w'],[3500,'T',0,-62,'OU','A',78,'w','m','pop'],
+  [4200,'T',400,-250,'SOIT','A',110,'p','m','drop'],
+  [4700,'T',400,-160,'il l\u2019a','B',62,'w','m','rise'],
+  [5200,'T',400,-20,'SOUS LA MAIN','A',120,'y','m','stamp',0,{max:560}],
+  [6000,'F',400,140],
+  [6800,'T',400,330,'corrigé, fiche, livre, table…','C',62,'w','m','rise'],
+  [2900,'P',-700,445,.8,1,1]]},
+ {lbl:'Tutorés',c:[5300,900],r:4,items:[
+  [300,'T',-700,-290,'Chaque','B',66,'w','s','slide'],
+  [700,'T',-700,-120,'TUTEUR','A',170,'y','s','stamp',0,{max:900}],
+  [1400,'T',-700,-20,'choisit','B',66,'w','s','slide'],
+  [2100,'T',-700,90,'un ou plusieurs','B',66,'w','s','slide'],
+  [2800,'T',-700,265,'TUTORÉS','A',170,'p','s','stamp',0,{max:900}],
+  [3300,'T',360,-270,'tuteur','C',62,'y','m','rise'],[3500,'P',360,-20,.95,1,1],
+  [4300,'L','M 360 10 Q 220 80 160 245','w'],[4700,'P',160,430,.85,0,0],
+  [5300,'L','M 360 10 L 360 265','w',true],[5600,'P',360,440,.85,5,0],
+  [6000,'L','M 360 10 Q 500 80 570 245','w',true],[6300,'P',570,430,.85,7,0]]},
+ {lbl:'Consignes',c:[5300,2200],r:8,items:[
+  [300,'T',-720,-300,'Le maître donne','B',64,'w','s','slide'],
+  [900,'T',-720,-130,'LES CONSIGNES','A',170,'y','s','stamp',0,{max:1300}],
+  [1800,'T',-720,-20,'et le','B',64,'w','s','slide'],
+  [2300,'T',-720,150,'CONTENU :','A',170,'w','s','stamp'],
+  [3100,'T',270,30,'7 × 8','A',100,'p','m','drop',-8],
+  [3500,'T',500,185,'beaucoup','C',96,'y','m','drop',6],
+  [3900,'T',600,45,'6 × 9','A',86,'p','m','drop',10],
+  [4300,'T',160,315,'toujours','C',90,'w','m','drop',-4],
+  [4700,'T',650,320,'9 × 7','A',80,'p','m','drop',-6],
+  [5100,'T',-200,330,'chemin','C',90,'y','m','drop',5],
+  [5700,'T',430,400,'etc.','C',80,'w','m','pop'],
+  [600,'M',-650,445,1,-30]]},
+ {lbl:'En groupes',c:[3600,2550],r:0,timer:true,items:[
+  [300,'T',-720,-320,'Les élèves se répartissent','B',58,'w','s','slide'],
+  [1000,'T',-720,-170,'EN GROUPES','A',150,'y','s','stamp',0,{max:760}],
+  [1700,'R',90,-400,190,240,'w'],[1900,'P',130,-185,.6,1,1],[2000,'P',185,-185,.6,0,0],[2100,'P',240,-185,.6,2,0],
+  [2300,'R',320,-400,190,240,'w'],[2500,'P',385,-185,.6,4,1],[2600,'P',445,-185,.6,3,0],
+  [2800,'R',550,-400,190,240,'w'],[3000,'P',590,-185,.6,6,1],[3100,'P',645,-185,.6,5,0],[3200,'P',700,-185,.6,7,0],
+  [3800,'T',-720,20,'et travaillent pendant','B',58,'w','s','slide'],
+  [4400,'T',-720,110,'un temps','B',58,'w','s','slide'],
+  [4900,'T',-720,280,'CHRONOMÉTRÉ','A',150,'p','s','stamp',0,{max:820}],
+  [5400,'Z',430,120,135,4600],
+  [5800,'T',430,345,'entre 10 et 30 min, selon les besoins','C',48,'w','m','rise']]},
+ {lbl:'Mise en commun',c:[1700,2700],r:-6,items:[
+  [300,'T',-720,-320,'Puis,','C',90,'p','s','rise'],
+  [800,'T',-720,-160,'MISE EN COMMUN','A',170,'y','s','stamp',0,{max:1250}],
+  [1800,'T',-720,-50,'On fait le point sur :','B',60,'w','s','slide'],
+  [2600,'T',-680,50,'→ le déroulé','B',62,'w','s','slide'],
+  [3500,'T',-680,145,'→ les difficultés des tuteurs','B',62,'w','s','slide'],
+  [4400,'T',-680,240,'→ les outils qu\u2019ils ont sollicités','B',62,'w','s','slide'],
+  [5600,'T',-680,350,'… ou même','C',80,'w','s','rise'],
+  [6200,'T',0,362,'INVENTÉS !','A',120,'p','s','stamp',0,{dx:28}],
+  [6900,'B',600,-90,.6],
+  [1400,'M',600,250,.62,15],[1600,'P',485,262,.48,1,1],[1700,'P',715,262,.48,6,1],[1800,'P',535,340,.48,0,0],[1900,'P',600,362,.48,4,1],[2000,'P',665,340,.48,5,0]]},
+ {lbl:'Fin',far:true,c:[3050,1600],items:[]}
+];
+const FIN=[[2600,'T',800,300,'Apprendre en aidant.','A',120,'w','m','stamp',0,{max:1400}],[3500,'T',800,440,'Apprendre en étant aidé.','A',120,'y','m','stamp',0,{max:1400}],
+ [4200,'P',330,850,.85,0,0],[4300,'P',440,850,.85,1,1],[4400,'P',550,850,.85,2,0],[4500,'P',660,850,.85,3,0],[4600,'M',800,860,.9,-60],[4700,'P',940,850,.85,4,1],[4800,'P',1050,850,.85,5,0],[4900,'P',1160,850,.85,6,1],[5000,'P',1270,850,.85,7,0]];
+
+/* ---------- personnages ---------- */
+const KIDS=[
+ {shirt:'#E8735A',skin:'#F2C9A5',hair:'#5A3A22',style:'pig'},
+ {shirt:'#2A9D8F',skin:'#A86B45',hair:'#1A1A1A',style:'curly'},
+ {shirt:'#E9B44C',skin:'#F5D3B3',hair:'#C98A3B',style:'short'},
+ {shirt:'#9C8CF0',skin:'#D9A27A',hair:'#2B1E16',style:'bun'},
+ {shirt:'#6BAA5A',skin:'#F2C9A5',hair:'#2B1E16',style:'short'},
+ {shirt:'#56B4F5',skin:'#6E4429',hair:'#1A1A1A',style:'puff'},
+ {shirt:'#F28DB2',skin:'#D9A27A',hair:'#5A3A22',style:'pig'},
+ {shirt:'#F08A3C',skin:'#A86B45',hair:'#2B1E16',style:'curly'},
+];
+const FRINGE='M -35 -134 C -40 -186 40 -186 35 -134 C 22 -151 -8 -157 -35 -134 Z';
+function face(b,cy){
+  E('circle',{cx:-21,cy:cy+12,r:6,style:'fill:#F07F7F;opacity:.4'},b);E('circle',{cx:21,cy:cy+12,r:6,style:'fill:#F07F7F;opacity:.4'},b);
+  E('circle',{cx:-12,cy:cy-1,r:4.3,style:'fill:var(--st-outline)'},b);E('circle',{cx:12,cy:cy-1,r:4.3,style:'fill:var(--st-outline)'},b);
+  E('path',{d:`M -11 ${cy+15} Q 0 ${cy+25} 11 ${cy+15}`,style:'fill:none;stroke:var(--st-outline);stroke-width:3.5;stroke-linecap:round'},b);}
+function kidFig(g,p,tutor){
+  E('ellipse',{cx:0,cy:0,rx:50,ry:12,style:'fill:rgba(0,0,0,.22)'},g);
+  const b=E('g',{class:'bob'},g); b.style.animationDelay=(-Math.random()*2.6).toFixed(2)+'s';
+  E('rect',{x:-24,y:-42,width:18,height:42,rx:8,class:'o',style:'fill:#2B3350'},b);
+  E('rect',{x:6,y:-42,width:18,height:42,rx:8,class:'o',style:'fill:#2B3350'},b);
+  const sh='fill:'+p.shirt, hf='fill:'+p.hair;
+  E('rect',{x:-50,y:-98,width:17,height:54,rx:8.5,class:'o',style:sh,transform:'rotate(10 -42 -98)'},b);
+  E('rect',{x:33,y:-98,width:17,height:54,rx:8.5,class:'o',style:sh,transform:'rotate(-10 42 -98)'},b);
+  E('rect',{x:-37,y:-106,width:74,height:72,rx:28,class:'o',style:sh},b);
+  if(p.style==='pig'){E('circle',{cx:-40,cy:-158,r:15,class:'o',style:hf},b);E('circle',{cx:40,cy:-158,r:15,class:'o',style:hf},b);}
+  if(p.style==='puff') E('circle',{cx:0,cy:-176,r:30,class:'o',style:hf},b);
+  if(p.style==='bun')  E('circle',{cx:0,cy:-184,r:16,class:'o',style:hf},b);
+  E('circle',{cx:0,cy:-138,r:34,class:'o',style:'fill:'+p.skin},b);
+  if(p.style==='curly'){for(let d=192;d<=348;d+=26){const r=d*Math.PI/180;E('circle',{cx:(31*Math.cos(r)).toFixed(1),cy:(-138+31*Math.sin(r)).toFixed(1),r:13,class:'o',style:hf},b);}}
+  else E('path',{d:FRINGE,class:'o',style:hf},b);
+  face(b,-138);
+  if(tutor) E('polygon',{points:star(0,-72,19,8.5),class:'o',style:'fill:var(--st-yellow);stroke-width:3'},b);
+}
+function teacherFig(g,arm){
+  E('ellipse',{cx:0,cy:0,rx:58,ry:13,style:'fill:rgba(0,0,0,.22)'},g);
+  const b=E('g',{class:'bob'},g); b.style.animationDuration='3.2s';
+  E('rect',{x:-28,y:-62,width:21,height:62,rx:9,class:'o',style:'fill:#2B3350'},b);
+  E('rect',{x:7,y:-62,width:21,height:62,rx:9,class:'o',style:'fill:#2B3350'},b);
+  const sh='fill:#F4F1E6';
+  E('rect',{x:-58,y:-162,width:19,height:70,rx:9.5,class:'o',style:sh,transform:'rotate(9 -48 -162)'},b);
+  E('rect',{x:-45,y:-170,width:90,height:116,rx:32,class:'o',style:sh},b);
+  E('path',{d:'M -16 -170 L 0 -146 L 16 -170',style:'fill:#E8735A;stroke:var(--st-outline);stroke-width:3;stroke-linejoin:round'},b);
+  E('circle',{cx:0,cy:-212,r:38,class:'o',style:'fill:#E8B98F'},b);
+  E('path',{d:FRINGE,class:'o',style:'fill:#3A2A20',transform:'translate(0,-212) scale(1.12) translate(0,138)'},b);
+  E('circle',{cx:-15,cy:-212,r:11,style:'fill:none;stroke:var(--st-outline);stroke-width:3'},b);
+  E('circle',{cx:15,cy:-212,r:11,style:'fill:none;stroke:var(--st-outline);stroke-width:3'},b);
+  E('line',{x1:-4,y1:-212,x2:4,y2:-212,style:'stroke:var(--st-outline);stroke-width:3'},b);
+  E('circle',{cx:-15,cy:-212,r:3.6,style:'fill:var(--st-outline)'},b);E('circle',{cx:15,cy:-212,r:3.6,style:'fill:var(--st-outline)'},b);
+  E('path',{d:'M -12 -194 Q 0 -184 12 -194',style:'fill:none;stroke:var(--st-outline);stroke-width:3.5;stroke-linecap:round'},b);
+  const a=E('g',{transform:`translate(34,-158) rotate(${arm})`},b);
+  E('rect',{x:-10,y:-10,width:72,height:20,rx:10,class:'o',style:sh},a);
+  E('circle',{cx:66,cy:0,r:11,class:'o',style:'fill:#E8B98F'},a);
+}
+
+/* ---------- construction ---------- */
+const els=[]; // {el, shot, t}
+const LAY=[]; // enregistrements pour la mise en page après chargement des polices
+let timerParts=null;
+function build(parent,shot,it){
+  const [t,k]=it; const add=(el)=>{els.push({el,shot,t});return el;};
+  const col=c=>({w:'w',y:'y',p:'p'})[c];
+  if(k==='T'){const [, ,x,y,txt,f,size,c,anc,fx,rot,o]=it;
+    const g=E('g',{transform:`translate(${x},${y})`+(rot?` rotate(${rot})`:'')},parent);
+    const te=add(E('text',{class:`w fx-${fx} ${f} c${col(c)}`,'font-size':size,'text-anchor':{s:'start',m:'middle',e:'end'}[anc]},g,txt));
+    LAY.push({k,parent,g,te,x,y,rot,size,anc,o:o||{}});}
+  else if(k==='S'){const [, ,x,y,R,c,o]=it; const pe=add(E('polygon',{points:star(x,y,R,R*.45),class:`w fx-spin c${col(c)}`},parent));LAY.push({k,parent,pe,x,y,R,o:o||{}});}
+  else if(k==='K'&&it[5]){const [, ,x,y,c,o]=it; const pe=add(E('path',{d:'',class:`ln s${col(c)}`,pathLength:1,style:'stroke-width:12'},parent));LAY.push({k,parent,pe,x,y,o});}
+  else if(k==='L'){const [, ,d,c,dash]=it; const p=E('path',{d,class:`ln s${col(c)}`,pathLength:1},parent); if(dash){p.classList.add('dash');p.style.strokeDasharray='0.04 0.035';p.style.strokeDashoffset=0;p.classList.replace('ln','w');p.classList.add('fx-pop');p.style.fill='none';p.style.strokeWidth=7;p.style.strokeLinecap='round';} add(p);}
+  else if(k==='R'){const [, ,x,y,w,h,c]=it; add(E('rect',{x,y,width:w,height:h,rx:28,class:`ln s${col(c)}`,pathLength:1,style:'stroke-width:5'},parent));}
+  else if(k==='K'){const [, ,x,y,c]=it; add(E('path',{d:`M ${x-28} ${y} l 20 22 l 42 -50`,class:`ln s${col(c)}`,pathLength:1,style:'stroke-width:12'},parent));}
+  else if(k==='O'){const [, ,x,y,r,c]=it; add(E('circle',{cx:x,cy:y,r,class:`ln s${col(c)}`,pathLength:1,style:'stroke-width:6'},parent));}
+  else if(k==='F'){const [, ,x,y]=it; const g=E('g',{class:'w fx-drop'},parent);
+    E('rect',{x:x-75,y:y-95,width:150,height:180,rx:10,class:'cw'},g);
+    [-55,-25,5].forEach(dy=>E('line',{x1:x-48,y1:y+dy,x2:x+48,y2:y+dy,style:'stroke:#A9BCEB;stroke-width:8;stroke-linecap:round'},g));
+    E('path',{d:`M ${x-30} ${y+48} l 16 16 l 40 -40`,style:'fill:none;stroke:#1E9E6A;stroke-width:11;stroke-linecap:round;stroke-linejoin:round'},g);
+    E('text',{x:x+95,y:y+80,class:'C cp','font-size':54},g,'corrigé');
+    add(g);}
+  else if(k==='Z'){const [, ,x,y,r,dur]=it; const g=E('g',{class:'w fx-pop'},parent);
+    E('rect',{x:x-26,y:y-r-48,width:52,height:34,rx:8,class:'cw'},g);
+    E('circle',{cx:x,cy:y,r,class:'ring-bg'},g);
+    const ring=E('circle',{cx:x,cy:y,r,class:'ring',pathLength:1,'stroke-dasharray':'1 1','stroke-dashoffset':0,transform:`rotate(-90 ${x} ${y})`},g);
+    const num=E('text',{x,y:y+30,'text-anchor':'middle',class:'A cw','font-size':92},g,'20:00');
+    timerParts={ring,num,t0:t,dur,shot}; add(g);}
+  else if(k==='P'){const [, ,x,y,sc,v,tut]=it; const w=E('g',{transform:`translate(${x},${y}) scale(${sc})`},parent); const g=add(E('g',{class:'w fx-pop'},w)); kidFig(g,KIDS[v],!!tut);}
+  else if(k==='M'){const [, ,x,y,sc,arm]=it; const w=E('g',{transform:`translate(${x},${y}) scale(${sc})`},parent); const g=add(E('g',{class:'w fx-pop'},w)); teacherFig(g,arm);}
+  else if(k==='B'){const [, ,x0,y0,bs]=it; const outer=E('g',{transform:`translate(${x0},${y0}) scale(${bs||1})`},parent); const x=0,y=0; const g=E('g',{class:'w fx-pop'},outer);
+    E('circle',{cx:x,cy:y,r:70,class:'cy'},g);
+    E('rect',{x:x-34,y:y+60,width:68,height:50,rx:10,class:'cw'},g);
+    [[0,-110,0,-140],[-90,-70,-112,-92],[90,-70,112,-92],[-110,0,-142,0],[110,0,142,0]].forEach(([a,b,c,d])=>E('line',{x1:x+a,y1:y+b,x2:x+c,y2:y+d,style:'stroke:var(--st-yellow);stroke-width:10;stroke-linecap:round'},g));
+    add(g);}
+}
+CL.forEach((cl,i)=>{const g=E('g',{transform:`translate(${cl.c[0]},${cl.c[1]}) rotate(${cl.r||0})`},world);cl.items.forEach(it=>build(g,i,it));});
+const scrim=E('rect',{x:0,y:0,width:1600,height:900,class:'scrim'},overlay);
+const FINSHOT=CL.length-1;
+FIN.forEach(it=>build(overlay,FINSHOT,it));
+CL.forEach(cl=>{const last=cl.items.reduce((m,it)=>Math.max(m,it[0]),0);cl.dur=cl.far?9000:last+3000;});
+
+function layout(){
+  let lastEnd=0,lastParent=null;
+  for(const r of LAY){
+    if(r.parent!==lastParent){lastParent=r.parent;lastEnd=0;}
+    let x=r.o.dx!=null?lastEnd+r.o.dx:r.x;
+    if(r.k==='T'){
+      r.te.setAttribute('font-size',r.size);
+      let len=0;try{len=r.te.getComputedTextLength();}catch(e){}
+      const lim=r.o.max||(r.anc==='s'?760-x:r.anc==='e'?x+760:2*(760-Math.abs(x)));
+      if(len>lim&&len>0){r.te.setAttribute('font-size',(r.size*lim/len).toFixed(1));len=lim;}
+      r.g.setAttribute('transform',`translate(${x},${r.y})`+(r.rot?` rotate(${r.rot})`:''));
+      if(!r.rot)lastEnd=r.anc==='s'?x+len:r.anc==='m'?x+len/2:x;
+    }else if(r.k==='S'){r.pe.setAttribute('points',star(x,r.y,r.R,r.R*.45));}
+    else if(r.k==='K'){r.pe.setAttribute('d',`M ${x} ${r.y} l 20 22 l 42 -50`);}
+  }}
+layout();
+const fw=document.fonts&&document.fonts.load?Promise.all(['64px Anton','600 64px "Bricolage Grotesque"','700 64px Caveat'].map(f=>document.fonts.load(f))):Promise.resolve();
+Promise.race([fw,new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{layout();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layout);});
+
+/* ---------- chapitres ---------- */
+const fills=[],chapBtns=[];
+CL.forEach((s,i)=>{const li=document.createElement('li');const b=document.createElement('button');b.type='button';b.id='chap-'+i;b.setAttribute('aria-label',s.lbl);
+  b.innerHTML='<span class="bar"><span class="fill"></span></span><span class="lbl"></span>';b.querySelector('.lbl').textContent=s.lbl;
+  b.addEventListener('click',()=>go(i));li.appendChild(b);$('chapters').appendChild(li);fills.push(b.querySelector('.fill'));chapBtns.push(b);});
+
+/* ---------- caméra & moteur ---------- */
+let idx=0,start=performance.now(),playing=true,pausedAt=0,ended=false;
+function camera(i){const cl=CL[i];
+  const s=cl.far?0.25:1, r=cl.far?0:(cl.r||0);
+  cam.classList.toggle('far',!!cl.far); svg.classList.toggle('far-mode',!!cl.far);
+  cam.style.transform=`translate(800px,450px) scale(${s}) rotate(${-r}deg) translate(${-cl.c[0]}px,${-cl.c[1]}px)`;
+  drift.style.transition='none';drift.style.transform='scale(1)';void drift.getBoundingClientRect();
+  drift.style.transition=`transform ${cl.dur}ms linear`;drift.style.transform=`scale(${cl.far?1.03:1.05})`;
+  scrim.classList.remove('on');
+}
+function sync(el){for(const e of els){const on=e.shot<idx||(e.shot===idx&&el>=e.t);if(e.el.classList.contains('on')!==on)e.el.classList.toggle('on',on);}
+  if(idx===FINSHOT&&el>=1900)scrim.classList.add('on');
+  if(timerParts){const {ring,num,t0,dur,shot}=timerParts;let f=idx>shot?1:idx<shot?0:Math.min(Math.max((el-t0-600)/dur,0),1);
+    const sec=Math.round(1200*(1-f));num.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');ring.setAttribute('stroke-dashoffset',(-f).toFixed(4));}}
+function go(i){idx=Math.max(0,Math.min(CL.length-1,i));start=performance.now();pausedAt=0;ended=false;playing=true;
+  camera(idx);
+  chapBtns.forEach((b,j)=>{if(j===idx)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');fills[j].style.width=j<idx?'100%':'0%';});
+  $('where').textContent=`${idx+1} / ${CL.length} · ${CL[idx].lbl}`;setIcon();}
+function setIcon(){const ic=$('playIcon'),b=$('play');
+  if(ended){ic.innerHTML='<path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/>';b.setAttribute('aria-label','Rejouer');}
+  else if(playing){ic.innerHTML='<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';b.setAttribute('aria-label','Pause');}
+  else{ic.innerHTML='<path d="M7 4v16l13-8z"/>';b.setAttribute('aria-label','Lecture');}}
+function toggle(){if(ended){go(0);return;}
+  if(playing){pausedAt=performance.now()-start;playing=false;}else{start=performance.now()-pausedAt;playing=true;}setIcon();}
+$('play').addEventListener('click',toggle);
+$('prev').addEventListener('click',()=>go(idx-1));
+$('next').addEventListener('click',()=>go(idx+1));
+document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('button,summary'))return;
+  if(e.key===' '){e.preventDefault();toggle();}else if(e.key==='ArrowRight')go(idx+1);else if(e.key==='ArrowLeft')go(idx-1);});
+function tick(now){
+  if(playing){const cl=CL[idx];const el=now-start;fills[idx].style.width=Math.min(el/cl.dur*100,100).toFixed(1)+'%';sync(el);
+    if(el>=cl.dur){if(idx<CL.length-1)go(idx+1);else{playing=false;ended=true;setIcon();}}}
+  requestAnimationFrame(tick);}
+go(0);
+requestAnimationFrame(()=>requestAnimationFrame(()=>svg.classList.remove('no-anim')));
+requestAnimationFrame(tick);
+})();
+</script>
