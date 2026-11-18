@@ -6,6 +6,7 @@
 - `src/` : moteur (`engine.js`, `engine.css`) et une scène par animation (`src/scenes/*.js`). `build.js` assemble chaque scène en un fichier HTML autonome.
 - `data/` : fonds de carte pré-projetés (`geo.mjs` les génère à partir de `world-atlas`/d3-geo).
 - `photos/` : manifeste des 108 photos (Wikimedia Commons) et script de téléchargement `telecharger-photos.bat` / `.mjs`.
+- `expose/` : **Atelier Exposés**, l'application où l'élève construit un exposé (sujet, recherche, diapos, présentation, chronomètre, quiz, définitions). Voir `expose/LISEZMOI-expose.md` ; lancement par `expose/lancer-atelier.bat`.
 - `BRIEF.md` : consignes de production d'une scène ; `CATALOGUE.md` : liste, points à relire, mots de voix à écouter.
 
 ## Construire
